@@ -30,3 +30,7 @@ jobs:
       - name: Tests
         run: |
           make test
+
+      - name: Tokenize
+        run: |
+          make tokenize
