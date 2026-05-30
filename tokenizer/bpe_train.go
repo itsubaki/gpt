@@ -13,10 +13,12 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 
 	idsList := make([][]int, len(texts))
 	for i, text := range texts {
-		bytes := []byte(text)
-		idsList[i] = make([]int, len(bytes))
-		for j := range bytes {
-			idsList[i][j] = int(bytes[j])
+		idsList[i] = make([]int, 0)
+		for _, preToken := range preTokenize(text) {
+			bytes := []byte(preToken)
+			for j := range bytes {
+				idsList[i] = append(idsList[i], int(bytes[j]))
+			}
 		}
 	}
 

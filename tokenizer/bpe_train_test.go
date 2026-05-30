@@ -22,8 +22,8 @@ func ExampleCountPairs() {
 
 func ExampleTrainBPE() {
 	// p17
-	train := "Hello world!<|endoftext|>This is BPE training."
-	mergeRules := tokenizer.TrainBPE(train, 260)
+	sample := "Hello world!<|endoftext|>This is BPE training."
+	mergeRules := tokenizer.TrainBPE(sample, 260)
 	for pair, newID := range mergeRules.Seq2() {
 		fmt.Println(pair, newID)
 	}

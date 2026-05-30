@@ -8,8 +8,8 @@ import (
 
 func ExampleBPETokenizer_Encode() {
 	// p27
-	train := "Hello world!<|endoftext|>This is BPE training."
-	mergeRules := tokenizer.TrainBPE(train, 260)
+	sample := "Hello world!<|endoftext|>This is BPE training."
+	mergeRules := tokenizer.TrainBPE(sample, 260)
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
 	text := "Hello world!<|endoftext|>"
@@ -23,6 +23,30 @@ func ExampleBPETokenizer_Encode() {
 	// Hello world!<|endoftext|>
 }
 
+func ExampleBPETokenizer_Encode_preTokenize() {
+	// p33
+	sample := "Say hello! Why hello? Just hello.<|endoftext|>Good morning!"
+	mergeRules := tokenizer.TrainBPE(sample, 270)
+	tknizer := tokenizer.NewBPETokenizer(mergeRules)
+
+	text := "Say hello!"
+	ids := tknizer.Encode(text)
+	decoded := tknizer.Decode(ids)
+	fmt.Println(ids)
+	fmt.Println(decoded)
+
+	for _, id := range ids {
+		fmt.Printf("%3d -> %q\n", id, tknizer.Decode([]int{id}))
+	}
+
+	// Output:
+	// [262 260 33]
+	// Say hello!
+	// 262 -> "Say"
+	// 260 -> " hello"
+	//  33 -> "!"
+}
+
 func ExampleMerge() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
@@ -34,9 +58,9 @@ func ExampleMerge() {
 }
 
 func ExampleReSplit() {
-	text := "Hello world!<|endoftext|>This is BPE training."
+	sample := "Hello world!<|endoftext|>This is BPE training."
 	pattern := "<|endoftext|>"
-	split := tokenizer.ReSplit(text, pattern)
+	split := tokenizer.ReSplit(sample, pattern)
 	for _, s := range split {
 		fmt.Printf("[%s]", s)
 	}

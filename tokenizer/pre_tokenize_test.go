@@ -8,12 +8,24 @@ import (
 
 func ExamplePreTokenize() {
 	// p30
-	text := "Hello! I'm fine."
-	preTokens := tokenizer.PreTokenize(text)
+	sample := "Hello! I'm fine."
+	preTokens := tokenizer.PreTokenize(sample)
 	for _, token := range preTokens {
 		fmt.Printf("[%s]", token)
 	}
 
 	// Output:
 	// [Hello][!][ I]['m][ fine][.]
+}
+
+func ExamplePreTokenize_hello() {
+	// p30
+	sample := "Say hello! Why hello? Just hello.<|endoftext|>Good morning!"
+	preTokens := tokenizer.PreTokenize(sample)
+	for _, token := range preTokens {
+		fmt.Printf("[%s]", token)
+	}
+
+	// Output:
+	// [Say][ hello][!][ Why][ hello][?][ Just][ hello][.<|][endoftext][|>][Good][ morning][!]
 }
