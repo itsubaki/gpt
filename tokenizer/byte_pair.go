@@ -3,16 +3,23 @@ package tokenizer
 import (
 	"iter"
 	"math"
+	"regexp"
 	"strings"
 )
 
 type BPETokenizer struct {
 	mergeRules *MergeRules
+	endToken   string
+	endTokenID int
 	idToBytes  map[int][]byte
 	vocabSize  int
 }
 
-func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
+func NewBPETokenizer(mergeRules *MergeRules, endToken ...string) *BPETokenizer {
+	if len(endToken) == 0 {
+		endToken = []string{"<|endoftext|>"}
+	}
+
 	idToBytes := make(map[int][]byte)
 	for i := range 256 {
 		idToBytes[i] = []byte{byte(i)}
@@ -23,14 +30,19 @@ func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
 		idToBytes[newID] = append(p0, p1...)
 	}
 
+	endTokenID := 256 + len(mergeRules.order)
+	idToBytes[endTokenID] = []byte(endToken[0])
+
 	return &BPETokenizer{
 		mergeRules: mergeRules,
+		endToken:   endToken[0],
+		endTokenID: endTokenID,
 		idToBytes:  idToBytes,
 		vocabSize:  len(idToBytes),
 	}
 }
 
-func (t *BPETokenizer) Encode(text string) []int {
+func (t *BPETokenizer) encodeText(text string) []int {
 	bytes := []byte(text)
 	ids := make([]int, len(bytes))
 	for i := range bytes {
@@ -42,6 +54,22 @@ func (t *BPETokenizer) Encode(text string) []int {
 	}
 
 	return ids
+}
+
+func (t *BPETokenizer) Encode(inputText string) []int {
+	texts := resplit(inputText, t.endToken)
+
+	var allIDs []int
+	for _, text := range texts {
+		if text == t.endToken {
+			allIDs = append(allIDs, t.endTokenID)
+			continue
+		}
+
+		allIDs = append(allIDs, t.encodeText(text)...)
+	}
+
+	return allIDs
 }
 
 func (t *BPETokenizer) Decode(ids []int) string {
@@ -189,4 +217,28 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *MergeRules {
 	}
 
 	return mergeRules
+}
+
+func resplit(inputText string, pattern string) []string {
+	re := regexp.MustCompile(regexp.QuoteMeta(pattern))
+	indices := re.FindAllStringIndex(inputText, -1)
+
+	var last int
+	var result []string
+	for _, loc := range indices {
+		start, end := loc[0], loc[1]
+
+		if start > last {
+			result = append(result, inputText[last:start])
+		}
+
+		result = append(result, inputText[start:end])
+		last = end
+	}
+
+	if last < len(inputText) {
+		result = append(result, inputText[last:])
+	}
+
+	return result
 }

@@ -32,9 +32,8 @@ func ExampleMerge() {
 
 func ExampleTrainBPE() {
 	// p17
-	text := "Hello world!<|endoftext|>This is BPE training."
-
-	mergeRules := tokenizer.TrainBPE(text, 260)
+	train := "Hello world!<|endoftext|>This is BPE training."
+	mergeRules := tokenizer.TrainBPE(train, 260)
 	for pair, newID := range mergeRules.Seq2() {
 		fmt.Println(pair, newID)
 	}
@@ -46,18 +45,18 @@ func ExampleTrainBPE() {
 }
 
 func ExampleBPETokenizer_Encode() {
-	// p21
+	// p27
 	train := "Hello world!<|endoftext|>This is BPE training."
 	mergeRules := tokenizer.TrainBPE(train, 260)
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
-	text := "Hello世界😁"
+	text := "Hello world!<|endoftext|>"
 	ids := tknizer.Encode(text)
 	decoded := tknizer.Decode(ids)
 	fmt.Println(ids)
 	fmt.Println(decoded)
 
 	// Output:
-	// [259 108 108 111 228 184 150 231 149 140 240 159 152 129]
-	// Hello世界😁
+	// [72 101 108 108 111 32 119 111 114 108 100 33 259]
+	// Hello world!<|endoftext|>
 }
