@@ -54,7 +54,7 @@ func (t *BPETokenizer) Decode(ids []int) string {
 
 type Pair [2]int
 
-func count(ids []int) (map[Pair]int, map[Pair]int) {
+func countPairs(ids []int) (map[Pair]int, map[Pair]int) {
 	counts := make(map[Pair]int)
 	firstSeen := make(map[Pair]int)
 
@@ -134,7 +134,7 @@ func trainBPE(text string, vocabSize int) *MergeRules {
 
 	mergeRules := NewMergeRules()
 	for step := range vocabSize - 256 {
-		counts, firstSeen := count(ids)
+		counts, firstSeen := countPairs(ids)
 		if len(counts) == 0 {
 			break
 		}

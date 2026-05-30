@@ -6,10 +6,10 @@ import (
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
-func ExampleCount() {
+func ExampleCountPairs() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
-	counts, _ := tokenizer.Count(ids)
+	counts, _ := tokenizer.CountPairs(ids)
 	for pair, count := range counts {
 		fmt.Println(pair, count)
 	}
