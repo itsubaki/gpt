@@ -9,7 +9,7 @@ import (
 func ExampleCount() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
-	counts := tokenizer.Count(ids)
+	counts, _ := tokenizer.Count(ids)
 	for pair, count := range counts {
 		fmt.Println(pair, count)
 	}
@@ -28,4 +28,20 @@ func ExampleMerge() {
 
 	// Output:
 	// [4 3 4]
+}
+
+func ExampleTrainBPE() {
+	// p17
+	text := "Hello world! This is BPE training."
+
+	mergeRules := tokenizer.TrainBPE(text, 260)
+	for pair, newID := range mergeRules {
+		fmt.Println(pair, newID)
+	}
+
+	// Unordered output:
+	// [105 115] 256
+	// [256 32] 257
+	// [105 110] 258
+	// [72 101] 259
 }

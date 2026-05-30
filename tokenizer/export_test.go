@@ -1,6 +1,7 @@
 package tokenizer
 
 var (
-	Count = count
-	Merge = merge
+	Count    = count
+	Merge    = merge
+	TrainBPE = trainBPE
 )
