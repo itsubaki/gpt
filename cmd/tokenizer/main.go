@@ -34,7 +34,8 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Println("saved merge rules to", mergeRulesGob, "elapsed time:", time.Since(now))
+		fmt.Println("saved merge rules to", mergeRulesGob)
+		fmt.Println("elapsed time:", time.Since(now))
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
