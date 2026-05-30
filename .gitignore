@@ -33,3 +33,4 @@ go.work.sum
 
 # add
 testdata/tiny_codes.txt
+testdata/merge_rules.gob

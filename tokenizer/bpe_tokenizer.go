@@ -1,6 +1,8 @@
 package tokenizer
 
-import "regexp"
+import (
+	"regexp"
+)
 
 type Pair [2]int
 
@@ -8,8 +10,8 @@ type BPETokenizer struct {
 	mergeRules *DefaultDict[Pair]
 	endToken   string
 	endTokenID int
-	idToBytes  map[int][]byte
-	vocabSize  int
+	ID2Bytes   map[int][]byte
+	VocabSize  int
 }
 
 func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPETokenizer {
@@ -17,25 +19,25 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 		endToken = []string{"<|endoftext|>"}
 	}
 
-	idToBytes := make(map[int][]byte)
+	id2Bytes := make(map[int][]byte)
 	for i := range 256 {
-		idToBytes[i] = []byte{byte(i)}
+		id2Bytes[i] = []byte{byte(i)}
 	}
 
 	for pair, newID := range mergeRules.Seq2() {
-		p0, p1 := idToBytes[pair[0]], idToBytes[pair[1]]
-		idToBytes[newID] = append(p0, p1...)
+		p0, p1 := id2Bytes[pair[0]], id2Bytes[pair[1]]
+		id2Bytes[newID] = append(p0, p1...)
 	}
 
 	endTokenID := 256 + mergeRules.Len()
-	idToBytes[endTokenID] = []byte(endToken[0])
+	id2Bytes[endTokenID] = []byte(endToken[0])
 
 	return &BPETokenizer{
 		mergeRules: mergeRules,
 		endToken:   endToken[0],
 		endTokenID: endTokenID,
-		idToBytes:  idToBytes,
-		vocabSize:  len(idToBytes),
+		ID2Bytes:   id2Bytes,
+		VocabSize:  len(id2Bytes),
 	}
 }
 
@@ -69,7 +71,7 @@ func (t *BPETokenizer) Encode(inputText string) []int {
 func (t *BPETokenizer) Decode(ids []int) string {
 	var bytes []byte
 	for _, id := range ids {
-		bytes = append(bytes, t.idToBytes[id]...)
+		bytes = append(bytes, t.ID2Bytes[id]...)
 	}
 
 	return string(bytes)

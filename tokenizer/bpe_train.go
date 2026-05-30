@@ -1,6 +1,7 @@
 package tokenizer
 
 import (
+	"fmt"
 	"math"
 	"strings"
 )
@@ -21,8 +22,11 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		idsList[i] = ids
 	}
 
+	numMerges := vocabSize - 256 - 1
 	mergeRules := NewDefaultDict[Pair]()
-	for step := range vocabSize - 256 - 1 {
+	for step := range numMerges {
+		fmt.Println(step, "/", numMerges)
+
 		counts := NewDefaultDict[Pair]()
 		for _, ids := range idsList {
 			counts = countPairs(ids, counts)
