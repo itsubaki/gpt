@@ -1,7 +1,7 @@
 # gpt
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/gpt)](https://pkg.go.dev/github.com/itsubaki/gpt)
-[![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/gpt?style=flat-square)](https://goreportcard.com/report/github.com/itsubaki/gpt)
+[![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/gpt)](https://goreportcard.com/report/github.com/itsubaki/gpt)
 [![tests](https://github.com/itsubaki/gpt/workflows/tests/badge.svg)](https://github.com/itsubaki/gpt/actions)
 
 GPT chatbot in Go from scratch
