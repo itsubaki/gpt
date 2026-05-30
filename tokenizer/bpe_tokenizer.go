@@ -40,12 +40,7 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 }
 
 func (t *BPETokenizer) encode(text string) []int {
-	bytes := []byte(text)
-	ids := make([]int, len(bytes))
-	for i := range bytes {
-		ids[i] = int(bytes[i])
-	}
-
+	ids := text2IDs(text)
 	for pair, newID := range t.mergeRules.Seq2() {
 		ids = merge(ids, pair, newID)
 	}
@@ -56,20 +51,19 @@ func (t *BPETokenizer) encode(text string) []int {
 func (t *BPETokenizer) Encode(inputText string) []int {
 	texts := reSplit(inputText, t.endToken)
 
-	var allIDs []int
+	var ids []int
 	for _, text := range texts {
 		if text == t.endToken {
-			allIDs = append(allIDs, t.endTokenID)
+			ids = append(ids, t.endTokenID)
 			continue
 		}
 
 		for _, preToken := range preTokenize(text) {
-
-			allIDs = append(allIDs, t.encode(preToken)...)
+			ids = append(ids, t.encode(preToken)...)
 		}
 	}
 
-	return allIDs
+	return ids
 }
 
 func (t *BPETokenizer) Decode(ids []int) string {
@@ -79,6 +73,16 @@ func (t *BPETokenizer) Decode(ids []int) string {
 	}
 
 	return string(bytes)
+}
+
+func text2IDs(text string) []int {
+	bytes := []byte(text)
+	ids := make([]int, len(bytes))
+	for i := range bytes {
+		ids[i] = int(bytes[i])
+	}
+
+	return ids
 }
 
 func merge(ids []int, pair Pair, newID int) []int {
@@ -105,7 +109,6 @@ func reSplit(inputText string, pattern string) []string {
 	var result []string
 	for _, loc := range indices {
 		start, end := loc[0], loc[1]
-
 		if start > last {
 			result = append(result, inputText[last:start])
 		}

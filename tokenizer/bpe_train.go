@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[Pair] {
+func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[Pair] {
 	if len(endToken) == 0 {
 		endToken = []string{"<|endoftext|>"}
 	}
@@ -13,16 +13,12 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 
 	idsList := make([][]int, len(texts))
 	for i, text := range texts {
-		idsList[i] = make([]int, 0)
+		ids := make([]int, 0)
 		for _, preToken := range preTokenize(text) {
-			bytes := []byte(preToken)
-			ids := make([]int, len(bytes))
-			for i := range bytes {
-				ids[i] = int(bytes[i])
-			}
-
-			idsList[i] = append(idsList[i], ids...)
+			ids = append(ids, text2IDs(preToken)...)
 		}
+
+		idsList[i] = ids
 	}
 
 	mergeRules := NewDefaultDict[Pair]()
