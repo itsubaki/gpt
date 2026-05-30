@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/itsubaki/gpt/tokenizer"
 )
@@ -26,13 +27,14 @@ func main() {
 
 	mergeRules, ok := load(mergeRulesGob)
 	if !ok {
-		fmt.Println("training BPE...")
+		now := time.Now()
+		fmt.Println("training BPE...", now.Format(time.RFC3339))
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
 		if err := save(mergeRulesGob, mergeRules); err != nil {
 			panic(err)
 		}
 
-		fmt.Println("saved merge rules to", mergeRulesGob)
+		fmt.Println("saved merge rules to", mergeRulesGob, "elapsed time:", time.Since(now))
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
