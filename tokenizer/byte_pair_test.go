@@ -39,9 +39,22 @@ func ExampleTrainBPE() {
 		fmt.Println(pair, newID)
 	}
 
-	// Unordered output:
+	// Output:
 	// [105 115] 256
 	// [256 32] 257
 	// [105 110] 258
 	// [72 101] 259
+}
+
+func ExampleBPETokenizer_Encode() {
+	// p21
+	train := "Hello world! This is BPE training."
+	mergeRules := tokenizer.TrainBPE(train, 260)
+
+	text := "Hello世界😁"
+	ids := tokenizer.NewBPETokenizer(mergeRules).Encode(text)
+	fmt.Println(ids)
+
+	// Output:
+	// [259 108 108 111 228 184 150 231 149 140 240 159 152 129]
 }

@@ -11,10 +11,10 @@ func ExampleCharTokenizer() {
 	tokenizer := tokenizer.NewCharTokenizer()
 	text := "hello世界😁"
 
-	tokens := tokenizer.Encode(text)
-	decoded := tokenizer.Decode(tokens)
+	ids := tokenizer.Encode(text)
+	decoded := tokenizer.Decode(ids)
 
-	fmt.Println(tokens)
+	fmt.Println(ids)
 	fmt.Println(decoded)
 
 	// Output:

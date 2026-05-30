@@ -7,24 +7,19 @@ import (
 
 type BPETokenizer struct {
 	mergeRules *MergeRules
-	idToBytes  map[int][]byte
+	idToBytes  map[int]byte
 	vocabSize  int
 }
 
 func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
-	idToBytes := make(map[int][]byte)
+	idToBytes := make(map[int]byte)
 	for i := range 256 {
-		idToBytes[i] = []byte{byte(i)}
+		idToBytes[i] = byte(i)
 	}
 
-	remaining := mergeRules.Len()
-	for remaining > 0 {
-		for pair, newID := range mergeRules.Seq2() {
-			p0, p1 := idToBytes[pair[0]], idToBytes[pair[1]]
-			idToBytes[newID] = append(p0, p1...)
-			delete(mergeRules.rules, pair)
-			remaining--
-		}
+	for pair, newID := range mergeRules.Seq2() {
+		p0, p1 := idToBytes[pair[0]], idToBytes[pair[1]]
+		idToBytes[newID] = p0 + p1
 	}
 
 	return &BPETokenizer{
@@ -35,9 +30,10 @@ func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
 }
 
 func (t *BPETokenizer) Encode(text string) []int {
-	ids := make([]int, len(text))
-	for i, b := range text {
-		ids[i] = int(b)
+	bytes := []byte(text)
+	ids := make([]int, len(bytes))
+	for i := range bytes {
+		ids[i] = int(bytes[i])
 	}
 
 	for pair, newID := range t.mergeRules.Seq2() {
@@ -95,10 +91,6 @@ func NewMergeRules() *MergeRules {
 	}
 }
 
-func (r *MergeRules) Len() int {
-	return len(r.rules)
-}
-
 func (r *MergeRules) Set(pair Pair, newID int) {
 	r.rules[pair] = newID
 	r.order = append(r.order, pair)
@@ -114,10 +106,21 @@ func (r *MergeRules) Seq2() iter.Seq2[Pair, int] {
 	}
 }
 
+func (r *MergeRules) Delete(pair Pair) {
+	delete(r.rules, pair)
+	for i, p := range r.order {
+		if p == pair {
+			r.order = append(r.order[:i], r.order[i+1:]...)
+			break
+		}
+	}
+}
+
 func trainBPE(text string, vocabSize int) *MergeRules {
-	ids := make([]int, len(text))
-	for i, b := range text {
-		ids[i] = int(b)
+	bytes := []byte(text)
+	ids := make([]int, len(bytes))
+	for i := range bytes {
+		ids[i] = int(bytes[i])
 	}
 
 	mergeRules := NewMergeRules()

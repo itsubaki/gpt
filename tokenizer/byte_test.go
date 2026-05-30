@@ -11,10 +11,10 @@ func ExampleByteTokenizer() {
 	tokenizer := tokenizer.NewByteTokenizer()
 	text := "hello世界😁"
 
-	tokens := tokenizer.Encode(text)
-	decoded := tokenizer.Decode(tokens)
+	ids := tokenizer.Encode(text)
+	decoded := tokenizer.Decode(ids)
 
-	fmt.Printf("%v\n", tokens)
+	fmt.Printf("%v\n", ids)
 	fmt.Println(decoded)
 
 	// Output:
