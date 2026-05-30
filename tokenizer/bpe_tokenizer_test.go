@@ -8,13 +8,17 @@ import (
 
 func ExampleBPETokenizer_Encode() {
 	// p27
-	sample := "Hello world!<|endoftext|>This is BPE training."
-	mergeRules := tokenizer.TrainBPE(sample, 260)
+	mergeRules := tokenizer.NewDefaultDict[tokenizer.Pair]()
+	mergeRules.Set(tokenizer.Pair{105, 115}, 256)
+	mergeRules.Set(tokenizer.Pair{256, 32}, 257)
+	mergeRules.Set(tokenizer.Pair{105, 110}, 258)
+
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
 	text := "Hello world!<|endoftext|>"
 	ids := tknizer.Encode(text)
 	decoded := tknizer.Decode(ids)
+
 	fmt.Println(ids)
 	fmt.Println(decoded)
 
@@ -32,23 +36,17 @@ func ExampleBPETokenizer_Encode_preTokenize() {
 	text := "Say hello!"
 	ids := tknizer.Encode(text)
 	decoded := tknizer.Decode(ids)
+
 	fmt.Println(ids)
 	fmt.Println(decoded)
-
 	for _, id := range ids {
-		// [262 260 33]
-		// Say hello!
-		// 262 -> "Say"
-		// 260 -> " hello"
-		//  33 -> "!"
 		fmt.Printf("%3d -> %q\n", id, tknizer.Decode([]int{id}))
 	}
 
 	// Output:
-	// [268 121 260 33]
+	// [262 260 33]
 	// Say hello!
-	// 268 -> "Sa"
-	// 121 -> "y"
+	// 262 -> "Say"
 	// 260 -> " hello"
 	//  33 -> "!"
 }
