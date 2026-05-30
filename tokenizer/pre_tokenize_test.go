@@ -7,6 +7,7 @@ import (
 )
 
 func ExamplePreTokenize() {
+	// p30
 	text := "Hello! I'm fine."
 	preTokens := tokenizer.PreTokenize(text)
 	for _, token := range preTokens {

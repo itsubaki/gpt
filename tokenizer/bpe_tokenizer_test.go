@@ -6,20 +6,6 @@ import (
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
-func ExampleCountPairs() {
-	// p14
-	ids := []int{1, 2, 3, 1, 2}
-	pairs := tokenizer.CountPairs(ids)
-	for pair, count := range pairs.Counts {
-		fmt.Println(pair, count)
-	}
-
-	// Unordered output:
-	// [1 2] 2
-	// [2 3] 1
-	// [3 1] 1
-}
-
 func ExampleMerge() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
@@ -28,20 +14,6 @@ func ExampleMerge() {
 
 	// Output:
 	// [4 3 4]
-}
-
-func ExampleTrainBPE() {
-	// p17
-	train := "Hello world!<|endoftext|>This is BPE training."
-	mergeRules := tokenizer.TrainBPE(train, 260)
-	for pair, newID := range mergeRules.Seq2() {
-		fmt.Println(pair, newID)
-	}
-
-	// Output:
-	// [105 115] 256
-	// [256 32] 257
-	// [105 110] 258
 }
 
 func ExampleBPETokenizer_Encode() {
