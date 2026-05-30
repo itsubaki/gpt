@@ -1,7 +1,6 @@
 package tokenizer
 
 import (
-	"math"
 	"strings"
 )
 
@@ -16,9 +15,12 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		idsList[i] = make([]int, 0)
 		for _, preToken := range preTokenize(text) {
 			bytes := []byte(preToken)
-			for j := range bytes {
-				idsList[i] = append(idsList[i], int(bytes[j]))
+			ids := make([]int, len(bytes))
+			for i := range bytes {
+				ids[i] = int(bytes[i])
 			}
+
+			idsList[i] = append(idsList[i], ids...)
 		}
 	}
 
@@ -34,12 +36,10 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		}
 
 		bestCount := -1
-		bestSeen := math.MaxInt
 		var bestPair Pair
 		for p, c := range counts.Seq2() {
-			if c > bestCount || (c == bestCount && p[0] < bestSeen) {
+			if c > bestCount {
 				bestCount = c
-				bestSeen = p[0]
 				bestPair = p
 			}
 		}

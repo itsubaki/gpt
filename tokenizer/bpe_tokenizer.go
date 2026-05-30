@@ -64,6 +64,7 @@ func (t *BPETokenizer) Encode(inputText string) []int {
 		}
 
 		for _, preToken := range preTokenize(text) {
+
 			allIDs = append(allIDs, t.encode(preToken)...)
 		}
 	}
