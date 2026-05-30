@@ -35,7 +35,7 @@ func ExampleTrainBPE() {
 	text := "Hello world! This is BPE training."
 
 	mergeRules := tokenizer.TrainBPE(text, 260)
-	for pair, newID := range mergeRules {
+	for pair, newID := range mergeRules.Seq2() {
 		fmt.Println(pair, newID)
 	}
 

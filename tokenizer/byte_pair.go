@@ -1,8 +1,51 @@
 package tokenizer
 
-import "math"
+import (
+	"iter"
+	"math"
+)
 
-type BytePairEncodingTokenizer struct{}
+type BPETokenizer struct {
+	mergeRules *MergeRules
+	idToBytes  map[int][]byte
+	vocabSize  int
+}
+
+func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
+	idToBytes := make(map[int][]byte)
+	for i := range 256 {
+		idToBytes[i] = []byte{byte(i)}
+	}
+
+	remaining := mergeRules.Len()
+	for remaining > 0 {
+		for pair, newID := range mergeRules.Seq2() {
+			p0, p1 := idToBytes[pair[0]], idToBytes[pair[1]]
+			idToBytes[newID] = append(p0, p1...)
+			delete(mergeRules.rules, pair)
+			remaining--
+		}
+	}
+
+	return &BPETokenizer{
+		mergeRules: mergeRules,
+		idToBytes:  idToBytes,
+		vocabSize:  len(idToBytes),
+	}
+}
+
+func (t *BPETokenizer) Encode(text string) []int {
+	ids := make([]int, len(text))
+	for i, b := range text {
+		ids[i] = int(b)
+	}
+
+	for pair, newID := range t.mergeRules.Seq2() {
+		ids = merge(ids, pair, newID)
+	}
+
+	return ids
+}
 
 type Pair [2]int
 
@@ -40,13 +83,44 @@ func merge(ids []int, pair Pair, newID int) []int {
 	return merged
 }
 
-func trainBPE(text string, vocabSize int) map[Pair]int {
+type MergeRules struct {
+	rules map[Pair]int
+	order []Pair
+}
+
+func NewMergeRules() *MergeRules {
+	return &MergeRules{
+		rules: make(map[Pair]int),
+		order: make([]Pair, 0),
+	}
+}
+
+func (r *MergeRules) Len() int {
+	return len(r.rules)
+}
+
+func (r *MergeRules) Set(pair Pair, newID int) {
+	r.rules[pair] = newID
+	r.order = append(r.order, pair)
+}
+
+func (r *MergeRules) Seq2() iter.Seq2[Pair, int] {
+	return func(yield func(Pair, int) bool) {
+		for _, pair := range r.order {
+			if !yield(pair, r.rules[pair]) {
+				return
+			}
+		}
+	}
+}
+
+func trainBPE(text string, vocabSize int) *MergeRules {
 	ids := make([]int, len(text))
 	for i, b := range text {
 		ids[i] = int(b)
 	}
 
-	mergeRules := make(map[Pair]int)
+	mergeRules := NewMergeRules()
 	for step := range vocabSize - 256 {
 		counts, firstSeen := count(ids)
 		if len(counts) == 0 {
@@ -64,7 +138,7 @@ func trainBPE(text string, vocabSize int) map[Pair]int {
 		}
 
 		newID := 256 + step
-		mergeRules[bestPair] = newID
+		mergeRules.Set(bestPair, newID)
 		ids = merge(ids, bestPair, newID)
 	}
 
