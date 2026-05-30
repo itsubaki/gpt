@@ -7,19 +7,19 @@ import (
 
 type BPETokenizer struct {
 	mergeRules *MergeRules
-	idToBytes  map[int]byte
+	idToBytes  map[int][]byte
 	vocabSize  int
 }
 
 func NewBPETokenizer(mergeRules *MergeRules) *BPETokenizer {
-	idToBytes := make(map[int]byte)
+	idToBytes := make(map[int][]byte)
 	for i := range 256 {
-		idToBytes[i] = byte(i)
+		idToBytes[i] = []byte{byte(i)}
 	}
 
 	for pair, newID := range mergeRules.Seq2() {
 		p0, p1 := idToBytes[pair[0]], idToBytes[pair[1]]
-		idToBytes[newID] = p0 + p1
+		idToBytes[newID] = append(p0, p1...)
 	}
 
 	return &BPETokenizer{
@@ -41,6 +41,15 @@ func (t *BPETokenizer) Encode(text string) []int {
 	}
 
 	return ids
+}
+
+func (t *BPETokenizer) Decode(ids []int) string {
+	var bytes []byte
+	for _, id := range ids {
+		bytes = append(bytes, t.idToBytes[id]...)
+	}
+
+	return string(bytes)
 }
 
 type Pair [2]int
