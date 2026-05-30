@@ -6,3 +6,6 @@ test:
 
 lint:
 	golangci-lint run
+
+dl:
+	curl -fs -o testdata/tiny_codes.txt https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
