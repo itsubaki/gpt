@@ -54,7 +54,7 @@ func (t *BPETokenizer) encode(text string) []int {
 }
 
 func (t *BPETokenizer) Encode(inputText string) []int {
-	texts := resplit(inputText, t.endToken)
+	texts := reSplit(inputText, t.endToken)
 
 	var allIDs []int
 	for _, text := range texts {
@@ -94,7 +94,7 @@ func merge(ids []int, pair Pair, newID int) []int {
 	return merged
 }
 
-func resplit(inputText string, pattern string) []string {
+func reSplit(inputText string, pattern string) []string {
 	re := regexp.MustCompile(regexp.QuoteMeta(pattern))
 	indices := re.FindAllStringIndex(inputText, -1)
 

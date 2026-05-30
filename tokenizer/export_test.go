@@ -5,4 +5,5 @@ var (
 	Merge       = merge
 	TrainBPE    = trainBPE
 	PreTokenize = preTokenize
+	ReSplit     = reSplit
 )
