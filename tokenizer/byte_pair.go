@@ -3,6 +3,7 @@ package tokenizer
 import (
 	"iter"
 	"math"
+	"strings"
 )
 
 type BPETokenizer struct {
@@ -54,14 +55,23 @@ func (t *BPETokenizer) Decode(ids []int) string {
 
 type Pair [2]int
 
-func countPairs(ids []int) (map[Pair]int, map[Pair]int) {
-	counts := make(map[Pair]int)
+type Counts struct {
+	Counts    map[Pair]int
+	FirstSeen map[Pair]int
+}
+
+func countPairs(ids []int, counts ...*Counts) *Counts {
+	cnt := make(map[Pair]int)
 	firstSeen := make(map[Pair]int)
+	if len(counts) > 0 {
+		cnt = counts[0].Counts
+		firstSeen = counts[0].FirstSeen
+	}
 
 	var order int
 	for i := range len(ids) - 1 {
 		p := Pair{ids[i], ids[i+1]}
-		counts[p]++
+		cnt[p]++
 
 		if _, ok := firstSeen[p]; !ok {
 			firstSeen[p] = order
@@ -69,7 +79,10 @@ func countPairs(ids []int) (map[Pair]int, map[Pair]int) {
 		}
 	}
 
-	return counts, firstSeen
+	return &Counts{
+		Counts:    cnt,
+		FirstSeen: firstSeen,
+	}
 }
 
 func merge(ids []int, pair Pair, newID int) []int {
@@ -125,23 +138,42 @@ func (r *MergeRules) Delete(pair Pair) {
 	}
 }
 
-func trainBPE(text string, vocabSize int) *MergeRules {
-	bytes := []byte(text)
-	ids := make([]int, len(bytes))
-	for i := range bytes {
-		ids[i] = int(bytes[i])
+func trainBPE(inputText string, vocabSize int, endToken ...string) *MergeRules {
+	if len(endToken) == 0 {
+		endToken = []string{"<|endoftext|>"}
+	}
+	texts := strings.Split(inputText, endToken[0])
+
+	idsList := make([][]int, len(texts))
+	for i, text := range texts {
+		bytes := []byte(text)
+		idsList[i] = make([]int, len(bytes))
+		for j := range bytes {
+			idsList[i][j] = int(bytes[j])
+		}
 	}
 
 	mergeRules := NewMergeRules()
-	for step := range vocabSize - 256 {
-		counts, firstSeen := countPairs(ids)
-		if len(counts) == 0 {
+	for step := range vocabSize - 256 - 1 {
+		counts := &Counts{
+			Counts:    make(map[Pair]int),
+			FirstSeen: make(map[Pair]int),
+		}
+		for _, ids := range idsList {
+			counts = countPairs(ids, counts)
+		}
+
+		cnt := counts.Counts
+		if len(cnt) == 0 {
 			break
 		}
 
-		bestCount, bestSeen := -1, math.MaxInt
+		bestCount := -1
+		bestSeen := math.MaxInt
+		firstSeen := counts.FirstSeen
+
 		var bestPair Pair
-		for p, c := range counts {
+		for p, c := range cnt {
 			if c > bestCount || (c == bestCount && firstSeen[p] < bestSeen) {
 				bestCount = c
 				bestSeen = firstSeen[p]
@@ -151,7 +183,9 @@ func trainBPE(text string, vocabSize int) *MergeRules {
 
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
-		ids = merge(ids, bestPair, newID)
+		for i, ids := range idsList {
+			idsList[i] = merge(ids, bestPair, newID)
+		}
 	}
 
 	return mergeRules

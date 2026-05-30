@@ -9,8 +9,8 @@ import (
 func ExampleCountPairs() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
-	counts, _ := tokenizer.CountPairs(ids)
-	for pair, count := range counts {
+	pairs := tokenizer.CountPairs(ids)
+	for pair, count := range pairs.Counts {
 		fmt.Println(pair, count)
 	}
 
@@ -32,7 +32,7 @@ func ExampleMerge() {
 
 func ExampleTrainBPE() {
 	// p17
-	text := "Hello world! This is BPE training."
+	text := "Hello world!<|endoftext|>This is BPE training."
 
 	mergeRules := tokenizer.TrainBPE(text, 260)
 	for pair, newID := range mergeRules.Seq2() {
@@ -43,12 +43,11 @@ func ExampleTrainBPE() {
 	// [105 115] 256
 	// [256 32] 257
 	// [105 110] 258
-	// [72 101] 259
 }
 
 func ExampleBPETokenizer_Encode() {
 	// p21
-	train := "Hello world! This is BPE training."
+	train := "Hello world!<|endoftext|>This is BPE training."
 	mergeRules := tokenizer.TrainBPE(train, 260)
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
