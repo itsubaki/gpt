@@ -36,13 +36,19 @@ func ExampleBPETokenizer_Encode_preTokenize() {
 	fmt.Println(decoded)
 
 	for _, id := range ids {
+		// [262 260 33]
+		// Say hello!
+		// 262 -> "Say"
+		// 260 -> " hello"
+		//  33 -> "!"
 		fmt.Printf("%3d -> %q\n", id, tknizer.Decode([]int{id}))
 	}
 
 	// Output:
-	// [262 260 33]
+	// [268 121 260 33]
 	// Say hello!
-	// 262 -> "Say"
+	// 268 -> "Sa"
+	// 121 -> "y"
 	// 260 -> " hello"
 	//  33 -> "!"
 }

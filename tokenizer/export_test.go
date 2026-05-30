@@ -5,4 +5,5 @@ var (
 	Merge       = merge
 	PreTokenize = preTokenize
 	ReSplit     = reSplit
+	Text2IDs    = text2IDs
 )

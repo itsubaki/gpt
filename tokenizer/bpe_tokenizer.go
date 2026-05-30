@@ -27,7 +27,7 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 		idToBytes[newID] = append(p0, p1...)
 	}
 
-	endTokenID := 256 + len(mergeRules.Order)
+	endTokenID := 256 + mergeRules.Len()
 	idToBytes[endTokenID] = []byte(endToken[0])
 
 	return &BPETokenizer{
@@ -86,7 +86,7 @@ func text2IDs(text string) []int {
 }
 
 func merge(ids []int, pair Pair, newID int) []int {
-	merged := make([]int, 0, len(ids))
+	merged := make([]int, 0)
 	for i := 0; i < len(ids); {
 		if i < len(ids)-1 && ids[i] == pair[0] && ids[i+1] == pair[1] {
 			merged = append(merged, newID)

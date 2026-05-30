@@ -45,8 +45,8 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
-		for i, ids := range idsList {
-			idsList[i] = merge(ids, bestPair, newID)
+		for i := range idsList {
+			idsList[i] = merge(idsList[i], bestPair, newID)
 		}
 	}
 

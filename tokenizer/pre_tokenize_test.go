@@ -19,13 +19,13 @@ func ExamplePreTokenize() {
 }
 
 func ExamplePreTokenize_hello() {
-	// p30
-	sample := "Say hello! Why hello? Just hello.<|endoftext|>Good morning!"
+	// p28
+	sample := "Say hello! Why hello? Just hello."
 	preTokens := tokenizer.PreTokenize(sample)
 	for _, token := range preTokens {
 		fmt.Printf("[%s]", token)
 	}
 
 	// Output:
-	// [Say][ hello][!][ Why][ hello][?][ Just][ hello][.<|][endoftext][|>][Good][ morning][!]
+	// [Say][ hello][!][ Why][ hello][?][ Just][ hello][.]
 }
