@@ -33,4 +33,5 @@ jobs:
 
       - name: Tokenize
         run: |
+          make dl
           make tokenize
