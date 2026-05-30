@@ -1,6 +1,7 @@
 package tokenizer
 
 import (
+	"math"
 	"strings"
 )
 
@@ -36,10 +37,12 @@ func trainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		}
 
 		bestCount := -1
+		bestSeen := math.MaxInt
 		var bestPair Pair
 		for p, c := range counts.Seq2() {
-			if c > bestCount {
+			if c > bestCount || (c == bestCount && p[0] < bestSeen) {
 				bestCount = c
+				bestSeen = p[0]
 				bestPair = p
 			}
 		}
