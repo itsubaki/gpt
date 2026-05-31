@@ -22,7 +22,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	for step := range numMerges {
 		counts := NewDefaultDict[Pair]()
 		for _, ids := range idsList {
-			counts = countPairs(ids, counts)
+			counts = countPairs(ids, 1, counts)
 		}
 
 		if counts.Len() == 0 {
@@ -48,7 +48,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	return mergeRules
 }
 
-func countPairs(ids []int, counts ...*DefaultDict[Pair]) *DefaultDict[Pair] {
+func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair]) *DefaultDict[Pair] {
 	cnts := NewDefaultDict[Pair]()
 	if len(counts) > 0 {
 		cnts = counts[0]
@@ -56,7 +56,7 @@ func countPairs(ids []int, counts ...*DefaultDict[Pair]) *DefaultDict[Pair] {
 
 	for i := range len(ids) - 1 {
 		p := Pair{ids[i], ids[i+1]}
-		cnts.Set(p, cnts.Dict[p]+1)
+		cnts.Set(p, cnts.Dict[p]+weight)
 	}
 
 	return cnts

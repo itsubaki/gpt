@@ -11,12 +11,11 @@ import (
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
-const mergeRulesGob = "testdata/merge_rules.gob"
-
 func main() {
-	var filepath string
+	var filepath, gobpath string
 	var vocabSize int
 	flag.StringVar(&filepath, "f", "testdata/tiny_codes.txt", "path to the input file")
+	flag.StringVar(&gobpath, "g", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.Parse()
 
@@ -25,16 +24,16 @@ func main() {
 		panic(err)
 	}
 
-	mergeRules, ok := load(mergeRulesGob)
+	mergeRules, ok := load(gobpath)
 	if !ok {
 		now := time.Now()
 		fmt.Println("training BPE...", now.Format(time.RFC3339))
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
-		if err := save(mergeRulesGob, mergeRules); err != nil {
+		if err := save(gobpath, mergeRules); err != nil {
 			panic(err)
 		}
 
-		fmt.Println("saved merge rules to", mergeRulesGob)
+		fmt.Println("saved merge rules to", gobpath)
 		fmt.Println("elapsed time:", time.Since(now))
 	}
 
