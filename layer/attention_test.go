@@ -12,17 +12,21 @@ func ExampleMultiHeadAttention() {
 	embeddim := 64
 	numOfhead := 8
 	headDim := 64
-	mha := L.MultiHeadAttention(embeddim, numOfhead, headDim, 0.1)
-
 	batchSize := 2
 	contextLen := 10
-	x := variable.Randn([]int{batchSize, contextLen, embeddim})
 
+	x := variable.Randn([]int{batchSize, contextLen, embeddim})
+	mha := L.MultiHeadAttention(embeddim, numOfhead, headDim, 0.1)
 	output := mha.First(x)
+
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
 
+	output.Backward()
+	fmt.Println(x.Grad.Shape())
+
 	// Output:
+	// [2 10 64]
 	// [2 10 64]
 	// [2 10 64]
 }
