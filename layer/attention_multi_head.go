@@ -1,1 +1,81 @@
 package layer
+
+import (
+	"math"
+
+	F "github.com/itsubaki/autograd/function"
+	"github.com/itsubaki/autograd/layer"
+	"github.com/itsubaki/autograd/tensor"
+	"github.com/itsubaki/autograd/variable"
+)
+
+var _ layer.Layer = (*MultiHeadAttentionT)(nil)
+
+func MultiHeadAttention(embeddim, headdim, numOfhead int) *MultiHeadAttentionT {
+	attn := &MultiHeadAttentionT{
+		embeddim:    embeddim,
+		headdim:     headdim,
+		numOfhead:   numOfhead,
+		dropoutRate: 0.1,
+	}
+
+	E, H, D, bias := embeddim, numOfhead, headdim, false
+	attn.Wq = Linear(E, H*D, bias)
+	attn.Wk = Linear(E, H*D, bias)
+	attn.Wv = Linear(E, H*D, bias)
+	attn.Wo = Linear(H*D, E, bias)
+
+	return attn
+}
+
+type MultiHeadAttentionT struct {
+	embeddim    int
+	headdim     int
+	numOfhead   int
+	Wq          *LinearT
+	Wk          *LinearT
+	Wv          *LinearT
+	Wo          *LinearT
+	dropoutRate float64
+	layer.Parameters
+}
+
+func (l *MultiHeadAttentionT) First(x ...*variable.Variable) *variable.Variable {
+	return l.Forward(x...)[0]
+}
+
+func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Variable {
+	v, shape := x[0], x[0].Shape()
+	B, C, H, D := shape[0], shape[1], l.numOfhead, l.headdim
+
+	Q := l.Wq.First(v)
+	K := l.Wk.First(v)
+	V := l.Wv.First(v)
+
+	Q = F.Transpose(1, 2)(F.Reshape(B, C, H, D)(Q)) // (B, H, C, D)
+	K = F.Transpose(1, 2)(F.Reshape(B, C, H, D)(K)) // (B, H, C, D)
+	V = F.Transpose(1, 2)(F.Reshape(B, C, H, D)(V)) // (B, H, C, D)
+
+	Kt := F.Transpose(-2, -1)(K)                       // (B, H, D, C)
+	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)
+	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
+
+	// attention mask
+	mask := variable.From(tensor.Tril(tensor.Ones[float64](C, C)))
+	inf := variable.From(tensor.MaskFill(scores.Data, mask.Data, func(x, m float64) bool {
+		return m == 0
+	}, math.Inf(-1)))
+	scores = F.Add(F.Mul(scores, mask), inf)
+
+	weights := F.Softmax(-1)(scores)                  // (B, H, C, C)
+	weights = F.DropoutSimple(l.dropoutRate)(weights) // (B, H, C, C)
+	hidden := F.MatMul(weights, V)                    // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)
+	hidden = F.Transpose(1, 2)(hidden)                // (B, H, C, D) -> (B, C, H, D)
+	hidden = F.Reshape(B, C, H*D)(hidden)             // (B, C, H*D)
+	output := l.Wo.First(hidden)                      // (B, C, E)
+	output = F.DropoutSimple(l.dropoutRate)(output)   // (B, C, E)
+
+	return []*variable.Variable{
+		output,
+	}
+}

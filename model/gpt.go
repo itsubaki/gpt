@@ -9,7 +9,10 @@ import (
 )
 
 var (
+	_ model.Layer = (*L.MultiHeadAttentionT)(nil)
+	_ model.Layer = (*L.BlockT)(nil)
 	_ model.Layer = (*L.EmbeddingsT)(nil)
+	_ model.Layer = (*L.FFNT)(nil)
 	_ model.Layer = (*L.LayerNormT)(nil)
 	_ model.Layer = (*L.LinearT)(nil)
 )

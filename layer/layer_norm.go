@@ -1,8 +1,6 @@
 package layer
 
 import (
-	randv2 "math/rand/v2"
-
 	"github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/variable"
 )
@@ -10,7 +8,6 @@ import (
 var _ layer.Layer = (*LayerNormT)(nil)
 
 type LayerNormT struct {
-	s randv2.Source
 	layer.Parameters
 }
 
