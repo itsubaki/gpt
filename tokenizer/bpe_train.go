@@ -21,38 +21,79 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		}
 	}
 
+	pair2IDs := NewDefaultDict[Pair, map[string]struct{}]()
+	pairCounts := NewDefaultDict[Pair, int]()
+	for key, count := range idsCounts.Seq2() {
+		ids := key2IDs(key)
+		pairCounts = countPairs(ids, count, pairCounts)
+		for i := range ids[:len(ids)-1] {
+			p := Pair{ids[i], ids[i+1]}
+			if _, ok := pair2IDs.Dict[p]; !ok {
+				pair2IDs.Set(p, make(map[string]struct{}))
+			}
+
+			pair2IDs.Dict[p][key] = struct{}{}
+		}
+	}
+
 	numMerges := vocabSize - 256 - 1
 	mergeRules := NewDefaultDict[Pair, int]()
 	for step := range numMerges {
-		counts := NewDefaultDict[Pair, int]()
-		for tokens, count := range idsCounts.Seq2() {
-			counts = countPairs(key2IDs(tokens), count, counts)
-		}
-
-		if counts.Len() == 0 {
+		if pairCounts.Len() == 0 {
 			break
 		}
 
 		bestCount := -1
 		var bestPair Pair
-		for p, c := range counts.Seq2() {
-			if c > bestCount {
-				bestCount = c
-				bestPair = p
+		for pair, count := range pairCounts.Seq2() {
+			if count > bestCount {
+				bestCount = count
+				bestPair = pair
 			}
 		}
 
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
 
-		newIDsCounts := NewDefaultDict[string, int]()
-		for tokens, count := range idsCounts.Seq2() {
-			newIDs := merge(key2IDs(tokens), bestPair, newID)
-			newIDsKey := id2Key(newIDs)
-			newIDsCounts.Set(newIDsKey, newIDsCounts.Dict[newIDsKey]+count)
+		affectedIDs := pair2IDs.Dict[bestPair]
+		pair2IDs.Delete(bestPair)
+		for key := range affectedIDs {
+			idsCount := idsCounts.Dict[key]
+			ids := key2IDs(key)
+			newIDs := merge(ids, bestPair, newID)
+
+			// update
+			idsCounts.Delete(key)
+			idsCounts.Set(id2Key(newIDs), idsCount)
+
+			// update old pair counts
+			oldCounts := countPairs(ids, 1)
+			for pair, count := range oldCounts.Seq2() {
+				pairCounts.Set(pair, pairCounts.Dict[pair]-count*idsCount)
+				if pairCounts.Dict[pair] <= 0 {
+					pairCounts.Delete(pair)
+				}
+
+				if pair2IDs.Dict[pair] != nil {
+					delete(pair2IDs.Dict[pair], key)
+					if len(pair2IDs.Dict[pair]) == 0 {
+						pair2IDs.Delete(pair)
+					}
+				}
+			}
+
+			// update new pair counts
+			newCounts := countPairs(newIDs, 1)
+			for pair, count := range newCounts.Seq2() {
+				pairCounts.Set(pair, pairCounts.Dict[pair]+count*idsCount)
+				if _, ok := pair2IDs.Dict[pair]; !ok {
+					pair2IDs.Set(pair, make(map[string]struct{}))
+				}
+
+				pair2IDs.Dict[pair][id2Key(newIDs)] = struct{}{}
+			}
 		}
 
-		idsCounts = newIDsCounts
 	}
 
 	return mergeRules

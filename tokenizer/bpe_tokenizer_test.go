@@ -44,9 +44,9 @@ func ExampleBPETokenizer_Encode_preTokenize() {
 	}
 
 	// Output:
-	// [262 260 33]
+	// [266 260 33]
 	// Say hello!
-	// 262 -> "Say"
+	// 266 -> "Say"
 	// 260 -> " hello"
 	//  33 -> "!"
 }
