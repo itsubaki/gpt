@@ -18,15 +18,11 @@ func Linear(xdim, hiddendim int, bias bool) *LinearT {
 	}
 
 	return &LinearT{
-		xdim:       xdim,
-		hiddendim:  hiddendim,
 		Parameters: p,
 	}
 }
 
 type LinearT struct {
-	xdim      int
-	hiddendim int
 	L.Parameters
 }
 
