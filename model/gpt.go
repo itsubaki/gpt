@@ -21,18 +21,12 @@ var (
 )
 
 type GPT struct {
-	vocabSize     int
-	maxContextLen int
-	embeddim      int
-	numOfHead     int
-	numOfBlock    int
-	ffdim         int
-	dropoutRate   float64
-	embed         *L.EmbeddingsT
-	posembed      *L.EmbeddingsT
-	blocks        []*L.BlockT
-	norm          *L.LayerNormT
-	unembed       *L.LinearT
+	dropoutRate float64
+	embed       *L.EmbeddingsT
+	posembed    *L.EmbeddingsT
+	blocks      []*L.BlockT
+	norm        *L.LayerNormT
+	unembed     *L.LinearT
 	model.Model
 }
 
@@ -43,18 +37,12 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int
 	}
 
 	return &GPT{
-		vocabSize:     vocabSize,
-		maxContextLen: maxContextLen,
-		embeddim:      embeddim,
-		numOfHead:     numOfHead,
-		numOfBlock:    numOfBlock,
-		ffdim:         ffdim,
-		dropoutRate:   dropoutRate,
-		embed:         L.Embeddings(vocabSize, embeddim),
-		posembed:      L.Embeddings(maxContextLen, embeddim),
-		blocks:        blocks,
-		norm:          L.LayerNorm(embeddim),
-		unembed:       L.Linear(embeddim, vocabSize, true),
+		dropoutRate: dropoutRate,
+		embed:       L.Embeddings(vocabSize, embeddim),
+		posembed:    L.Embeddings(maxContextLen, embeddim),
+		blocks:      blocks,
+		norm:        L.LayerNorm(embeddim),
+		unembed:     L.Linear(embeddim, vocabSize, true),
 	}
 }
 

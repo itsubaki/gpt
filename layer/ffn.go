@@ -9,17 +9,15 @@ import (
 var _ L.Layer = (*FFNT)(nil)
 
 func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
-	fnn := &FFNT{
+	return &FFNT{
 		xDim:        xdim,
 		hiddenDim:   hiddendim,
 		dropoutRate: dropoutRate,
-		Layers:      make(L.Layers),
+		Layers: L.Layers{
+			"l1": Linear(xdim, hiddendim, true),
+			"l2": Linear(hiddendim, xdim, true),
+		},
 	}
-
-	bias := true
-	fnn.Add("l1", Linear(xdim, hiddendim, bias))
-	fnn.Add("l2", Linear(hiddendim, xdim, bias))
-	return fnn
 }
 
 type FFNT struct {
