@@ -8,7 +8,7 @@ import (
 )
 
 func ExampleLayerNorm() {
-	embeddim := 512
+	embeddim := 64
 	norm := L.LayerNorm(embeddim)
 
 	x := variable.Randn([]int{10, 20, embeddim})
@@ -17,6 +17,6 @@ func ExampleLayerNorm() {
 	fmt.Println(output.Shape())
 
 	// Output:
-	// [10 20 512]
-	// [10 20 512]
+	// [10 20 64]
+	// [10 20 64]
 }

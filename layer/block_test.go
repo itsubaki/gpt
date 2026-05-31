@@ -8,7 +8,7 @@ import (
 )
 
 func ExampleBlock() {
-	embeddim := 128
+	embeddim := 64
 	numOfhead := 8
 	ffdim := 4 * embeddim
 	block := L.Block(embeddim, numOfhead, ffdim, 0.1)
@@ -22,6 +22,6 @@ func ExampleBlock() {
 	fmt.Println(output.Shape())
 
 	// Output:
-	// [2 30 128]
-	// [2 30 128]
+	// [2 30 64]
+	// [2 30 64]
 }

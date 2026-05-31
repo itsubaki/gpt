@@ -1,11 +1,14 @@
 package model
 
 import (
+	"os"
+
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/model"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
+	"github.com/itsubaki/gpt/progress"
 )
 
 var (
@@ -67,8 +70,10 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := F.DropoutSimple(m.dropoutRate)(F.Add(emb, posemb))
 
 	// blocks
-	for _, block := range m.blocks {
+	bar := progress.NewProgressBar("Transformer Blocks", len(m.blocks), os.Stdout)
+	for i, block := range m.blocks {
 		x = block.First(x)
+		bar.Update(i + 1)
 	}
 	x = m.norm.First(x)
 

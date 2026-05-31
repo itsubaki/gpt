@@ -9,7 +9,7 @@ import (
 
 func ExampleMultiHeadAttention() {
 	// p100
-	embeddim := 512
+	embeddim := 64
 	numOfhead := 8
 	headDim := 64
 	mha := L.MultiHeadAttention(embeddim, numOfhead, headDim, 0.1)
@@ -23,6 +23,6 @@ func ExampleMultiHeadAttention() {
 	fmt.Println(output.Shape())
 
 	// Output:
-	// [2 10 512]
-	// [2 10 512]
+	// [2 10 64]
+	// [2 10 64]
 }

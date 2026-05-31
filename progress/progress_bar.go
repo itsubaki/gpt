@@ -74,7 +74,7 @@ func (p *ProgressBar) Update(current int) {
 	p.lastCount = current
 
 	// finish
-	if current == p.total {
+	if current >= p.total {
 		if _, err := fmt.Fprint(p.writer, "\n"); err != nil {
 			fmt.Println(err)
 		}
