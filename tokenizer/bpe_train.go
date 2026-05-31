@@ -29,10 +29,11 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		pairCounts = countPairs(ids, count, pairCounts)
 		for i := range ids[:len(ids)-1] {
 			p := Pair{ids[i], ids[i+1]}
+
+			// update cache
 			if _, ok := pair2IDs[p]; !ok {
 				pair2IDs[p] = make(map[string]struct{})
 			}
-
 			pair2IDs[p][key] = struct{}{}
 		}
 	}
