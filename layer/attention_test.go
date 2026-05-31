@@ -12,7 +12,7 @@ func ExampleMultiHeadAttention() {
 	embeddim := 512
 	numOfhead := 8
 	headDim := 64
-	mha := L.MultiHeadAttention(embeddim, numOfhead, headDim)
+	mha := L.MultiHeadAttention(embeddim, numOfhead, headDim, 0.1)
 
 	batchSize := 2
 	contextLen := 10

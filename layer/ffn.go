@@ -8,17 +8,17 @@ import (
 
 var _ L.Layer = (*FFNT)(nil)
 
-func FFN(xdim int) *FFNT {
+func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
 	fnn := &FFNT{
 		xDim:        xdim,
-		hiddenDim:   4 * xdim,
-		dropoutRate: 0.1,
+		hiddenDim:   hiddendim,
+		dropoutRate: dropoutRate,
 		Layers:      make(L.Layers),
 	}
 
 	bias := true
-	fnn.Add("l1", Linear(xdim, 4*xdim, bias))
-	fnn.Add("l2", Linear(4*xdim, xdim, bias))
+	fnn.Add("l1", Linear(xdim, hiddendim, bias))
+	fnn.Add("l2", Linear(hiddendim, xdim, bias))
 	return fnn
 }
 

@@ -1,8 +1,6 @@
 package layer
 
 import (
-	"math"
-
 	F "github.com/itsubaki/autograd/function"
 	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
@@ -13,7 +11,8 @@ var _ L.Layer = (*LinearT)(nil)
 
 func Linear(xdim, hiddendim int, bias bool) *LinearT {
 	p := make(L.Parameters)
-	p.Add("w", initw(xdim, hiddendim))
+	p.Add("w", variable.From(tensor.Randn([]int{xdim, hiddendim})))
+
 	if bias {
 		p.Add("b", variable.Zeros(1, hiddendim))
 	}
@@ -48,10 +47,4 @@ func (l *LinearT) xparams(x *variable.Variable) []*variable.Variable {
 	}
 
 	return xp
-}
-
-func initw(xdim, hiddendim int) *variable.Variable {
-	w := tensor.Randn([]int{xdim, hiddendim})
-	xavier := 1.0 / math.Sqrt(float64(xdim))
-	return variable.From(tensor.MulC(xavier, w))
 }

@@ -31,9 +31,14 @@ func (l *LayerNormT) First(x ...*variable.Variable) *variable.Variable {
 func (l *LayerNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 	mean := F.Mean(-1)(x[0])
 	variance := F.Variance(-1)(x[0], mean)
-	normx := F.Div(F.Sub(x[0], mean), F.Pow(0.5)(F.AddC(l.eps, variance)))
-	y := F.Add(F.Mul(l.Parameters["gamma"], normx), l.Parameters["beta"])
 
+	// normx = (x - mean) / sqrt(variance + eps)
+	sub := F.Sub(x[0], mean)
+	addc := F.AddC(l.eps, variance)
+	sqrt := F.Pow(0.5)(addc)
+	normx := F.Div(sub, sqrt)
+
+	y := F.Add(F.Mul(l.Parameters["gamma"], normx), l.Parameters["beta"])
 	return []*variable.Variable{
 		y,
 	}
