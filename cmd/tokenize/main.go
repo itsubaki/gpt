@@ -26,15 +26,13 @@ func main() {
 
 	mergeRules, ok := load(gobpath)
 	if !ok {
-		now := time.Now()
-		fmt.Println("training BPE...")
+		tokenizer.Writer = os.Stdout
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
 		if err := save(gobpath, mergeRules); err != nil {
 			panic(err)
 		}
 
 		fmt.Println("saved merge rules to", gobpath)
-		fmt.Println("elapsed time:", time.Since(now))
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)

@@ -1,9 +1,14 @@
 package tokenizer
 
 import (
+	"io"
 	"strconv"
 	"strings"
+
+	"github.com/itsubaki/gpt/progress"
 )
+
+var Writer io.Writer = io.Discard
 
 type Pair [2]int
 
@@ -40,7 +45,10 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 
 	numMerges := vocabSize - 256 - 1
 	mergeRules := NewDefaultDict[Pair, int]()
+
+	bar := progress.NewProgressBar("Training BPE", numMerges, Writer)
 	for step := range numMerges {
+		bar.Update(step + 1)
 		if pairCounts.Len() == 0 {
 			break
 		}
