@@ -93,7 +93,6 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 				pair2IDs.Dict[pair][id2Key(newIDs)] = struct{}{}
 			}
 		}
-
 	}
 
 	return mergeRules
