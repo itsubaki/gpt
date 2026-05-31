@@ -14,7 +14,6 @@ var _ L.Layer = (*MultiHeadAttentionT)(nil)
 func MultiHeadAttention(embeddim, numOfHead, headdim int, dropoutRate float64) *MultiHeadAttentionT {
 	E, H, D, bias := embeddim, numOfHead, headdim, false
 	return &MultiHeadAttentionT{
-		embeddim:    embeddim,
 		numOfHead:   numOfHead,
 		headdim:     headdim,
 		dropoutRate: dropoutRate,
@@ -28,7 +27,6 @@ func MultiHeadAttention(embeddim, numOfHead, headdim int, dropoutRate float64) *
 }
 
 type MultiHeadAttentionT struct {
-	embeddim    int
 	headdim     int
 	numOfHead   int
 	dropoutRate float64
