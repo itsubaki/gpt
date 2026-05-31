@@ -10,8 +10,6 @@ var _ L.Layer = (*FFNT)(nil)
 
 func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
 	return &FFNT{
-		xDim:        xdim,
-		hiddenDim:   hiddendim,
 		dropoutRate: dropoutRate,
 		Layers: L.Layers{
 			"l1": Linear(xdim, hiddendim, true),
@@ -21,8 +19,6 @@ func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
 }
 
 type FFNT struct {
-	xDim        int
-	hiddenDim   int
 	dropoutRate float64
 	L.Layers
 }
