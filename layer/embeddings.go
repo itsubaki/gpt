@@ -14,14 +14,12 @@ func Embeddings(xdim, embeddim int) *EmbeddingsT {
 	p.Add("w", variable.From(tensor.Randn([]int{xdim, embeddim})))
 
 	return &EmbeddingsT{
-		xdim:       xdim,
 		embeddim:   embeddim,
 		Parameters: p,
 	}
 }
 
 type EmbeddingsT struct {
-	xdim     int
 	embeddim int
 	L.Parameters
 }
