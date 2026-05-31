@@ -7,13 +7,13 @@ import (
 
 type Pair [2]int
 
-func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[Pair] {
+func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[Pair, int] {
 	if len(endToken) == 0 {
 		endToken = []string{"<|endoftext|>"}
 	}
 	texts := strings.Split(inputText, endToken[0])
 
-	idsCounts := NewDefaultDict[string]()
+	idsCounts := NewDefaultDict[string, int]()
 	for _, text := range texts {
 		for _, preToken := range preTokenize(text) {
 			key := id2Key(text2IDs(preToken))
@@ -22,9 +22,9 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	}
 
 	numMerges := vocabSize - 256 - 1
-	mergeRules := NewDefaultDict[Pair]()
+	mergeRules := NewDefaultDict[Pair, int]()
 	for step := range numMerges {
-		counts := NewDefaultDict[Pair]()
+		counts := NewDefaultDict[Pair, int]()
 		for tokens, count := range idsCounts.Seq2() {
 			counts = countPairs(key2IDs(tokens), count, counts)
 		}
@@ -45,7 +45,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
 
-		newIDsCounts := NewDefaultDict[string]()
+		newIDsCounts := NewDefaultDict[string, int]()
 		for tokens, count := range idsCounts.Seq2() {
 			newIDs := merge(key2IDs(tokens), bestPair, newID)
 			newIDsKey := id2Key(newIDs)
@@ -58,8 +58,8 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	return mergeRules
 }
 
-func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair]) *DefaultDict[Pair] {
-	cnts := NewDefaultDict[Pair]()
+func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair, int]) *DefaultDict[Pair, int] {
+	cnts := NewDefaultDict[Pair, int]()
 	if len(counts) > 0 {
 		cnts = counts[0]
 	}

@@ -61,7 +61,7 @@ func keys(m map[int][]byte) []int {
 	return keys
 }
 
-func save(filename string, dict *tokenizer.DefaultDict[tokenizer.Pair]) error {
+func save(filename string, dict *tokenizer.DefaultDict[tokenizer.Pair, int]) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("create file: %v", err)
@@ -75,14 +75,14 @@ func save(filename string, dict *tokenizer.DefaultDict[tokenizer.Pair]) error {
 	return nil
 }
 
-func load(filename string) (*tokenizer.DefaultDict[tokenizer.Pair], bool) {
+func load(filename string) (*tokenizer.DefaultDict[tokenizer.Pair, int], bool) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, false
 	}
 	defer func() { _ = f.Close() }()
 
-	var dict tokenizer.DefaultDict[tokenizer.Pair]
+	var dict tokenizer.DefaultDict[tokenizer.Pair, int]
 	if err := gob.NewDecoder(f).Decode(&dict); err != nil {
 		return nil, false
 	}
