@@ -9,7 +9,7 @@ import (
 func ExampleCountPairs() {
 	// p14
 	ids := []int{1, 2, 3, 1, 2}
-	counts := tokenizer.CountPairs(ids)
+	counts := tokenizer.CountPairs(ids, 1)
 	for pair, count := range counts.Seq2() {
 		fmt.Println(pair, count)
 	}

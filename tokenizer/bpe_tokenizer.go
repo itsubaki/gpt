@@ -1,20 +1,16 @@
 package tokenizer
 
-import (
-	"regexp"
-)
-
-type Pair [2]int
+import "regexp"
 
 type BPETokenizer struct {
-	mergeRules *DefaultDict[Pair]
+	mergeRules *DefaultDict[Pair, int]
 	endToken   string
 	endTokenID int
 	ID2Bytes   map[int][]byte
 	VocabSize  int
 }
 
-func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPETokenizer {
+func NewBPETokenizer(mergeRules *DefaultDict[Pair, int], endToken ...string) *BPETokenizer {
 	if len(endToken) == 0 {
 		endToken = []string{"<|endoftext|>"}
 	}
@@ -75,16 +71,6 @@ func (t *BPETokenizer) Decode(ids []int) string {
 	}
 
 	return string(bytes)
-}
-
-func text2IDs(text string) []int {
-	bytes := []byte(text)
-	ids := make([]int, len(bytes))
-	for i := range bytes {
-		ids[i] = int(bytes[i])
-	}
-
-	return ids
 }
 
 func merge(ids []int, pair Pair, newID int) []int {

@@ -8,7 +8,7 @@ import (
 
 func ExampleBPETokenizer_Encode() {
 	// p27
-	mergeRules := tokenizer.NewDefaultDict[tokenizer.Pair]()
+	mergeRules := tokenizer.NewDefaultDict[tokenizer.Pair, int]()
 	mergeRules.Set(tokenizer.Pair{105, 115}, 256)
 	mergeRules.Set(tokenizer.Pair{256, 32}, 257)
 	mergeRules.Set(tokenizer.Pair{105, 110}, 258)
@@ -44,9 +44,9 @@ func ExampleBPETokenizer_Encode_preTokenize() {
 	}
 
 	// Output:
-	// [262 260 33]
+	// [266 260 33]
 	// Say hello!
-	// 262 -> "Say"
+	// 266 -> "Say"
 	// 260 -> " hello"
 	//  33 -> "!"
 }
