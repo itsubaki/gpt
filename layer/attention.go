@@ -13,20 +13,15 @@ var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
 func MultiHeadAttention(embeddim, numOfhead, headdim int) *MultiHeadAttentionT {
 	E, H, D, bias := embeddim, numOfhead, headdim, false
-	Wq := Linear(E, H*D, bias)
-	Wk := Linear(E, H*D, bias)
-	Wv := Linear(E, H*D, bias)
-	Wo := Linear(H*D, E, bias)
-
 	return &MultiHeadAttentionT{
 		embeddim:    embeddim,
 		numOfhead:   numOfhead,
 		headdim:     headdim,
 		dropoutRate: 0.1,
-		Wq:          Wq,
-		Wk:          Wk,
-		Wv:          Wv,
-		Wo:          Wo,
+		Wq:          Linear(E, H*D, bias),
+		Wk:          Linear(E, H*D, bias),
+		Wv:          Linear(E, H*D, bias),
+		Wo:          Linear(H*D, E, bias),
 	}
 }
 
@@ -63,11 +58,8 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
 
 	// attention mask
-	mask := variable.From(tensor.Tril(tensor.Ones[float64](C, C)))
-	inf := variable.From(tensor.MaskFill(scores.Data, mask.Data, func(x, m float64) bool {
-		return m == 0
-	}, math.Inf(-1)))
-	scores = F.Add(F.Mul(scores, mask), inf)
+	mask := tensor.Tril(tensor.Ones[float64](C, C))
+	scores = F.MaskFill(mask, math.Inf(-1))(scores)
 
 	weights := F.Softmax(-1)(scores)                  // (B, H, C, C)
 	weights = F.DropoutSimple(l.dropoutRate)(weights) // (B, H, C, C)

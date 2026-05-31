@@ -7,9 +7,14 @@ test:
 lint:
 	golangci-lint run
 
+update:
+	GOPROXY=direct go get github.com/itsubaki/autograd@HEAD
+	go get -u
+	go mod tidy
+	pinact run -u
+
 dl:
 	curl -fs -o testdata/tiny_codes.txt https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
-
 
 tokenize:
 	rm -f testdata/merge_rules.gob
