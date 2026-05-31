@@ -2,18 +2,18 @@ package layer
 
 import (
 	F "github.com/itsubaki/autograd/function"
-	"github.com/itsubaki/autograd/layer"
+	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/variable"
 )
 
-var _ layer.Layer = (*FFNT)(nil)
+var _ L.Layer = (*FFNT)(nil)
 
 func FFN(xdim int) *FFNT {
 	fnn := &FFNT{
 		xDim:        xdim,
 		hiddenDim:   4 * xdim,
 		dropoutRate: 0.1,
-		Layers:      make(layer.Layers),
+		Layers:      make(L.Layers),
 	}
 
 	bias := true
@@ -26,7 +26,7 @@ type FFNT struct {
 	xDim        int
 	hiddenDim   int
 	dropoutRate float64
-	layer.Layers
+	L.Layers
 }
 
 func (l *FFNT) First(x ...*variable.Variable) *variable.Variable {

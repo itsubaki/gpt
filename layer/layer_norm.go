@@ -1,14 +1,14 @@
 package layer
 
 import (
-	"github.com/itsubaki/autograd/layer"
+	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/variable"
 )
 
-var _ layer.Layer = (*LayerNormT)(nil)
+var _ L.Layer = (*LayerNormT)(nil)
 
 type LayerNormT struct {
-	layer.Parameters
+	L.Parameters
 }
 
 func (l *LayerNormT) First(x ...*variable.Variable) *variable.Variable {

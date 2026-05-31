@@ -1,14 +1,14 @@
 package layer
 
 import (
-	"github.com/itsubaki/autograd/layer"
+	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/variable"
 )
 
-var _ layer.Layer = (*EmbeddingsT)(nil)
+var _ L.Layer = (*EmbeddingsT)(nil)
 
 type EmbeddingsT struct {
-	layer.Parameters
+	L.Parameters
 }
 
 func (l *EmbeddingsT) First(x ...*variable.Variable) *variable.Variable {

@@ -4,15 +4,16 @@ import (
 	"math"
 
 	F "github.com/itsubaki/autograd/function"
-	"github.com/itsubaki/autograd/layer"
+	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
 
-var _ layer.Layer = (*LinearT)(nil)
+var _ L.Layer = (*LinearT)(nil)
 
 func Linear(xdim, hiddendim int, bias bool) *LinearT {
-	p := make(layer.Parameters)
+	p := make(L.Parameters)
+	p.Add("w", initw(xdim, hiddendim))
 	if bias {
 		p.Add("b", variable.Zeros(1, hiddendim))
 	}
@@ -27,7 +28,7 @@ func Linear(xdim, hiddendim int, bias bool) *LinearT {
 type LinearT struct {
 	xdim      int
 	hiddendim int
-	layer.Parameters
+	L.Parameters
 }
 
 func (l *LinearT) First(x ...*variable.Variable) *variable.Variable {
@@ -35,10 +36,6 @@ func (l *LinearT) First(x ...*variable.Variable) *variable.Variable {
 }
 
 func (l *LinearT) Forward(x ...*variable.Variable) []*variable.Variable {
-	if _, ok := l.Parameters["w"]; !ok {
-		l.Add("w", initw(l.xdim, l.hiddendim))
-	}
-
 	return []*variable.Variable{
 		F.Linear(l.xparams(x[0])...),
 	}
