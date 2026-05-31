@@ -37,4 +37,6 @@ func main() {
 
 	// [1 256 1000]
 	fmt.Println(logits.Shape())
+
+	logits.Backward()
 }

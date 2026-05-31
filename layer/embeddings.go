@@ -1,6 +1,7 @@
 package layer
 
 import (
+	F "github.com/itsubaki/autograd/function"
 	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
@@ -37,7 +38,7 @@ func (l *EmbeddingsT) Forward(x ...*variable.Variable) []*variable.Variable {
 	w := l.Parameters["w"]
 
 	shape := append(x[0].Shape(), l.embeddim)
-	y := variable.GetItem(ids, 0)(w).Reshape(shape...)
+	y := F.Reshape(shape...)(F.GetItem(ids, 0)(w))
 	return []*variable.Variable{
 		y,
 	}

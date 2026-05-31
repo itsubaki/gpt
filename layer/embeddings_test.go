@@ -25,7 +25,11 @@ func ExampleEmbeddings() {
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
 
+	output.Backward()
+	fmt.Println(emb.Parameters["w"].Grad.Shape())
+
 	// Output:
 	// [1 10]
 	// [1 10 32]
+	// [100 32]
 }
