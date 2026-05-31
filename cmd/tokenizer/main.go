@@ -42,13 +42,16 @@ func main() {
 		fmt.Printf("%3d -> %q\n", key, tknizer.Decode([]int{key}))
 	}
 
-	sample := string([]rune(string(data))[:10000])
+	sample := string([]rune(string(data)))
 	byteCount := len([]byte(sample))
+
+	now := time.Now()
 	ids := tknizer.Encode(sample)
 
 	fmt.Println("byte count:", byteCount)
 	fmt.Println("token count:", len(ids))
 	fmt.Println("compression ratio:", float64(byteCount)/float64(len(ids)))
+	fmt.Println("elapsed time:", time.Since(now))
 }
 
 func keys(m map[int][]byte) []int {

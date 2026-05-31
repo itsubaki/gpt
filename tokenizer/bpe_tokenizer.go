@@ -1,6 +1,9 @@
 package tokenizer
 
-import "regexp"
+import (
+	"math"
+	"regexp"
+)
 
 type BPETokenizer struct {
 	mergeRules *DefaultDict[Pair, int]
@@ -39,8 +42,29 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair, int], endToken ...string) *BP
 
 func (t *BPETokenizer) encode(text string) []int {
 	ids := text2IDs(text)
-	for pair, newID := range t.mergeRules.Seq2() {
-		ids = merge(ids, pair, newID)
+	for len(ids) > 1 {
+		counts := countPairs(ids, 1)
+
+		bestPriority := math.MaxInt
+		var bestPair Pair
+		for pair := range counts.Seq2() {
+			p := t.mergeRules.Dict[pair]
+			if p == 0 {
+				p = math.MaxInt
+			}
+
+			if p < bestPriority {
+				bestPriority = p
+				bestPair = pair
+			}
+		}
+
+		newID, ok := t.mergeRules.Dict[bestPair]
+		if !ok {
+			break
+		}
+
+		ids = merge(ids, bestPair, newID)
 	}
 
 	return ids
