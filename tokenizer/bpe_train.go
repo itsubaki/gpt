@@ -72,6 +72,16 @@ func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair]) *DefaultDic
 	return cnts
 }
 
+func text2IDs(text string) []int {
+	bytes := []byte(text)
+	ids := make([]int, len(bytes))
+	for i := range bytes {
+		ids[i] = int(bytes[i])
+	}
+
+	return ids
+}
+
 func id2Key(ids []int) string {
 	if len(ids) == 0 {
 		return ""

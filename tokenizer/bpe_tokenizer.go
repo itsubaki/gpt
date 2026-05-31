@@ -73,16 +73,6 @@ func (t *BPETokenizer) Decode(ids []int) string {
 	return string(bytes)
 }
 
-func text2IDs(text string) []int {
-	bytes := []byte(text)
-	ids := make([]int, len(bytes))
-	for i := range bytes {
-		ids[i] = int(bytes[i])
-	}
-
-	return ids
-}
-
 func merge(ids []int, pair Pair, newID int) []int {
 	merged := make([]int, 0)
 	for i := 0; i < len(ids); {
