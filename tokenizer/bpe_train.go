@@ -21,18 +21,19 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		}
 	}
 
-	pair2IDs := NewDefaultDict[Pair, map[string]struct{}]()
+	// cache
+	pair2IDs := make(map[Pair]map[string]struct{})
 	pairCounts := NewDefaultDict[Pair, int]()
 	for key, count := range idsCounts.Seq2() {
 		ids := key2IDs(key)
 		pairCounts = countPairs(ids, count, pairCounts)
 		for i := range ids[:len(ids)-1] {
 			p := Pair{ids[i], ids[i+1]}
-			if _, ok := pair2IDs.Dict[p]; !ok {
-				pair2IDs.Set(p, make(map[string]struct{}))
+			if _, ok := pair2IDs[p]; !ok {
+				pair2IDs[p] = make(map[string]struct{})
 			}
 
-			pair2IDs.Dict[p][key] = struct{}{}
+			pair2IDs[p][key] = struct{}{}
 		}
 	}
 
@@ -55,8 +56,8 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
 
-		affectedIDs := pair2IDs.Dict[bestPair]
-		pair2IDs.Delete(bestPair)
+		affectedIDs := pair2IDs[bestPair]
+		delete(pair2IDs, bestPair)
 		for key := range affectedIDs {
 			idsCount := idsCounts.Dict[key]
 			ids := key2IDs(key)
@@ -70,14 +71,15 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			oldCounts := countPairs(ids, 1)
 			for pair, count := range oldCounts.Seq2() {
 				pairCounts.Set(pair, pairCounts.Dict[pair]-count*idsCount)
-				if pairCounts.Dict[pair] <= 0 {
+				if pairCounts.Dict[pair] < 1 {
 					pairCounts.Delete(pair)
 				}
 
-				if pair2IDs.Dict[pair] != nil {
-					delete(pair2IDs.Dict[pair], key)
-					if len(pair2IDs.Dict[pair]) == 0 {
-						pair2IDs.Delete(pair)
+				// update cache
+				if pair2IDs[pair] != nil {
+					delete(pair2IDs[pair], key)
+					if len(pair2IDs[pair]) == 0 {
+						delete(pair2IDs, pair)
 					}
 				}
 			}
@@ -86,11 +88,12 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			newCounts := countPairs(newIDs, 1)
 			for pair, count := range newCounts.Seq2() {
 				pairCounts.Set(pair, pairCounts.Dict[pair]+count*idsCount)
-				if _, ok := pair2IDs.Dict[pair]; !ok {
-					pair2IDs.Set(pair, make(map[string]struct{}))
-				}
 
-				pair2IDs.Dict[pair][id2Key(newIDs)] = struct{}{}
+				// update cache
+				if _, ok := pair2IDs[pair]; !ok {
+					pair2IDs[pair] = make(map[string]struct{})
+				}
+				pair2IDs[pair][id2Key(newIDs)] = struct{}{}
 			}
 		}
 	}

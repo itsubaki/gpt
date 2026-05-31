@@ -13,4 +13,4 @@ dl:
 
 tokenize:
 	rm -f testdata/merge_rules.gob
-	go run ./cmd/tokenizer -f testdata/tiny_codes.txt -vocab-size 1000
+	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000

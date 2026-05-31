@@ -27,7 +27,7 @@ func main() {
 	mergeRules, ok := load(gobpath)
 	if !ok {
 		now := time.Now()
-		fmt.Println("training BPE...", now.Format(time.RFC3339))
+		fmt.Println("training BPE...")
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
 		if err := save(gobpath, mergeRules); err != nil {
 			panic(err)
