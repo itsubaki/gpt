@@ -12,7 +12,6 @@ var _ L.Layer = (*LinearT)(nil)
 func Linear(xdim, hiddendim int, bias bool) *LinearT {
 	p := make(L.Parameters)
 	p.Add("w", variable.From(tensor.Randn([]int{xdim, hiddendim})))
-
 	if bias {
 		p.Add("b", variable.Zeros(1, hiddendim))
 	}
