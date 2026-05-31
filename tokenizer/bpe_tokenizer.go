@@ -1,10 +1,6 @@
 package tokenizer
 
-import (
-	"regexp"
-)
-
-type Pair [2]int
+import "regexp"
 
 type BPETokenizer struct {
 	mergeRules *DefaultDict[Pair]
