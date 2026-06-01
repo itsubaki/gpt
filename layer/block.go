@@ -12,10 +12,10 @@ func Block(embeddim, numOfHead, ffdim int) *BlockT {
 	headdim := int(embeddim / numOfHead)
 	return &BlockT{
 		Layers: L.Layers{
-			"norm1": LayerNorm(embeddim),
-			"norm2": LayerNorm(embeddim),
-			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim),
-			"ffn":   SwiGLU(embeddim),
+			"norm1": RMSNorm(embeddim),                                // instead of LayerNorm(embeddim)
+			"norm2": RMSNorm(embeddim),                                // instead of LayerNorm(embeddim)
+			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim), //
+			"ffn":   SwiGLU(embeddim),                                 // instead of FFN(ffdim, embeddim)
 		},
 	}
 }

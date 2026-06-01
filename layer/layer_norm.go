@@ -33,8 +33,8 @@ func (l *LayerNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 	last := len(shape) - 1
 	shape[last] = 1
 
-	mean := F.Reshape(shape...)(F.Mean(last)(x[0]))
-	variance := F.Reshape(shape...)(F.Variance(last)(x[0], mean))
+	mean := F.Reshape(shape...)(F.Mean(last)(x[0]))               // keepdims
+	variance := F.Reshape(shape...)(F.Variance(last)(x[0], mean)) // keepdims
 
 	// normx = (x - mean) / sqrt(variance + eps)
 	sub := F.Sub(x[0], mean)

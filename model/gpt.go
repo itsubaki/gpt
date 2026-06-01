@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	F "github.com/itsubaki/autograd/function"
@@ -19,17 +20,20 @@ var (
 	_ model.Layer = (*L.FFNT)(nil)
 	_ model.Layer = (*L.LayerNormT)(nil)
 	_ model.Layer = (*L.LinearT)(nil)
+	_ model.Layer = (*L.RMSNormT)(nil)
 	_ model.Layer = (*L.SwiGLUT)(nil)
 )
 
 type GPT struct {
 	numOfBlock int
+	writer     io.Writer
 	model.Model
 }
 
 func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int) *GPT {
 	gpt := &GPT{
 		numOfBlock: numOfBlock,
+		writer:     os.Stdout,
 	}
 
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
@@ -37,7 +41,7 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int
 	for i := range numOfBlock {
 		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim))
 	}
-	gpt.Add("norm", L.LayerNorm(embeddim))
+	gpt.Add("norm", L.RMSNorm(embeddim)) // instead of LayerNorm(embeddim)
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
 
 	return gpt
@@ -55,7 +59,7 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := F.Add(emb, posemb)
 
 	// blocks
-	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlock, os.Stdout)
+	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlock, m.writer)
 	for i := range m.numOfBlock {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 		bar.Update(i + 1)
