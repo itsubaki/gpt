@@ -32,6 +32,8 @@ func (l *RMSNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 	last := len(shape) - 1
 	shape[last] = 1
 
+	// rms = sqrt(mean(x^2) + eps)
+	// y = gamma * x / rms
 	x2 := F.Pow(2)(x[0])
 	ms := F.Reshape(shape...)(F.Mean(last)(x2)) // keepdims
 	rms := F.Pow(0.5)(F.AddC(l.eps, ms))

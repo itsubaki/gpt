@@ -42,6 +42,7 @@ func (l *LayerNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 	sqrt := F.Pow(0.5)(addc)
 	normx := F.Div(sub, sqrt)
 
+	// y = gamma * normx + beta
 	gamma := l.Parameters["gamma"]
 	beta := l.Parameters["beta"]
 	y := F.Add(F.Mul(gamma, normx), beta)
