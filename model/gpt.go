@@ -23,7 +23,6 @@ var (
 
 type GPT struct {
 	numOfBlock int
-	dropout    func(...*variable.Variable) *variable.Variable
 	model.Model
 }
 
