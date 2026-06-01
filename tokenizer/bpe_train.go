@@ -27,19 +27,13 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	}
 
 	// cache
-	pair2IDs := make(map[Pair]map[string]struct{})
+	pair2IDs := NewCache()
 	pairCounts := NewDefaultDict[Pair, int]()
 	for key, count := range idsCounts.Seq2() {
 		ids := key2IDs(key)
 		pairCounts = countPairs(ids, count, pairCounts)
 		for i := range ids[:len(ids)-1] {
-			p := Pair{ids[i], ids[i+1]}
-
-			// update cache
-			if _, ok := pair2IDs[p]; !ok {
-				pair2IDs[p] = make(map[string]struct{})
-			}
-			pair2IDs[p][key] = struct{}{}
+			pair2IDs.Add(Pair{ids[i], ids[i+1]}, key)
 		}
 	}
 
@@ -65,8 +59,8 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
 
-		affectedIDs := pair2IDs[bestPair]
-		delete(pair2IDs, bestPair)
+		affectedIDs := pair2IDs.Get(bestPair)
+		pair2IDs.Delete(bestPair)
 		for key := range affectedIDs {
 			idsCount := idsCounts.Dict[key]
 			ids := key2IDs(key)
@@ -84,25 +78,14 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 					pairCounts.Delete(pair)
 				}
 
-				// update cache
-				if pair2IDs[pair] != nil {
-					delete(pair2IDs[pair], key)
-					if len(pair2IDs[pair]) == 0 {
-						delete(pair2IDs, pair)
-					}
-				}
+				pair2IDs.Delete(pair, key) // update cache
 			}
 
 			// update new pair counts
 			newCounts := countPairs(newIDs, 1)
 			for pair, count := range newCounts.Seq2() {
 				pairCounts.Set(pair, pairCounts.Dict[pair]+count*idsCount)
-
-				// update cache
-				if _, ok := pair2IDs[pair]; !ok {
-					pair2IDs[pair] = make(map[string]struct{})
-				}
-				pair2IDs[pair][id2Key(newIDs)] = struct{}{}
+				pair2IDs.Add(pair, id2Key(newIDs)) // update cache
 			}
 		}
 	}
