@@ -14,16 +14,17 @@ func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 	if keydim%2 != 0 {
 		panic("keydim must be even")
 	}
+	half := keydim / 2
 
-	positions := tensor.Arange(0, maxContextLen)
-	invFreq := tensor.F(tensor.Arange(0, keydim/2), func(v int) float64 {
+	pos := tensor.Arange(0, maxContextLen)
+	invFreq := tensor.F(tensor.Arange(0, half), func(v int) float64 {
 		return 1.0 / math.Pow(theta, 2.0*float64(v)/float64(keydim))
 	})
 
-	pos2d := tensor.Expand(positions, 1) // [:, None]
-	freq2d := tensor.Expand(invFreq, 0)  // [None, :]
+	pos2d := tensor.Expand(pos, 1)                      // (maxContextLen, 1)
+	freq2d := tensor.Expand(invFreq, 0)                 // (1, half)
+	angles := tensor.Mul(tensor.Float64(pos2d), freq2d) // (maxContextLen, half)
 
-	angles := tensor.Mul(tensor.Float64(pos2d), freq2d)
 	cos := tensor.Cos(angles)
 	sin := tensor.Sin(angles)
 
