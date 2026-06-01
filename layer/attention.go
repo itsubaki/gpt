@@ -11,11 +11,11 @@ import (
 
 var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
-func MultiHeadAttention(embeddim, numOfHead, headdim int) *MultiHeadAttentionT {
-	E, H, D, bias := embeddim, numOfHead, headdim, false
+func MultiHeadAttention(embeddim, numOfHeads, headdim int) *MultiHeadAttentionT {
+	E, H, D, bias := embeddim, numOfHeads, headdim, false
 	return &MultiHeadAttentionT{
-		numOfHead: numOfHead,
-		headdim:   headdim,
+		numOfHeads: numOfHeads,
+		headdim:    headdim,
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D, bias),
 			"Wk": Linear(E, H*D, bias),
@@ -26,8 +26,8 @@ func MultiHeadAttention(embeddim, numOfHead, headdim int) *MultiHeadAttentionT {
 }
 
 type MultiHeadAttentionT struct {
-	headdim   int
-	numOfHead int
+	headdim    int
+	numOfHeads int
 	L.Layers
 }
 
@@ -37,7 +37,7 @@ func (l *MultiHeadAttentionT) First(x ...*variable.Variable) *variable.Variable 
 
 func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Variable {
 	v, shape := x[0], x[0].Shape()
-	B, C, H, D := shape[0], shape[1], l.numOfHead, l.headdim
+	B, C, H, D := shape[0], shape[1], l.numOfHeads, l.headdim
 
 	Q := l.Layers["Wq"].First(v)
 	K := l.Layers["Wk"].First(v)

@@ -8,14 +8,14 @@ import (
 
 var _ L.Layer = (*BlockT)(nil)
 
-func Block(embeddim, numOfHead, ffdim int) *BlockT {
-	headdim := int(embeddim / numOfHead)
+func Block(embeddim, numOfHeads, ffdim int) *BlockT {
+	headdim := int(embeddim / numOfHeads)
 	return &BlockT{
 		Layers: L.Layers{
-			"norm1": RMSNorm(embeddim),                                // instead of LayerNorm(embeddim)
-			"norm2": RMSNorm(embeddim),                                // instead of LayerNorm(embeddim)
-			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim), //
-			"ffn":   SwiGLU(embeddim),                                 // instead of FFN(ffdim, embeddim)
+			"norm1": RMSNorm(embeddim),                                 // instead of LayerNorm(embeddim)
+			"norm2": RMSNorm(embeddim),                                 // instead of LayerNorm(embeddim)
+			"attn":  MultiHeadAttention(embeddim, numOfHeads, headdim), //
+			"ffn":   SwiGLU(embeddim),                                  // instead of FFN(ffdim, embeddim)
 		},
 	}
 }
