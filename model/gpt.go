@@ -23,20 +23,18 @@ var (
 
 type GPT struct {
 	numOfBlock int
-	dropout    func(...*variable.Variable) *variable.Variable
 	model.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int, dropoutRate float64) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int) *GPT {
 	gpt := &GPT{
 		numOfBlock: numOfBlock,
-		dropout:    F.DropoutSimple(dropoutRate),
 	}
 
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
 	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
 	for i := range numOfBlock {
-		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim, dropoutRate))
+		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim))
 	}
 	gpt.Add("norm", L.LayerNorm(embeddim))
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, true))
@@ -53,7 +51,7 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	posemb := m.L["posembed"].First(pos)
 
 	// pos encoding
-	x := m.dropout(F.Add(emb, posemb))
+	x := F.Add(emb, posemb)
 
 	// blocks
 	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlock, os.Stdout)

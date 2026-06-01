@@ -15,7 +15,6 @@ func main() {
 	numOfHead := 6
 	numOfBlock := 6
 	ffdim := 4 * embeddim
-	dropoutRate := 0.1
 
 	m := model.NewGPT(
 		vocabSize,
@@ -24,7 +23,6 @@ func main() {
 		numOfHead,
 		numOfBlock,
 		ffdim,
-		dropoutRate,
 	)
 
 	tokens := make([]float64, maxContextLen)

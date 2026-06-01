@@ -8,14 +8,14 @@ import (
 
 var _ L.Layer = (*BlockT)(nil)
 
-func Block(embeddim, numOfHead, ffdim int, dropoutRate float64) *BlockT {
+func Block(embeddim, numOfHead, ffdim int) *BlockT {
 	headdim := int(embeddim / numOfHead)
 	return &BlockT{
 		Layers: L.Layers{
 			"norm1": LayerNorm(embeddim),
 			"norm2": LayerNorm(embeddim),
-			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim, dropoutRate),
-			"ffn":   FFN(embeddim, ffdim, dropoutRate),
+			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim),
+			"ffn":   FFN(embeddim, ffdim),
 		},
 	}
 }
@@ -34,6 +34,6 @@ func (l *BlockT) Forward(x ...*variable.Variable) []*variable.Variable {
 	x2 := F.Add(x[0], x1)
 	x3 := l.Layers["norm2"].First(x2)
 	x4 := l.Layers["ffn"].First(x3)
-	x5 := F.Add(x[0], x4)
+	x5 := F.Add(x2, x4)
 	return []*variable.Variable{x5}
 }
