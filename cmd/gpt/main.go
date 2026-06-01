@@ -37,7 +37,11 @@ func main() {
 	fmt.Println(logits.Shape())
 
 	logits.Backward()
+
+	var total int
 	for name, param := range m.Params().Seq2() {
 		fmt.Println(name, param.Shape(), param.Grad.Shape())
+		total += param.Size()
 	}
+	fmt.Println("total:", total)
 }
