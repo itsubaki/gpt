@@ -14,9 +14,9 @@ var _ L.Layer = (*MultiHeadAttentionT)(nil)
 func MultiHeadAttention(embeddim, numOfHead, headdim int, dropoutRate float64) *MultiHeadAttentionT {
 	E, H, D, bias := embeddim, numOfHead, headdim, false
 	return &MultiHeadAttentionT{
-		numOfHead:   numOfHead,
-		headdim:     headdim,
-		dropoutRate: dropoutRate,
+		numOfHead: numOfHead,
+		headdim:   headdim,
+		dropout:   F.DropoutSimple(dropoutRate),
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D, bias),
 			"Wk": Linear(E, H*D, bias),
@@ -27,9 +27,9 @@ func MultiHeadAttention(embeddim, numOfHead, headdim int, dropoutRate float64) *
 }
 
 type MultiHeadAttentionT struct {
-	headdim     int
-	numOfHead   int
-	dropoutRate float64
+	headdim   int
+	numOfHead int
+	dropout   func(...*variable.Variable) *variable.Variable
 	L.Layers
 }
 
@@ -57,13 +57,13 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	mask := tensor.Tril(tensor.Ones[float64](C, C))
 	scores = F.MaskFill(mask, math.Inf(-1))(scores)
 
-	weights := F.Softmax(-1)(scores)                  // (B, H, C, C)
-	weights = F.DropoutSimple(l.dropoutRate)(weights) // (B, H, C, C)
-	hidden := F.MatMul(weights, V)                    // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)
-	hidden = F.Transpose(0, 2, 1, 3)(hidden)          // (B, H, C, D) -> (B, C, H, D)
-	hidden = F.Reshape(B, C, H*D)(hidden)             // (B, C, H*D)
-	output := l.Layers["Wo"].First(hidden)            // (B, C, E)
-	output = F.DropoutSimple(l.dropoutRate)(output)   // (B, C, E)
+	weights := F.Softmax(-1)(scores)         // (B, H, C, C)
+	weights = l.dropout(weights)             // (B, H, C, C)
+	hidden := F.MatMul(weights, V)           // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)
+	hidden = F.Transpose(0, 2, 1, 3)(hidden) // (B, H, C, D) -> (B, C, H, D)
+	hidden = F.Reshape(B, C, H*D)(hidden)    // (B, C, H*D)
+	output := l.Layers["Wo"].First(hidden)   // (B, C, E)
+	output = l.dropout(output)               // (B, C, E)
 
 	return []*variable.Variable{
 		output,

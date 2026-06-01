@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"os"
 
 	F "github.com/itsubaki/autograd/function"
@@ -21,51 +22,48 @@ var (
 )
 
 type GPT struct {
-	dropoutRate float64
-	embed       *L.EmbeddingsT
-	posembed    *L.EmbeddingsT
-	blocks      []*L.BlockT
-	norm        *L.LayerNormT
-	unembed     *L.LinearT
+	numOfBlock int
+	dropout    func(...*variable.Variable) *variable.Variable
 	model.Model
 }
 
 func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int, dropoutRate float64) *GPT {
-	blocks := make([]*L.BlockT, numOfBlock)
-	for i := range blocks {
-		blocks[i] = L.Block(embeddim, numOfHead, ffdim, dropoutRate)
+	gpt := &GPT{
+		numOfBlock: numOfBlock,
+		dropout:    F.DropoutSimple(dropoutRate),
 	}
 
-	return &GPT{
-		dropoutRate: dropoutRate,
-		embed:       L.Embeddings(vocabSize, embeddim),
-		posembed:    L.Embeddings(maxContextLen, embeddim),
-		blocks:      blocks,
-		norm:        L.LayerNorm(embeddim),
-		unembed:     L.Linear(embeddim, vocabSize, true),
+	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
+	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
+	for i := range numOfBlock {
+		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim, dropoutRate))
 	}
+	gpt.Add("norm", L.LayerNorm(embeddim))
+	gpt.Add("unembed", L.Linear(embeddim, vocabSize, true))
+
+	return gpt
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	_, C := ids.Shape()[0], ids.Shape()[1]
+	pos := variable.From(tensor.Arange(0, float64(C)))
 
 	// embeddings
-	pos := variable.From(tensor.Arange(0, float64(C)))
-	emb := m.embed.First(ids)
-	posemb := m.posembed.First(pos)
+	emb := m.L["embed"].First(ids)
+	posemb := m.L["posembed"].First(pos)
 
 	// pos encoding
-	x := F.DropoutSimple(m.dropoutRate)(F.Add(emb, posemb))
+	x := m.dropout(F.Add(emb, posemb))
 
 	// blocks
-	bar := progress.NewProgressBar("Transformer Blocks", len(m.blocks), os.Stdout)
-	for i, block := range m.blocks {
-		x = block.First(x)
+	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlock, os.Stdout)
+	for i := range m.numOfBlock {
+		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 		bar.Update(i + 1)
 	}
-	x = m.norm.First(x)
+	x = m.L["norm"].First(x)
 
 	// unembedding
-	logits := m.unembed.First(x)
+	logits := m.L["unembed"].First(x)
 	return logits
 }

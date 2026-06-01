@@ -10,7 +10,7 @@ var _ L.Layer = (*FFNT)(nil)
 
 func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
 	return &FFNT{
-		dropoutRate: dropoutRate,
+		dropout: F.DropoutSimple(dropoutRate),
 		Layers: L.Layers{
 			"l1": Linear(xdim, hiddendim, true),
 			"l2": Linear(hiddendim, xdim, true),
@@ -19,7 +19,7 @@ func FFN(xdim, hiddendim int, dropoutRate float64) *FFNT {
 }
 
 type FFNT struct {
-	dropoutRate float64
+	dropout func(...*variable.Variable) *variable.Variable
 	L.Layers
 }
 
@@ -31,6 +31,6 @@ func (l *FFNT) Forward(x ...*variable.Variable) []*variable.Variable {
 	x0 := l.Layers["l1"].First(x...)
 	x1 := F.GELU(x0)
 	x2 := l.Layers["l2"].First(x1)
-	x3 := F.DropoutSimple(l.dropoutRate)(x2)
+	x3 := l.dropout(x2)
 	return []*variable.Variable{x3}
 }

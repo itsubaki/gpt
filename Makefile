@@ -16,6 +16,9 @@ update:
 dl:
 	curl -fs -o testdata/tiny_codes.txt https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
 
+gpt:
+	go run ./cmd/gpt/main.go
+
 tokenize:
 	rm -f testdata/merge_rules.gob
 	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000

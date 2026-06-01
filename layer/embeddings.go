@@ -3,7 +3,6 @@ package layer
 import (
 	F "github.com/itsubaki/autograd/function"
 	L "github.com/itsubaki/autograd/layer"
-	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
 
@@ -11,7 +10,7 @@ var _ L.Layer = (*EmbeddingsT)(nil)
 
 func Embeddings(xdim, embeddim int) *EmbeddingsT {
 	p := make(L.Parameters)
-	p.Add("w", variable.From(tensor.Randn([]int{xdim, embeddim})))
+	p.Add("w", initw(xdim, embeddim))
 
 	return &EmbeddingsT{
 		embeddim:   embeddim,
