@@ -45,5 +45,5 @@ func (l *LinearT) xparams(x *variable.Variable) []*variable.Variable {
 }
 
 func initw(x, y int) *variable.Variable {
-	return variable.From(tensor.Randn([]int{x, y}))
+	return variable.From(tensor.Normal([]int{x, y}, 0, 0.02))
 }
