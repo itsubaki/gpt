@@ -39,7 +39,7 @@ func main() {
 	fmt.Println(logits.Shape())
 
 	logits.Backward()
-	for _, param := range m.Params().Seq2() {
-		fmt.Println(param.Name, param.Shape(), param.Grad.Shape())
+	for name, param := range m.Params().Seq2() {
+		fmt.Println(name, param.Shape(), param.Grad.Shape())
 	}
 }
