@@ -15,7 +15,7 @@ func Block(embeddim, numOfHead, ffdim int) *BlockT {
 			"norm1": LayerNorm(embeddim),
 			"norm2": LayerNorm(embeddim),
 			"attn":  MultiHeadAttention(embeddim, numOfHead, headdim),
-			"ffn":   FFN(embeddim, ffdim),
+			"ffn":   SwiGLU(embeddim),
 		},
 	}
 }

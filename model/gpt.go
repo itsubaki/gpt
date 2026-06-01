@@ -19,6 +19,7 @@ var (
 	_ model.Layer = (*L.FFNT)(nil)
 	_ model.Layer = (*L.LayerNormT)(nil)
 	_ model.Layer = (*L.LinearT)(nil)
+	_ model.Layer = (*L.SwiGLUT)(nil)
 )
 
 type GPT struct {
