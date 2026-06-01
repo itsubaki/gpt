@@ -12,16 +12,16 @@ func main() {
 	vocabSize := 1000
 	maxContextLen := 256
 	embeddim := 384
-	numOfHead := 6
-	numOfBlock := 6
+	numOfHeads := 6
+	numOfBlocks := 6
 	ffdim := 4 * embeddim
 
 	m := model.NewGPT(
 		vocabSize,
 		maxContextLen,
 		embeddim,
-		numOfHead,
-		numOfBlock,
+		numOfHeads,
+		numOfBlocks,
 		ffdim,
 	)
 

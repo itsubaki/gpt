@@ -25,21 +25,21 @@ var (
 )
 
 type GPT struct {
-	numOfBlock int
-	writer     io.Writer
+	numOfBlocks int
+	writer      io.Writer
 	model.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int) *GPT {
 	gpt := &GPT{
-		numOfBlock: numOfBlock,
-		writer:     os.Stdout,
+		numOfBlocks: numOfBlocks,
+		writer:      os.Stdout,
 	}
 
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
 	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
-	for i := range numOfBlock {
-		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim))
+	for i := range numOfBlocks {
+		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim))
 	}
 	gpt.Add("norm", L.RMSNorm(embeddim)) // instead of LayerNorm(embeddim)
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
@@ -59,8 +59,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := F.Add(emb, posemb)
 
 	// blocks
-	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlock, m.writer)
-	for i := range m.numOfBlock {
+	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlocks, m.writer)
+	for i := range m.numOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 		bar.Update(i + 1)
 	}
