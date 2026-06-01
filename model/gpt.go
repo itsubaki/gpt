@@ -37,7 +37,7 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHead, numOfBlock, ffdim int
 		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHead, ffdim))
 	}
 	gpt.Add("norm", L.LayerNorm(embeddim))
-	gpt.Add("unembed", L.Linear(embeddim, vocabSize, true))
+	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
 
 	return gpt
 }
