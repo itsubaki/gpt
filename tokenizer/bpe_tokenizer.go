@@ -6,14 +6,14 @@ import (
 )
 
 type BPETokenizer struct {
-	mergeRules *DefaultDict[Pair, int]
+	mergeRules *DefaultDict[Pair]
 	endToken   string
 	endTokenID int
 	ID2Bytes   map[int][]byte
 	VocabSize  int
 }
 
-func NewBPETokenizer(mergeRules *DefaultDict[Pair, int], endToken ...string) *BPETokenizer {
+func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPETokenizer {
 	if len(endToken) == 0 {
 		endToken = []string{"<|endoftext|>"}
 	}
