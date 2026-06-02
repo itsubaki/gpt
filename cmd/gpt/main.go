@@ -44,8 +44,8 @@ func main() {
 
 	var total int
 	for name, param := range m.Params().Seq2() {
-		total += param.Size()
 		fmt.Println(name, param.Shape(), param.Grad.Shape())
+		total += param.Size()
 	}
 
 	fmt.Println("total:", total)
