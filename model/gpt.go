@@ -5,9 +5,7 @@ import (
 	"io"
 	"os"
 
-	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/model"
-	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/progress"
@@ -38,8 +36,6 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	}
 
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
-	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
-
 	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
 	for i := range numOfBlocks {
 		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope))
@@ -52,25 +48,15 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	_, C := ids.Shape()[0], ids.Shape()[1]
-	pos := variable.From(tensor.Arange(0, float64(C)))
-
-	// embeddings
-	emb := m.L["embed"].First(ids)
-	posemb := m.L["posembed"].First(pos)
-
-	// pos encoding
-	x := F.Add(emb, posemb)
-
-	// blocks
 	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlocks, m.writer)
+
+	x := m.L["embed"].First(ids)
 	for i := range m.numOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 		bar.Update(i + 1)
 	}
-	x = m.L["norm"].First(x)
 
-	// unembedding
-	logits := m.L["unembed"].First(x)
+	x = m.L["norm"].First(x)
+	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
 	return logits
 }
