@@ -17,26 +17,25 @@ func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 	half := keydim / 2
 
 	pos := tensor.Arange(0, maxContextLen)
-	invFreq := tensor.F(tensor.Arange(0, half), func(v int) float64 {
-		return 1.0 / math.Pow(theta, 2.0*float64(v)/float64(keydim))
+	ids := tensor.Arange(0, half)
+	invFreq := tensor.F(ids, func(k int) float64 {
+		// 1/(theta^(2k/d))
+		return 1.0 / math.Pow(theta, 2.0*float64(k)/float64(keydim))
 	})
 
 	pos2d := tensor.Expand(pos, 1)                      // (maxContextLen, 1)
 	freq2d := tensor.Expand(invFreq, 0)                 // (1, half)
 	angles := tensor.Mul(tensor.Float64(pos2d), freq2d) // (maxContextLen, half)
 
-	cos := tensor.Cos(angles)
-	sin := tensor.Sin(angles)
-
 	return &RoPET{
-		cos: cos,
-		sin: sin,
+		cos: tensor.Cos(angles).Data,
+		sin: tensor.Sin(angles).Data,
 	}
 }
 
 type RoPET struct {
-	cos          *tensor.Tensor[float64]
-	sin          *tensor.Tensor[float64]
+	cos          []float64
+	sin          []float64
 	L.Parameters // not used
 }
 
@@ -54,9 +53,6 @@ func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 	}
 	half := D / 2
 
-	cos := l.cos.Data
-	sin := l.sin.Data
-
 	for b := range B {
 		baseB := b * sB
 		for h := range H {
@@ -65,8 +61,8 @@ func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 				baseT := baseH + t*sT
 				angle := t * half
 				for i := range half {
-					c := cos[angle+i]
-					s := sin[angle+i]
+					c := l.cos[angle+i]
+					s := l.sin[angle+i]
 
 					evenIdx := baseT + (2*i)*sD
 					oddIdx := baseT + (2*i+1)*sD
