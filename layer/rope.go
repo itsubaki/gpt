@@ -3,9 +3,12 @@ package layer
 import (
 	"math"
 
+	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
+
+var _ L.Layer = (*RoPET)(nil)
 
 func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 	if keydim%2 != 0 {
@@ -32,8 +35,9 @@ func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 }
 
 type RoPET struct {
-	cos *tensor.Tensor[float64]
-	sin *tensor.Tensor[float64]
+	cos          *tensor.Tensor[float64]
+	sin          *tensor.Tensor[float64]
+	L.Parameters // not used
 }
 
 func (l *RoPET) First(x ...*variable.Variable) *variable.Variable {

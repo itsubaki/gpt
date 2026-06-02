@@ -21,6 +21,7 @@ var (
 	_ model.Layer = (*L.LayerNormT)(nil)
 	_ model.Layer = (*L.LinearT)(nil)
 	_ model.Layer = (*L.RMSNormT)(nil)
+	_ model.Layer = (*L.RoPET)(nil)
 	_ model.Layer = (*L.SwiGLUT)(nil)
 )
 
