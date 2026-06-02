@@ -12,8 +12,8 @@ func ExampleSwiGLU() {
 
 	x := variable.Randn([]int{10, 20, embeddim})
 	swiglu := L.SwiGLU(embeddim)
-	output := swiglu.First(x)
 
+	output := swiglu.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
 
