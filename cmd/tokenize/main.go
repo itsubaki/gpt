@@ -50,7 +50,7 @@ func main() {
 	fmt.Println("byte count:", byteCount)
 	fmt.Println("token count:", len(ids))
 	fmt.Println("compression ratio:", float64(byteCount)/float64(len(ids)))
-	fmt.Println("tokenization elapsed time:", time.Since(now))
+	fmt.Println("encoding time:", time.Since(now))
 }
 
 func keys(m map[int][]byte) []int {

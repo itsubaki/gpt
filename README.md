@@ -28,7 +28,7 @@ saved merge rules to testdata/merge_rules.gob
 byte count: 6487033
 token count: 2640742
 compression ratio: 2.456519038967078
-tokenization elapsed time: 1.459157917s
+encoding time: 1.459157917s
 ```
 
 ## References
