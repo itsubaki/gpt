@@ -8,6 +8,15 @@ import (
 	"github.com/itsubaki/gpt/model"
 )
 
+func sample(vocabSize, maxContextLen int) *variable.Variable {
+	tokens := make([]float64, maxContextLen)
+	for i := range tokens {
+		tokens[i] = float64(rand.Intn(vocabSize))
+	}
+
+	return variable.New(tokens...).Reshape(1, maxContextLen)
+}
+
 func main() {
 	vocabSize := 1000
 	maxContextLen := 256
@@ -25,16 +34,9 @@ func main() {
 		ffdim,
 	)
 
-	tokens := make([]float64, maxContextLen)
-	for i := range tokens {
-		tokens[i] = float64(rand.Intn(vocabSize))
-	}
-
-	x := variable.New(tokens...).Reshape(1, maxContextLen)
+	x := sample(vocabSize, maxContextLen)
 	logits := m.Forward(x)
-
-	// [1 256 1000]
-	fmt.Println(logits.Shape())
+	fmt.Println(logits.Shape()) // [1 256 1000]
 
 	logits.Backward()
 
@@ -43,5 +45,6 @@ func main() {
 		fmt.Println(name, param.Shape(), param.Grad.Shape())
 		total += param.Size()
 	}
+
 	fmt.Println("total:", total)
 }
