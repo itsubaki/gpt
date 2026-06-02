@@ -24,6 +24,7 @@ func main() {
 	numOfHeads := 6
 	numOfBlocks := 6
 	ffdim := 4 * embeddim
+	theta := 10000.0
 
 	m := model.NewGPT(
 		vocabSize,
@@ -32,6 +33,7 @@ func main() {
 		numOfHeads,
 		numOfBlocks,
 		ffdim,
+		theta,
 	)
 
 	x := sample(vocabSize, maxContextLen)
@@ -42,8 +44,8 @@ func main() {
 
 	var total int
 	for name, param := range m.Params().Seq2() {
-		fmt.Println(name, param.Shape(), param.Grad.Shape())
 		total += param.Size()
+		fmt.Println(name, param.Shape(), param.Grad.Shape())
 	}
 
 	fmt.Println("total:", total)

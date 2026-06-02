@@ -30,7 +30,7 @@ type GPT struct {
 	model.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int, theta float64) *GPT {
 	gpt := &GPT{
 		numOfBlocks: numOfBlocks,
 		writer:      os.Stdout,
@@ -38,9 +38,12 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
 	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
+
+	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim))
+		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope))
 	}
+
 	gpt.Add("norm", L.RMSNorm(embeddim)) // instead of LayerNorm(embeddim)
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
 

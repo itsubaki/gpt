@@ -14,10 +14,16 @@ func ExampleRoPE() {
 
 	x := variable.Randn([]int{10, 20, 30, keydim})
 	rope := layer.RoPE(theta, keydim, maxContextLen)
+
 	out := rope.First(x)
+	fmt.Println(x.Shape())
 	fmt.Println(out.Shape())
+
 	out.Backward()
+	fmt.Println(x.Grad.Shape())
 
 	// Output:
+	// [10 20 30 4]
+	// [10 20 30 4]
 	// [10 20 30 4]
 }

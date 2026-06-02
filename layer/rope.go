@@ -3,12 +3,9 @@ package layer
 import (
 	"math"
 
-	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
-
-var _ L.Layer = (*RoPET)(nil)
 
 func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 	if keydim%2 != 0 {
@@ -37,7 +34,6 @@ func RoPE(theta float64, keydim, maxContextLen int) *RoPET {
 type RoPET struct {
 	cos *tensor.Tensor[float64]
 	sin *tensor.Tensor[float64]
-	L.Parameters
 }
 
 func (l *RoPET) First(x ...*variable.Variable) *variable.Variable {
@@ -45,22 +41,20 @@ func (l *RoPET) First(x ...*variable.Variable) *variable.Variable {
 }
 
 func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
-	v, shape := x[0], x[0].Shape()
+	shape := x[0].Shape()
 	B, H, T, D := shape[0], shape[1], shape[2], shape[3]
 	if D%2 != 0 {
 		panic("keydim must be even")
 	}
-	half := D / 2
 
 	strideB := H * T * D
 	strideH := T * D
 	strideT := D
+	half := D / 2
 
 	cos := l.cos.Data
 	sin := l.sin.Data
 
-	data := v.Data.Data
-	y := make([]float64, len(data))
 	for b := range B {
 		baseB := b * strideB
 		for h := range H {
@@ -72,20 +66,20 @@ func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 					evenIdx := baseT + 2*i
 					oddIdx := baseT + 2*i + 1
 
-					even := data[evenIdx]
-					odd := data[oddIdx]
+					even := x[0].Data.Data[evenIdx]
+					odd := x[0].Data.Data[oddIdx]
 
 					c := cos[angle+i]
 					s := sin[angle+i]
 
-					y[evenIdx] = even*c - odd*s
-					y[oddIdx] = even*s + odd*c
+					x[0].Data.Data[evenIdx] = even*c - odd*s
+					x[0].Data.Data[oddIdx] = even*s + odd*c
 				}
 			}
 		}
 	}
 
 	return []*variable.Variable{
-		variable.From(tensor.New(shape, y)),
+		x[0],
 	}
 }
