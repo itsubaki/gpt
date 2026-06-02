@@ -45,6 +45,47 @@ func (l *RoPET) First(x ...*variable.Variable) *variable.Variable {
 }
 
 func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
-	// TODO: implement RoPE
-	return nil
+	v, shape := x[0], x[0].Shape()
+	B, H, T, D := shape[0], shape[1], shape[2], shape[3]
+	if D%2 != 0 {
+		panic("keydim must be even")
+	}
+	half := D / 2
+
+	strideB := H * T * D
+	strideH := T * D
+	strideT := D
+
+	cos := l.cos.Data
+	sin := l.sin.Data
+
+	data := v.Data.Data
+	y := make([]float64, len(data))
+	for b := range B {
+		baseB := b * strideB
+		for h := range H {
+			baseH := baseB + h*strideH
+			for t := range T {
+				baseT := baseH + t*strideT
+				angle := t * half
+				for i := range half {
+					evenIdx := baseT + 2*i
+					oddIdx := baseT + 2*i + 1
+
+					even := data[evenIdx]
+					odd := data[oddIdx]
+
+					c := cos[angle+i]
+					s := sin[angle+i]
+
+					y[evenIdx] = even*c - odd*s
+					y[oddIdx] = even*s + odd*c
+				}
+			}
+		}
+	}
+
+	return []*variable.Variable{
+		variable.From(tensor.New(shape, y)),
+	}
 }
