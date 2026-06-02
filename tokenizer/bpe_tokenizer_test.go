@@ -8,7 +8,7 @@ import (
 
 func ExampleBPETokenizer_Encode() {
 	// p27
-	mergeRules := tokenizer.NewDefaultDict[tokenizer.Pair, int]()
+	mergeRules := tokenizer.NewDefaultDict[tokenizer.Pair]()
 	mergeRules.Set(tokenizer.Pair{105, 115}, 256)
 	mergeRules.Set(tokenizer.Pair{256, 32}, 257)
 	mergeRules.Set(tokenizer.Pair{105, 110}, 258)
