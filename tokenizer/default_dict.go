@@ -39,7 +39,12 @@ func (d *DefaultDict[T]) Incr(key T, value int) {
 	d.Dict[key] += value
 }
 
-func (d *DefaultDict[T]) Get(key T) int {
+func (d *DefaultDict[T]) Get(key T) (int, bool) {
+	value, ok := d.Dict[key]
+	return value, ok
+}
+
+func (d *DefaultDict[T]) Value(key T) int {
 	return d.Dict[key]
 }
 

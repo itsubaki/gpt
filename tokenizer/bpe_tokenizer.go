@@ -48,7 +48,7 @@ func (t *BPETokenizer) encode(text string) []int {
 		bestPriority := math.MaxInt
 		var bestPair Pair
 		for pair := range counts.Seq2() {
-			p := t.mergeRules.Get(pair)
+			p := t.mergeRules.Value(pair)
 			if p == 0 {
 				p = math.MaxInt
 			}
@@ -59,7 +59,7 @@ func (t *BPETokenizer) encode(text string) []int {
 			}
 		}
 
-		newID, ok := t.mergeRules.Dict[bestPair]
+		newID, ok := t.mergeRules.Get(bestPair)
 		if !ok {
 			break
 		}

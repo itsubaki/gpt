@@ -66,7 +66,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			newIDs := merge(ids, bestPair, newID)
 
 			// update
-			idsCount := idsCounts.Get(key)
+			idsCount := idsCounts.Value(key)
 			idsCounts.Delete(key)
 			idsCounts.Set(ids2Key(newIDs), idsCount)
 
@@ -74,7 +74,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			oldCounts := countPairs(ids, 1)
 			for pair, count := range oldCounts.Seq2() {
 				pairCounts.Incr(pair, -count*idsCount)
-				if pairCounts.Get(pair) < 1 {
+				if pairCounts.Value(pair) < 1 {
 					pairCounts.Delete(pair)
 				}
 
