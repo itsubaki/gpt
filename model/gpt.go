@@ -6,28 +6,31 @@ import (
 	"os"
 
 	F "github.com/itsubaki/autograd/function"
-	"github.com/itsubaki/autograd/model"
+	M "github.com/itsubaki/autograd/model"
+	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/progress"
 )
 
+var _ O.Model = (*GPT)(nil)
+
 var (
-	_ model.Layer = (*L.MultiHeadAttentionT)(nil)
-	_ model.Layer = (*L.BlockT)(nil)
-	_ model.Layer = (*L.EmbeddingsT)(nil)
-	_ model.Layer = (*L.FFNT)(nil)
-	_ model.Layer = (*L.LayerNormT)(nil)
-	_ model.Layer = (*L.LinearT)(nil)
-	_ model.Layer = (*L.RMSNormT)(nil)
-	_ model.Layer = (*L.SwiGLUT)(nil)
+	_ M.Layer = (*L.MultiHeadAttentionT)(nil)
+	_ M.Layer = (*L.BlockT)(nil)
+	_ M.Layer = (*L.EmbeddingsT)(nil)
+	_ M.Layer = (*L.FFNT)(nil)
+	_ M.Layer = (*L.LayerNormT)(nil)
+	_ M.Layer = (*L.LinearT)(nil)
+	_ M.Layer = (*L.RMSNormT)(nil)
+	_ M.Layer = (*L.SwiGLUT)(nil)
 )
 
 type GPT struct {
 	numOfBlocks int
 	writer      io.Writer
-	model.Model
+	M.Model
 }
 
 func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int) *GPT {
