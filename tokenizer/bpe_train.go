@@ -27,25 +27,27 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	}
 
 	// cache
-	pair2IDs := NewCache()
+	cache := NewCache()
 	pairCounts := NewDefaultDict[Pair]()
 	for key, count := range idsCounts.Seq2() {
 		ids := key2IDs(key)
 		pairCounts = countPairs(ids, count, pairCounts)
 		for i := range ids[:len(ids)-1] {
-			pair2IDs.Add(Pair{ids[i], ids[i+1]}, key)
+			cache.Add(Pair{ids[i], ids[i+1]}, key)
 		}
 	}
 
 	numMerges := vocabSize - 256 - 1
 	mergeRules := NewDefaultDict[Pair]()
 	bar := progress.NewProgressBar("Training BPE", numMerges, Writer)
+
 	for step := range numMerges {
 		bar.Update(step + 1)
 		if pairCounts.Len() == 0 {
 			break
 		}
 
+		// find best pair
 		bestCount := -1
 		var bestPair Pair
 		for pair, count := range pairCounts.Seq2() {
@@ -58,14 +60,14 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 		newID := 256 + step
 		mergeRules.Set(bestPair, newID)
 
-		affectedIDs := pair2IDs.Get(bestPair)
-		pair2IDs.Delete(bestPair)
+		affectedIDs := cache.Get(bestPair)
+		cache.Delete(bestPair)
 		for key := range affectedIDs {
-			idsCount := idsCounts.Get(key)
 			ids := key2IDs(key)
 			newIDs := merge(ids, bestPair, newID)
 
 			// update
+			idsCount := idsCounts.Get(key)
 			idsCounts.Delete(key)
 			idsCounts.Set(id2Key(newIDs), idsCount)
 
@@ -77,14 +79,14 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 					pairCounts.Delete(pair)
 				}
 
-				pair2IDs.Delete(pair, key) // update cache
+				cache.Delete(pair, key)
 			}
 
 			// update new pair counts
 			newCounts := countPairs(newIDs, 1)
 			for pair, count := range newCounts.Seq2() {
 				pairCounts.Incr(pair, count*idsCount)
-				pair2IDs.Add(pair, id2Key(newIDs)) // update cache
+				cache.Add(pair, id2Key(newIDs))
 			}
 		}
 	}
