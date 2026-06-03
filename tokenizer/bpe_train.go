@@ -21,8 +21,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 	idsCounts := NewDefaultDict[string]()
 	for _, text := range texts {
 		for _, preToken := range preTokenize(text) {
-			key := id2Key(text2IDs(preToken))
-			idsCounts.Incr(key, 1)
+			idsCounts.Incr(ids2Key(text2IDs(preToken)), 1)
 		}
 	}
 
@@ -69,7 +68,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			// update
 			idsCount := idsCounts.Get(key)
 			idsCounts.Delete(key)
-			idsCounts.Set(id2Key(newIDs), idsCount)
+			idsCounts.Set(ids2Key(newIDs), idsCount)
 
 			// update old pair counts
 			oldCounts := countPairs(ids, 1)
@@ -86,7 +85,7 @@ func TrainBPE(inputText string, vocabSize int, endToken ...string) *DefaultDict[
 			newCounts := countPairs(newIDs, 1)
 			for pair, count := range newCounts.Seq2() {
 				pairCounts.Incr(pair, count*idsCount)
-				cache.Add(pair, id2Key(newIDs))
+				cache.Add(pair, ids2Key(newIDs))
 			}
 		}
 	}
@@ -118,7 +117,7 @@ func text2IDs(text string) []int {
 	return ids
 }
 
-func id2Key(ids []int) string {
+func ids2Key(ids []int) string {
 	if len(ids) == 0 {
 		return ""
 	}
