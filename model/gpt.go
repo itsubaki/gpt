@@ -5,10 +5,8 @@ import (
 	"io"
 	"os"
 
-	F "github.com/itsubaki/autograd/function"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
-	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/progress"
@@ -25,7 +23,7 @@ var (
 	_ M.Layer = (*L.LinearT)(nil)
 	_ M.Layer = (*L.RMSNormT)(nil)
 	_ M.Layer = (*L.RoPET)(nil)
-  _ M.Layer = (*L.SwiGLUT)(nil)
+	_ M.Layer = (*L.SwiGLUT)(nil)
 )
 
 type GPT struct {
@@ -39,10 +37,10 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 		numOfBlocks: numOfBlocks,
 		writer:      os.Stdout,
 	}
-  
-  rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
-  
-  // Layers
+
+	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
+
+	// Layers
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
 	for i := range numOfBlocks {
 		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope))
