@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"os"
@@ -12,10 +11,11 @@ import (
 )
 
 func main() {
-	var filepath, gobpath string
+	var filepath, mergeRulesPath, tokenIDsPath string
 	var vocabSize int
 	flag.StringVar(&filepath, "f", "testdata/tiny_codes.txt", "path to the input file")
-	flag.StringVar(&gobpath, "g", "testdata/merge_rules.gob", "path to the merge rules gob file")
+	flag.StringVar(&mergeRulesPath, "r", "testdata/merge_rules.gob", "path to the merge rules gob file")
+	flag.StringVar(&tokenIDsPath, "t", "testdata/tiny_codes.gob", "path to the token IDs gob file")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.Parse()
 
@@ -24,15 +24,15 @@ func main() {
 		panic(err)
 	}
 
-	mergeRules, ok := load(gobpath)
+	mergeRules, ok := tokenizer.Load(mergeRulesPath)
 	if !ok {
 		tokenizer.Writer = os.Stdout
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
-		if err := save(gobpath, mergeRules); err != nil {
+		if err := tokenizer.Save(mergeRulesPath, mergeRules); err != nil {
 			panic(err)
 		}
 
-		fmt.Println("saved merge rules to", gobpath)
+		fmt.Println("saved merge rules to", mergeRulesPath)
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
@@ -51,6 +51,7 @@ func main() {
 	fmt.Println("token count:", len(ids))
 	fmt.Println("compression ratio:", float64(byteCount)/float64(len(ids)))
 	fmt.Println("encoding time:", time.Since(now))
+
 }
 
 func keys(m map[int][]byte) []int {
@@ -61,33 +62,4 @@ func keys(m map[int][]byte) []int {
 
 	sort.Ints(keys)
 	return keys
-}
-
-func save(filename string, dict *tokenizer.DefaultDict[tokenizer.Pair]) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("create file: %v", err)
-	}
-	defer func() { _ = f.Close() }()
-
-	if err := gob.NewEncoder(f).Encode(dict); err != nil {
-		return fmt.Errorf("encode: %v", err)
-	}
-
-	return nil
-}
-
-func load(filename string) (*tokenizer.DefaultDict[tokenizer.Pair], bool) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, false
-	}
-	defer func() { _ = f.Close() }()
-
-	var dict tokenizer.DefaultDict[tokenizer.Pair]
-	if err := gob.NewDecoder(f).Decode(&dict); err != nil {
-		return nil, false
-	}
-
-	return &dict, true
 }

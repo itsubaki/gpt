@@ -1,6 +1,11 @@
 package tokenizer
 
-import "iter"
+import (
+	"encoding/gob"
+	"fmt"
+	"iter"
+	"os"
+)
 
 type DefaultDict[T comparable] struct {
 	Dict  map[T]int
@@ -57,4 +62,33 @@ func (d *DefaultDict[T]) Seq2() iter.Seq2[T, int] {
 			}
 		}
 	}
+}
+
+func Save(filename string, dict *DefaultDict[Pair]) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("create file: %v", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := gob.NewEncoder(f).Encode(dict); err != nil {
+		return fmt.Errorf("encode: %v", err)
+	}
+
+	return nil
+}
+
+func Load(filename string) (*DefaultDict[Pair], bool) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, false
+	}
+	defer func() { _ = f.Close() }()
+
+	var dict DefaultDict[Pair]
+	if err := gob.NewDecoder(f).Decode(&dict); err != nil {
+		return nil, false
+	}
+
+	return &dict, true
 }
