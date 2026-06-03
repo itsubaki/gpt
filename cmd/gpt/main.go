@@ -24,6 +24,7 @@ func main() {
 	numOfHeads := 6
 	numOfBlocks := 6
 	ffdim := 4 * embeddim
+	theta := 10000.0
 
 	m := model.NewGPT(
 		vocabSize,
@@ -32,6 +33,7 @@ func main() {
 		numOfHeads,
 		numOfBlocks,
 		ffdim,
+		theta,
 	)
 
 	x := sample(vocabSize, maxContextLen)

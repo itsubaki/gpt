@@ -5,10 +5,8 @@ import (
 	"io"
 	"os"
 
-	F "github.com/itsubaki/autograd/function"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
-	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/progress"
@@ -24,6 +22,7 @@ var (
 	_ M.Layer = (*L.LayerNormT)(nil)
 	_ M.Layer = (*L.LinearT)(nil)
 	_ M.Layer = (*L.RMSNormT)(nil)
+	_ M.Layer = (*L.RoPET)(nil)
 	_ M.Layer = (*L.SwiGLUT)(nil)
 )
 
@@ -33,16 +32,18 @@ type GPT struct {
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int, theta float64) *GPT {
 	gpt := &GPT{
 		numOfBlocks: numOfBlocks,
 		writer:      os.Stdout,
 	}
 
+	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
+
+	// Layers
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
-	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim))
 	for i := range numOfBlocks {
-		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim))
+		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope))
 	}
 	gpt.Add("norm", L.RMSNorm(embeddim)) // instead of LayerNorm(embeddim)
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
@@ -51,25 +52,15 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	_, C := ids.Shape()[0], ids.Shape()[1]
-	pos := variable.From(tensor.Arange(0, float64(C)))
-
-	// embeddings
-	emb := m.L["embed"].First(ids)
-	posemb := m.L["posembed"].First(pos)
-
-	// pos encoding
-	x := F.Add(emb, posemb)
-
-	// blocks
 	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlocks, m.writer)
+
+	x := m.L["embed"].First(ids)
 	for i := range m.numOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 		bar.Update(i + 1)
 	}
-	x = m.L["norm"].First(x)
 
-	// unembedding
-	logits := m.L["unembed"].First(x)
+	x = m.L["norm"].First(x)
+	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
 	return logits
 }

@@ -20,8 +20,8 @@ func ExampleEmbeddings() {
 
 	x := variable.New(tokens...).Reshape(1, maxContextLen)
 	emb := L.Embeddings(vocabSize, embeddim)
-	output := emb.First(x)
 
+	output := emb.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
 

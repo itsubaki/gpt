@@ -12,8 +12,8 @@ func ExampleLayerNorm() {
 
 	x := variable.Randn([]int{10, 20, embeddim})
 	norm := L.LayerNorm(embeddim)
-	output := norm.First(x)
 
+	output := norm.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
 
