@@ -51,14 +51,15 @@ func main() {
 		LearningRate: 0.01,
 	}
 
-	// forward
+	// batch
 	x := sample(vocabSize, maxContextLen)
-	logits := m.Forward(x)
-	fmt.Println(logits.Shape()) // (B, C, V) = [1 256 1000]
+	y := F.Reshape(-1)(batchY(1, maxContextLen, vocabSize)) // (B, C) -> (B*C)
 
-	// loss
-	y := F.Reshape(-1)(batchY(1, maxContextLen, vocabSize))     // (B, C) -> (B*C)
+	// forward
+	logits := m.Forward(x)
 	loss := F.CrossEntropy(F.Reshape(-1, vocabSize)(logits), y) // (B, C, V) -> (B*C, V)
+	fmt.Println(logits.Shape())
+	fmt.Println(loss.At())
 
 	// backward and update
 	m.Cleargrads()
