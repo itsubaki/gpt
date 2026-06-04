@@ -97,22 +97,6 @@ func (t *BPETokenizer) Decode(ids []int) string {
 	return string(bytes)
 }
 
-func merge(ids []int, pair Pair, newID int) []int {
-	merged := make([]int, 0)
-	for i := 0; i < len(ids); {
-		if i < len(ids)-1 && ids[i] == pair[0] && ids[i+1] == pair[1] {
-			merged = append(merged, newID)
-			i += 2
-			continue
-		}
-
-		merged = append(merged, ids[i])
-		i++
-	}
-
-	return merged
-}
-
 func reSplit(inputText string, pattern string) []string {
 	re := regexp.MustCompile(regexp.QuoteMeta(pattern))
 	indices := re.FindAllStringIndex(inputText, -1)

@@ -107,6 +107,22 @@ func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair]) *DefaultDic
 	return cnts
 }
 
+func merge(ids []int, pair Pair, newID int) []int {
+	merged := make([]int, 0)
+	for i := 0; i < len(ids); {
+		if i < len(ids)-1 && ids[i] == pair[0] && ids[i+1] == pair[1] {
+			merged = append(merged, newID)
+			i += 2
+			continue
+		}
+
+		merged = append(merged, ids[i])
+		i++
+	}
+
+	return merged
+}
+
 func text2IDs(text string) []int {
 	bytes := []byte(text)
 	ids := make([]int, len(bytes))

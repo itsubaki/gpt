@@ -1,25 +1,27 @@
 package main
 
 import (
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
 func main() {
-	var filepath, mergeRulesPath, tokenIDsPath string
+	var path, mergeRulesPath string
 	var vocabSize int
-	flag.StringVar(&filepath, "f", "testdata/tiny_codes.txt", "path to the input file")
+	flag.StringVar(&path, "f", "testdata/tiny_codes.txt", "path to the input file")
 	flag.StringVar(&mergeRulesPath, "r", "testdata/merge_rules.gob", "path to the merge rules gob file")
-	flag.StringVar(&tokenIDsPath, "t", "testdata/tiny_codes.gob", "path to the token IDs gob file")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.Parse()
 
-	data, err := os.ReadFile(filepath)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +54,10 @@ func main() {
 	fmt.Println("compression ratio:", float64(byteCount)/float64(len(ids)))
 	fmt.Println("encoding time:", time.Since(now))
 
+	bin := strings.TrimSuffix(path, filepath.Ext(path)) + ".bin"
+	if err := save(bin, ids); err != nil {
+		panic(err)
+	}
 }
 
 func keys(m map[int][]byte) []int {
@@ -62,4 +68,18 @@ func keys(m map[int][]byte) []int {
 
 	sort.Ints(keys)
 	return keys
+}
+
+func save(filename string, ids []int) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("create file: %v", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := gob.NewEncoder(f).Encode(ids); err != nil {
+		return fmt.Errorf("encode: %v", err)
+	}
+
+	return nil
 }

@@ -21,4 +21,5 @@ gpt:
 
 tokenize:
 	rm -f testdata/merge_rules.gob
+	rm -f testdata/tiny_codes.bin
 	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
