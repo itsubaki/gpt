@@ -59,8 +59,8 @@ func main() {
 	// forward
 	logits := m.Forward(x)
 	loss := F.CrossEntropy(
-		F.Reshape(-1, vocabSize)(logits), // (B, C, V) -> (B*C, V)
-		F.Reshape(-1)(y),                 // (B, C) -> (B*C)
+		F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
+		F.Reshape(-1)(y),                       // (B, C) -> (B*C)
 	)
 	fmt.Println(logits.Shape())
 	fmt.Println(loss.At())
