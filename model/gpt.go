@@ -38,15 +38,15 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 		writer:      os.Stdout,
 	}
 
-	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
-
 	// Layers
 	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
+	gpt.Add("norm", L.RMSNorm(embeddim))                     // instead of LayerNorm(embeddim)
+	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false)) // no bias in unembedding layer
+
+	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope))
+		gpt.Add(newBlock(i, embeddim, numOfHeads, ffdim, rope))
 	}
-	gpt.Add("norm", L.RMSNorm(embeddim)) // instead of LayerNorm(embeddim)
-	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))
 
 	return gpt
 }
@@ -63,4 +63,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x = m.L["norm"].First(x)
 	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
 	return logits
+}
+
+func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope)
 }
