@@ -27,8 +27,8 @@ func MultiHeadAttention(embeddim, numOfHeads, headdim int, rope *RoPET) *MultiHe
 }
 
 type MultiHeadAttentionT struct {
-	headdim    int
 	numOfHeads int
+	headdim    int
 	rope       *RoPET
 	L.Layers
 }
