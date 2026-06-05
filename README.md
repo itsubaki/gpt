@@ -6,7 +6,7 @@
 
 GPT-based chatbot in Go from scratch
 
-## BPE Tokenizer
+## BPE Tokenize
 
 ```shell
 % make dl
@@ -36,7 +36,10 @@ encoding time: 1.459157917s
 ```shell
 % make gpt
 go run ./cmd/gpt/main.go --max-iters 200
-iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]]
+iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]
+```
+
+```shell
 % cat loss.csv
   0,6.9367
   1,6.9461
