@@ -35,14 +35,16 @@ encoding time: 1.459157917s
 
 ```shell
 % make gpt
-go run ./cmd/gpt/main.go
-iterations   100%|██████████████████████████████| 100/100 [63.0s<0.0s, 1.5 it/s]
+go run ./cmd/gpt/main.go --max-iters 200
+iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]]
 % cat loss.csv
- 0,6.9370
- 1,6.9336
- 2,6.9185
+  0,6.9367
+  1,6.9461
+  2,6.9208
 ...
-99,3.7965
+ 99,2.6893
+...
+199,1.9285
 ```
 
 ## References

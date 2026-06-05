@@ -50,7 +50,7 @@ func main() {
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.IntVar(&warmupIters, "warmup-iters", 10, "number of warmup iterations")
-	flag.IntVar(&maxIters, "max-iters", 100, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 200, "number of maximum iterations")
 	flag.Parse()
 
 	// model
