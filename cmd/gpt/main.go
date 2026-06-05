@@ -53,6 +53,7 @@ func main() {
 	flag.IntVar(&maxIters, "max-iters", 100, "number of maximum iterations")
 	flag.Parse()
 
+	// model
 	m := model.NewGPT(
 		vocabSize,
 		contextLen,
@@ -63,6 +64,7 @@ func main() {
 		theta,
 	)
 
+	// optimizer
 	o := O.AdamW{
 		Adam: O.Adam{
 			Alpha: maxLR,
@@ -75,12 +77,14 @@ func main() {
 		WeightDecay: weightDecay,
 	}
 
+	// learning rate scheduler
 	sched := scheduler.D2Z{
 		MaxLearningRate: maxLR,
 		WarmupIters:     warmupIters,
 		MaxIters:        maxIters,
 	}
 
+	// dataloader
 	tokens, err := load("testdata/tiny_codes.bin")
 	if err != nil {
 		fmt.Println("failed to load tokens:", err)
@@ -97,9 +101,11 @@ func main() {
 		},
 	}
 
+	// progress bar
 	bar := progress.NewProgressBar("iterations", maxIters, os.Stdout)
 	bar.Update(0)
 
+	// training loop
 	losses := make([]float64, 0, maxIters)
 	for i := range maxIters {
 		// learning rate scheduling
@@ -125,6 +131,7 @@ func main() {
 		bar.Update(i + 1)
 	}
 
+	// save losses to CSV
 	if err := save("loss.csv", losses); err != nil {
 		fmt.Println("failed to save losses:", err)
 		return
