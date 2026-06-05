@@ -56,14 +56,14 @@ func (p *ProgressBar) Update(current int) {
 	}
 
 	// print
-	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%.1fs<%.1fs, %.1f it/s]",
+	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%.1fs<%s, %.1f it/s]",
 		fmt.Sprintf("%-12s", p.desc),
 		percent*100,
 		bar,
 		current,
 		p.total,
 		elapsed,
-		eta,
+		format(eta),
 		speed,
 	); err != nil {
 		fmt.Println(err)
@@ -79,4 +79,16 @@ func (p *ProgressBar) Update(current int) {
 			fmt.Println(err)
 		}
 	}
+}
+
+func format(sec float64) string {
+	if sec >= 600*60 {
+		return fmt.Sprintf("%.1fh", sec/3600)
+	}
+
+	if sec >= 600 {
+		return fmt.Sprintf("%.1fm", sec/60)
+	}
+
+	return fmt.Sprintf("%.1fs", sec)
 }

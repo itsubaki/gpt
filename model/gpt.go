@@ -2,14 +2,11 @@ package model
 
 import (
 	"fmt"
-	"io"
-	"os"
 
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
-	"github.com/itsubaki/gpt/progress"
 )
 
 var _ O.Model = (*GPT)(nil)
@@ -27,15 +24,25 @@ var (
 )
 
 type GPT struct {
-	numOfBlocks int
-	writer      io.Writer
+	vocabSize     int
+	maxContextLen int
+	embeddim      int
+	numOfHeads    int
+	numOfBlocks   int
+	ffdim         int
+	theta         float64
 	M.Model
 }
 
 func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int, theta float64) *GPT {
 	gpt := &GPT{
-		numOfBlocks: numOfBlocks,
-		writer:      os.Stdout,
+		vocabSize:     vocabSize,
+		maxContextLen: maxContextLen,
+		embeddim:      embeddim,
+		numOfHeads:    numOfHeads,
+		numOfBlocks:   numOfBlocks,
+		ffdim:         ffdim,
+		theta:         theta,
 	}
 
 	// Layers
@@ -52,12 +59,9 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	bar := progress.NewProgressBar("Transformer Blocks", m.numOfBlocks, m.writer)
-
 	x := m.L["embed"].First(ids)
 	for i := range m.numOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
-		bar.Update(i + 1)
 	}
 
 	x = m.L["norm"].First(x)
