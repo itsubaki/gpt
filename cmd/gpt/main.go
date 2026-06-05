@@ -9,6 +9,7 @@ import (
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/model"
+	"github.com/itsubaki/gpt/scheduler"
 )
 
 func batch(B, C, V int) *variable.Variable {
@@ -18,20 +19,6 @@ func batch(B, C, V int) *variable.Variable {
 	}
 
 	return variable.New(tokens...).Reshape(B, C)
-}
-
-// D2Z
-func getLearningRate(it int, maxLR float64, warmupIters, maxIters int) float64 {
-	if it < warmupIters {
-		return maxLR * float64(it) / float64(warmupIters)
-	}
-
-	if it < maxIters {
-		progress := float64(it-warmupIters) / float64(maxIters-warmupIters)
-		return maxLR * (1.0 - progress)
-	}
-
-	return 0.0
 }
 
 func main() {
@@ -69,10 +56,15 @@ func main() {
 		WeightDecay: 0.01,
 	}
 
+	sche := scheduler.D2Z{
+		MaxLearningRate: maxLR,
+		WarmupIters:     warmupIters,
+		MaxIters:        maxIters,
+	}
+
 	for i := range 3 {
 		// learning rate scheduling
-		lr := getLearningRate(i, maxLR, warmupIters, maxIters)
-		o.Alpha = lr
+		o.Alpha = sche.GetLearningRate(i)
 
 		// batch
 		x := batch(batchSize, maxContextLen, vocabSize)
