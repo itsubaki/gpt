@@ -6,7 +6,7 @@
 
 GPT implementation in Go from scratch
 
-## BPE Tokenize
+## Train BPE Tokenizer
 
 ```shell
 % make dl
@@ -31,7 +31,7 @@ compression ratio: 2.456519038967078
 encoding time: 1.459157917s
 ```
 
-## PreTrain
+## Pre-Train GPT
 
 ```shell
 % make gpt
