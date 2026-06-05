@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/gpt)](https://goreportcard.com/report/github.com/itsubaki/gpt)
 [![tests](https://github.com/itsubaki/gpt/workflows/tests/badge.svg)](https://github.com/itsubaki/gpt/actions)
 
-GPT-based chatbot in Go from scratch
+GPT implementation in Go from scratch
 
 ## BPE Tokenize
 
