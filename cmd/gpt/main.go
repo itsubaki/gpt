@@ -56,7 +56,7 @@ func main() {
 		WeightDecay: 0.01,
 	}
 
-	sche := scheduler.D2Z{
+	sched := scheduler.D2Z{
 		MaxLearningRate: maxLR,
 		WarmupIters:     warmupIters,
 		MaxIters:        maxIters,
@@ -64,7 +64,7 @@ func main() {
 
 	for i := range 3 {
 		// learning rate scheduling
-		o.Alpha = sche.GetLearningRate(i)
+		o.Alpha = sched.GetLearningRate(i)
 
 		// batch
 		x := batch(batchSize, maxContextLen, vocabSize)
