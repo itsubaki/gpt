@@ -35,3 +35,8 @@ jobs:
         run: |
           make dl
           make tokenize
+
+      - name: Train GPT
+        run: |
+          go run ./cmd/gpt/main.go --max-iters 10
+          cat loss.csv

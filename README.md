@@ -31,6 +31,22 @@ compression ratio: 2.456519038967078
 encoding time: 1.459157917s
 ```
 
+## PreTrain
+
+```shell
+% make gpt
+go run ./cmd/gpt/main.go --max-iters 200
+iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]]
+% cat loss.csv
+  0,6.9367
+  1,6.9461
+  2,6.9208
+...
+ 99,2.6893
+...
+199,1.9285
+```
+
 ## References
 
 - [ゼロから作るDeep Learning ❻](https://www.oreilly.co.jp/books/9784814401611/)
