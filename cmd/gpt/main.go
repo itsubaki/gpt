@@ -9,6 +9,7 @@ import (
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/model"
+	"github.com/itsubaki/gpt/scheduler"
 )
 
 func batch(B, C, V int) *variable.Variable {
@@ -29,6 +30,9 @@ func main() {
 	ffdim := 4 * embeddim
 	theta := 10000.0
 	batchSize := 1
+	maxLR := 6e-4
+	warmupIters := 200
+	maxIters := 40000
 
 	m := model.NewGPT(
 		vocabSize,
@@ -42,7 +46,7 @@ func main() {
 
 	o := O.AdamW{
 		Adam: O.Adam{
-			Alpha: 0.001,
+			Alpha: maxLR,
 			Beta1: 0.9,
 			Beta2: 0.999,
 			Hook: []O.Hook{
@@ -52,23 +56,34 @@ func main() {
 		WeightDecay: 0.01,
 	}
 
-	// batch
-	x := batch(batchSize, maxContextLen, vocabSize)
-	y := batch(batchSize, maxContextLen, vocabSize)
+	sche := scheduler.D2Z{
+		MaxLearningRate: maxLR,
+		WarmupIters:     warmupIters,
+		MaxIters:        maxIters,
+	}
 
-	// forward
-	logits := m.Forward(x)
-	loss := F.CrossEntropy(
-		F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
-		F.Reshape(-1)(y),                       // (B, C) -> (B*C)
-	)
-	fmt.Println(logits.Shape())
-	fmt.Println(loss.At())
+	for i := range 3 {
+		// learning rate scheduling
+		o.Alpha = sche.GetLearningRate(i)
 
-	// backward and update
-	m.Cleargrads()
-	loss.Backward()
-	o.Update(m)
+		// batch
+		x := batch(batchSize, maxContextLen, vocabSize)
+		y := batch(batchSize, maxContextLen, vocabSize)
+
+		// forward
+		logits := m.Forward(x)
+		loss := F.CrossEntropy(
+			F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
+			F.Reshape(-1)(y),                       // (B, C) -> (B*C)
+		)
+		fmt.Println(logits.Shape())
+		fmt.Println(loss.At())
+
+		// backward and update
+		m.Cleargrads()
+		loss.Backward()
+		o.Update(m)
+	}
 
 	// print param shapes and total param count
 	var total int
