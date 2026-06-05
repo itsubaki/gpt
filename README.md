@@ -16,7 +16,7 @@ curl -fs -o testdata/tiny_codes.txt https://raw.githubusercontent.com/oreilly-ja
 ```shell
 % make tokenize
 go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
-Training BPE 100%|██████████████████████████████| 743/743 [1.8s<0.0s, 880.1 it/s]]]
+Training BPE 100%|██████████████████████████████| 743/743 [1.8s<0.0s, 880.1 it/s]
 saved merge rules to testdata/merge_rules.gob
 ...
 995 -> "are"
