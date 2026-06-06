@@ -28,5 +28,5 @@ tokenize:
 	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
 
 gpt:
-	go run ./cmd/gpt/main.go
+	caffeinate -i go run ./cmd/gpt/main.go
 	plot loss.csv

@@ -42,7 +42,7 @@ func main() {
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.IntVar(&warmupIters, "warmup-iters", 100, "number of warmup iterations")
-	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 200, "number of maximum iterations")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
@@ -238,9 +238,10 @@ func Generate(
 			}
 
 			// forward
-			x := newVariable(ids).Reshape(1, -1)
-			logits := model.Forward(x)
-			logits = F.GetItem([]int{logits.Size(1) - 1}, 1)(logits)
+			x := newVariable(ids).Reshape(1, -1)                     // (1, C)
+			logits := model.Forward(x)                               // (1, C, V)
+			logits = F.GetItem([]int{logits.Size(1) - 1}, 1)(logits) // (1, 1, V)
+			logits = F.Reshape(-1)(logits)                           // (V)
 
 			// sample next token
 			probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
@@ -276,7 +277,7 @@ func multinominal(probs *variable.Variable) int {
 
 	var cum float64
 	for i := range probs.Size() {
-		cum += probs.Reshape(-1).At(i)
+		cum += probs.At(i)
 		if r < cum {
 			return i
 		}
