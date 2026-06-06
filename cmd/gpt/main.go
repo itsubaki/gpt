@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	// hyper parameters
+	// parameters
 	var contextLen, vocabSize, batchSize, embeddim, numOfHeads, numOfBlocks int
 	var theta, maxLR, beta1, beta2, clip, weightDecay float64
 	var warmupIters, maxIters int
@@ -47,7 +47,7 @@ func main() {
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
-	flag.IntVar(&maxNewTokens, "max-new-tokens", 100, "maximum number of new tokens to generate")
+	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()
 
 	if usePProf {
@@ -115,6 +115,11 @@ func main() {
 		},
 	}
 
+	// progress bar
+	bar := progress.NewProgressBar("iterations", maxIters, os.Stdout)
+	bar.Update(0)
+
+	// save loss to csv
 	f, err := os.Create("loss.csv")
 	if err != nil {
 		panic(err)
@@ -123,10 +128,6 @@ func main() {
 
 	w := csv.NewWriter(f)
 	defer w.Flush()
-
-	// progress bar
-	bar := progress.NewProgressBar("iterations", maxIters, os.Stdout)
-	bar.Update(0)
 
 	// training loop
 	losses := make([]float64, 0, maxIters)
