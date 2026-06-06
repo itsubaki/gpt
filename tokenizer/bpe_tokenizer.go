@@ -40,6 +40,10 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 	}
 }
 
+func (t *BPETokenizer) EndTokenID() int {
+	return t.endTokenID
+}
+
 func (t *BPETokenizer) encode(text string) []int {
 	ids := text2IDs(text)
 	for len(ids) > 1 {

@@ -5,16 +5,19 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"runtime/pprof"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/hook"
 	"github.com/itsubaki/autograd/optimizer"
+	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
 	"github.com/itsubaki/gpt/scheduler"
+	"github.com/itsubaki/gpt/tokenizer"
 )
 
 func main() {
@@ -23,6 +26,9 @@ func main() {
 	var theta, maxLR, beta1, beta2, clip, weightDecay float64
 	var warmupIters, maxIters int
 	var usePProf bool
+	var mergeRulesPath, prompt string
+	var temperature float64
+	var maxNewTokens int
 	flag.IntVar(&contextLen, "context-len", 128, "maximum context length")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&batchSize, "batch-size", 16, "batch size")
@@ -38,6 +44,10 @@ func main() {
 	flag.IntVar(&warmupIters, "warmup-iters", 10, "number of warmup iterations")
 	flag.IntVar(&maxIters, "max-iters", 200, "number of maximum iterations")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
+	flag.StringVar(&mergeRulesPath, "r", "testdata/merge_rules.gob", "path to the merge rules gob file")
+	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
+	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
+	flag.IntVar(&maxNewTokens, "max-new-tokens", 100, "maximum number of new tokens to generate")
 	flag.Parse()
 
 	if usePProf {
@@ -140,6 +150,23 @@ func main() {
 		fmt.Println("failed to save losses:", err)
 		return
 	}
+
+	// tokenizer
+	mergeRules, ok := tokenizer.Load(mergeRulesPath)
+	if !ok {
+		panic("failed to load merge rules")
+	}
+
+	// generate text
+	generatedText := Generate(
+		m,
+		tokenizer.NewBPETokenizer(mergeRules),
+		prompt,
+		maxNewTokens,
+		temperature,
+	)
+
+	fmt.Println(generatedText)
 }
 
 func load(path string) ([]int, error) {
@@ -177,4 +204,85 @@ func save(path string, losses []float64) error {
 	}
 
 	return w.Error()
+}
+
+var _ Tokenizer = (*tokenizer.BPETokenizer)(nil)
+
+var _ Model = (*model.GPT)(nil)
+
+type Tokenizer interface {
+	Encode(text string) []int
+	Decode(tokens []int) string
+	EndTokenID() int
+}
+
+type Model interface {
+	Forward(x *variable.Variable) *variable.Variable
+	MaxContextLen() int
+}
+
+func Generate(
+	model Model,
+	tokenizer Tokenizer,
+	prompt string,
+	maxNewTokens int,
+	temperature float64,
+) string {
+	ids := tokenizer.Encode(prompt)
+	generatedIDs := make([]int, len(ids))
+	copy(generatedIDs, ids)
+
+	func() {
+		defer variable.Nograd().End()
+
+		for range maxNewTokens {
+			if len(ids) > model.MaxContextLen() {
+				ids = ids[len(ids)-model.MaxContextLen():]
+			}
+
+			// forward
+			x := newVariable(ids).Reshape(1, -1)
+			logits := model.Forward(x)
+			logits = F.GetItem([]int{logits.Size(1) - 1}, 1)(logits)
+
+			// sample next token
+			probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
+			nextID := multinominal(probs)
+
+			// stop if end token is generated
+			if nextID == tokenizer.EndTokenID() {
+				break
+			}
+
+			// append next token to input and generated tokens
+			ids = append(ids, nextID)
+			generatedIDs = append(generatedIDs, nextID)
+		}
+	}()
+
+	generatedText := tokenizer.Decode(generatedIDs)
+	return generatedText
+}
+
+func newVariable(x []int) *variable.Variable {
+	f := make([]float64, len(x))
+	for i, v := range x {
+		f[i] = float64(v)
+	}
+
+	return variable.New(f...)
+}
+
+func multinominal(probs *variable.Variable) int {
+	r := rand.Float64()
+
+	var cum float64
+	for i := range probs.Size() {
+		cum += probs.Reshape(-1).At(i)
+		if r < cum {
+			return i
+		}
+	}
+
+	return probs.Size() - 1
 }
