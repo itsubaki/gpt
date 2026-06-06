@@ -10,7 +10,7 @@ import (
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/hook"
-	O "github.com/itsubaki/autograd/optimizer"
+	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
@@ -18,31 +18,17 @@ import (
 )
 
 func main() {
-	f, err := os.Create("cpu.prof")
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if err := f.Close(); err != nil {
-			fmt.Println(err)
-		}
-	}()
-
-	if err := pprof.StartCPUProfile(f); err != nil {
-		panic(err)
-	}
-	defer pprof.StopCPUProfile()
-
 	// hyper parameters
 	var contextLen, vocabSize, batchSize, embeddim, numOfHeads, numOfBlocks int
 	var theta, maxLR, beta1, beta2, clip, weightDecay float64
 	var warmupIters, maxIters int
-	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
+	var usePProf bool
+	flag.IntVar(&contextLen, "context-len", 128, "maximum context length")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&batchSize, "batch-size", 16, "batch size")
 	flag.IntVar(&embeddim, "embeddim", 192, "embedding dimension")
-	flag.IntVar(&numOfHeads, "num-of-heads", 3, "number of heads")
-	flag.IntVar(&numOfBlocks, "num-of-blocks", 3, "number of blocks")
+	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
+	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&theta, "theta", 10000.0, "theta for positional encoding")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for Adam optimizer")
@@ -51,7 +37,25 @@ func main() {
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.IntVar(&warmupIters, "warmup-iters", 10, "number of warmup iterations")
 	flag.IntVar(&maxIters, "max-iters", 200, "number of maximum iterations")
+	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.Parse()
+
+	if usePProf {
+		f, err := os.Create("cpu.prof")
+		if err != nil {
+			panic(err)
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				fmt.Println(err)
+			}
+		}()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			panic(err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 
 	// model
 	m := model.NewGPT(
@@ -65,12 +69,12 @@ func main() {
 	)
 
 	// optimizer
-	o := O.AdamW{
-		Adam: O.Adam{
+	o := optimizer.AdamW{
+		Adam: optimizer.Adam{
 			Alpha: maxLR,
 			Beta1: beta1,
 			Beta2: beta2,
-			Hook: []O.Hook{
+			Hook: []optimizer.Hook{
 				hook.ClipGrad(clip),
 			},
 		},
@@ -87,7 +91,7 @@ func main() {
 	// dataloader
 	tokens, err := load("testdata/tiny_codes.bin")
 	if err != nil {
-		fmt.Println("failed to load tokens:", err)
+		fmt.Println("load tokens:", err)
 		return
 	}
 

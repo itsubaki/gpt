@@ -1,6 +1,6 @@
 package dataloader
 
-type Dataset[T any] interface {
+type Dataset interface {
 	Len() int
-	GetItem(i int) ([]T, []T)
+	GetItem(i int) ([]int, []int)
 }

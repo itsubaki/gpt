@@ -8,7 +8,7 @@ import (
 
 type DataLoader struct {
 	BatchSize int
-	Dataset   Dataset[int]
+	Dataset   Dataset
 	Cycle     bool
 	Shuffle   bool
 	indices   []int
@@ -41,15 +41,14 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 	x, y := l.Dataset.GetItem(i)
 	l.idx++
 
-	vx, vy := variable.New(f64(x)...), variable.New(f64(y)...)
-	return vx.Reshape(l.BatchSize, -1), vy.Reshape(l.BatchSize, -1)
+	return newVariable(x).Reshape(l.BatchSize, -1), newVariable(y).Reshape(l.BatchSize, -1)
 }
 
-func f64(x []int) []float64 {
+func newVariable(x []int) *variable.Variable {
 	f := make([]float64, len(x))
 	for i, v := range x {
 		f[i] = float64(v)
 	}
 
-	return f
+	return variable.New(f...)
 }
