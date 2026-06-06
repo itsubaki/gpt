@@ -241,7 +241,7 @@ func Generate(
 			// forward
 			x := newVariable(ids).Reshape(1, -1)                     // (1, C)
 			logits := model.Forward(x)                               // (1, C, V)
-			logits = F.GetItem([]int{logits.Size(1) - 1}, 1)(logits) // (1, 1, V)
+			logits = F.GetItem(1, []int{logits.Size(1) - 1})(logits) // (1, 1, V)
 			logits = F.Reshape(-1)(logits)                           // (V)
 
 			// sample next token

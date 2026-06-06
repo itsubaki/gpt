@@ -35,7 +35,7 @@ func (l *EmbeddingsT) Forward(x ...*variable.Variable) []*variable.Variable {
 	w := l.Parameters["w"]
 
 	shape := append(x[0].Shape(), l.embeddim)
-	y := F.Reshape(shape...)(F.GetItem(ids, 0)(w))
+	y := F.Reshape(shape...)(F.GetItem(0, ids)(w))
 	return []*variable.Variable{
 		y,
 	}
