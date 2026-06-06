@@ -29,10 +29,10 @@ func main() {
 	var mergeRulesPath, prompt string
 	var temperature float64
 	var maxNewTokens int
-	flag.IntVar(&contextLen, "context-len", 128, "maximum context length")
+	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
-	flag.IntVar(&batchSize, "batch-size", 16, "batch size")
-	flag.IntVar(&embeddim, "embeddim", 192, "embedding dimension")
+	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
+	flag.IntVar(&embeddim, "embeddim", 384, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&theta, "theta", 10000.0, "theta for positional encoding")
@@ -41,10 +41,10 @@ func main() {
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for Adam optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
-	flag.IntVar(&warmupIters, "warmup-iters", 10, "number of warmup iterations")
-	flag.IntVar(&maxIters, "max-iters", 200, "number of maximum iterations")
+	flag.IntVar(&warmupIters, "warmup-iters", 100, "number of warmup iterations")
+	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
-	flag.StringVar(&mergeRulesPath, "r", "testdata/merge_rules.gob", "path to the merge rules gob file")
+	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 100, "maximum number of new tokens to generate")
@@ -115,6 +115,15 @@ func main() {
 		},
 	}
 
+	f, err := os.Create("loss.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	w := csv.NewWriter(f)
+	defer w.Flush()
+
 	// progress bar
 	bar := progress.NewProgressBar("iterations", maxIters, os.Stdout)
 	bar.Update(0)
@@ -143,12 +152,19 @@ func main() {
 
 		// update progress bar
 		bar.Update(i + 1)
-	}
 
-	// save losses to CSV
-	if err := save("loss.csv", losses); err != nil {
-		fmt.Println("failed to save losses:", err)
-		return
+		// flush loss
+		if err := w.Write([]string{
+			fmt.Sprintf("%d", i),
+			fmt.Sprintf("%.4f", losses[len(losses)-1]),
+		}); err != nil {
+			panic(err)
+		}
+
+		w.Flush()
+		if err := w.Error(); err != nil {
+			panic(err)
+		}
 	}
 
 	// tokenizer
@@ -184,28 +200,6 @@ func load(path string) ([]int, error) {
 	return ids, nil
 }
 
-func save(path string, losses []float64) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = f.Close() }()
-
-	w := csv.NewWriter(f)
-	defer w.Flush()
-
-	for i, loss := range losses {
-		if err := w.Write([]string{
-			fmt.Sprintf("%d", i),
-			fmt.Sprintf("%.4f", loss),
-		}); err != nil {
-			return err
-		}
-	}
-
-	return w.Error()
-}
-
 var _ Tokenizer = (*tokenizer.BPETokenizer)(nil)
 
 var _ Model = (*model.GPT)(nil)
@@ -233,10 +227,13 @@ func Generate(
 	copy(generatedIDs, ids)
 
 	func() {
+		// disable gradient tracking for generation
 		defer variable.Nograd().End()
 
+		// generate tokens
 		for range maxNewTokens {
 			if len(ids) > model.MaxContextLen() {
+				// keep only the last maxContextLen tokens as input
 				ids = ids[len(ids)-model.MaxContextLen():]
 			}
 
@@ -260,6 +257,7 @@ func Generate(
 		}
 	}()
 
+	// decode generated tokens to text
 	generatedText := tokenizer.Decode(generatedIDs)
 	return generatedText
 }
