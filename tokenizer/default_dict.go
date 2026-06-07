@@ -69,8 +69,8 @@ func (d *DefaultDict[T]) Seq2() iter.Seq2[T, int] {
 	}
 }
 
-func Save(filename string, dict *DefaultDict[Pair]) error {
-	f, err := os.Create(filename)
+func Save(path string, dict *DefaultDict[Pair]) error {
+	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("create file: %v", err)
 	}
@@ -83,8 +83,8 @@ func Save(filename string, dict *DefaultDict[Pair]) error {
 	return nil
 }
 
-func Load(filename string) (*DefaultDict[Pair], bool) {
-	f, err := os.Open(filename)
+func Load(path string) (*DefaultDict[Pair], bool) {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, false
 	}

@@ -38,19 +38,13 @@ func main() {
 	}
 
 	fmt.Println("model parameters:")
-	fmt.Println(" vocab size:", m.VocabSize)
-	fmt.Println(" max context length:", m.MaxContextLen)
-	fmt.Println(" embedding dimension:", m.Embeddim)
-	fmt.Println(" number of heads:", m.NumOfHeads)
-	fmt.Println(" number of blocks:", m.NumOfBlocks)
-	fmt.Println(" ffn dimension:", m.FFDim)
-	fmt.Println(" theta for RoPE:", m.Theta)
-	fmt.Println("model layers:")
-	for _, layer := range m.Layers {
-		for _, param := range m.L[layer].Params() {
-			fmt.Println("", layer, param.Name, param.Shape())
-		}
-	}
+	fmt.Println(" VocaSize     :", m.VocabSize)
+	fmt.Println(" MaxContextLen:", m.MaxContextLen)
+	fmt.Println(" Embeddim     :", m.Embeddim)
+	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
+	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
+	fmt.Println(" FFDim        :", m.FFDim)
+	fmt.Println(" Theta        :", m.Theta)
 
 	// tokenizer
 	mergeRules, ok := tokenizer.Load(mergeRulesPath)
@@ -68,6 +62,7 @@ func main() {
 		temperature,
 	)
 
+	fmt.Println("generated text:")
 	fmt.Println(generatedText)
 }
 

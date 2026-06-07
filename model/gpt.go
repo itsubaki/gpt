@@ -60,19 +60,40 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	return gpt
 }
 
-func NewGPTFrom(filename string) (*GPT, error) {
-	f, err := os.Open(filename)
+func NewGPTFrom(path string) (*GPT, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = f.Close() }()
 
-	var m GPT
-	if err := gob.NewDecoder(f).Decode(&m); err != nil {
+	// Decode into a temporary GPT to read the metadata and saved weights.
+	// Unexported fields in layer structs (e.g. embeddim, numOfHeads, rope) are
+	// not preserved by gob, so we reconstruct the model via NewGPT and then
+	// copy the saved parameter values in.
+	var saved GPT
+	if err := gob.NewDecoder(f).Decode(&saved); err != nil {
 		return nil, err
 	}
 
-	return &m, nil
+	m := NewGPT(
+		saved.VocabSize,
+		saved.MaxContextLen,
+		saved.Embeddim,
+		saved.NumOfHeads,
+		saved.NumOfBlocks,
+		saved.FFDim,
+		saved.Theta,
+	)
+
+	savedParams := saved.Params()
+	for key, p := range m.Params() {
+		if src, ok := savedParams[key]; ok {
+			copy(p.Data.Data, src.Data.Data)
+		}
+	}
+
+	return m, nil
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
@@ -86,8 +107,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func (m *GPT) Save(filename string) error {
-	f, err := os.Create(filename)
+func (m *GPT) Save(path string) error {
+	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("create file: %v", err)
 	}
