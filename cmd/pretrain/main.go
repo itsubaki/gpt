@@ -115,7 +115,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	w := csv.NewWriter(f)
 	defer w.Flush()
@@ -136,15 +136,18 @@ func main() {
 			F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
 			F.Reshape(-1)(y),                       // (B, C) -> (B*C)
 		)
+		losses = append(losses, loss.At())
 
-		if loss.At() < minLoss {
+		// save model if loss is improved
+		if loss.At() < minLoss && i > 100 {
 			minLoss = loss.At()
 			if err := m.Save("testdata/model.gob"); err != nil {
 				fmt.Println("save model:", err)
 			}
-		}
 
-		losses = append(losses, loss.At())
+			fmt.Println()
+			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
+		}
 
 		// backward and update
 		m.Cleargrads()

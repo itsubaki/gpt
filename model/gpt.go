@@ -8,7 +8,6 @@ import (
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
-	"github.com/itsubaki/gpt/layer"
 	L "github.com/itsubaki/gpt/layer"
 )
 
@@ -77,15 +76,15 @@ func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L
 }
 
 func init() {
-	gob.Register(&layer.MultiHeadAttentionT{})
-	gob.Register(&layer.BlockT{})
-	gob.Register(&layer.EmbeddingsT{})
-	gob.Register(&layer.FFNT{})
-	gob.Register(&layer.LayerNormT{})
-	gob.Register(&layer.LinearT{})
-	gob.Register(&layer.RMSNormT{})
-	gob.Register(&layer.RoPET{})
-	gob.Register(&layer.SwiGLUT{})
+	gob.Register(&L.MultiHeadAttentionT{})
+	gob.Register(&L.BlockT{})
+	gob.Register(&L.EmbeddingsT{})
+	gob.Register(&L.FFNT{})
+	gob.Register(&L.LayerNormT{})
+	gob.Register(&L.LinearT{})
+	gob.Register(&L.RMSNormT{})
+	gob.Register(&L.RoPET{})
+	gob.Register(&L.SwiGLUT{})
 }
 
 func NewGPTFrom(path string) (*GPT, error) {
