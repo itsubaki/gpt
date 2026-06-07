@@ -20,7 +20,9 @@ func main() {
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
+	flag.Parse()
 
+	// model from gob file
 	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
 		panic(fmt.Errorf("new model from %q: %v", modelPath, err))
