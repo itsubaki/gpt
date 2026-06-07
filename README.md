@@ -29,27 +29,22 @@ byte count: 6487033
 token count: 2640742
 compression ratio: 2.456519038967078
 encoding time: 1.459157917s
+saved tokens to testdata/tiny_codes.bin
 ```
 
 ## Pre-Train GPT
 
 ```shell
 % make gpt
-go run ./cmd/gpt/main.go --max-iters 200
+go run ./cmd/pretrain/main.go --max-iters 200
 iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]
 ```
 
+## Generate Text
+
 ```shell
-% cat loss.csv
-  0, 6.93
-  1, 6.94
-  2, 6.92
-...
- 49, 4.15
-...
- 99, 2.68
-...
-199, 1.92
+make generate
+go run ./comd/generate/main.go
 ```
 
 ## References

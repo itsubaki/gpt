@@ -58,6 +58,7 @@ func main() {
 	if err := save(bin, ids); err != nil {
 		panic(err)
 	}
+	fmt.Println("saved tokens to", bin)
 }
 
 func keys(m map[int][]byte) []int {
