@@ -25,7 +25,10 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 
 	for pair, newID := range mergeRules.Seq2() {
 		p0, p1 := id2Bytes[pair[0]], id2Bytes[pair[1]]
-		id2Bytes[newID] = append(p0, p1...)
+		buf := make([]byte, 0, len(p0)+len(p1))
+		buf = append(buf, p0...)
+		buf = append(buf, p1...)
+		id2Bytes[newID] = buf
 	}
 
 	endTokenID := 256 + mergeRules.Len()

@@ -43,11 +43,13 @@ func main() {
 		panic("failed to load merge rules")
 	}
 
+	tknizer := tokenizer.NewBPETokenizer(mergeRules)
+
 	// generate text
 	generatedText := Generate(
 		m,
 		m.MaxContextLen,
-		tokenizer.NewBPETokenizer(mergeRules),
+		tknizer,
 		prompt,
 		maxNewTokens,
 		temperature,
