@@ -40,11 +40,11 @@ func main() {
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.001, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
+	flag.IntVar(&maxIters, "max-iters", 2000, "number of maximum iterations")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
-	flag.IntVar(&maxIters, "max-iters", 2000, "number of maximum iterations")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.Parse()
 
