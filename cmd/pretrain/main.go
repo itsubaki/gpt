@@ -141,8 +141,16 @@ func main() {
 		)
 		losses = append(losses, loss.At())
 
+		// backward and update
+		m.Cleargrads()
+		loss.Backward()
+		o.Update(m)
+
+		// update progress bar
+		bar.Update(i + 1)
+
 		// save model if loss is improved
-		if loss.At() < minLoss && i > 200 {
+		if loss.At() < minLoss && loss.At() < 1 {
 			minLoss = loss.At()
 			if err := m.Save(modelPath); err != nil {
 				fmt.Println("save model:", err)
@@ -151,14 +159,6 @@ func main() {
 			fmt.Println()
 			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
 		}
-
-		// backward and update
-		m.Cleargrads()
-		loss.Backward()
-		o.Update(m)
-
-		// update progress bar
-		bar.Update(i + 1)
 
 		// flush loss
 		if err := w.Write([]string{
