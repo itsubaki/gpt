@@ -23,6 +23,7 @@ func main() {
 	var contextLen, vocabSize, batchSize, embeddim, numOfHeads, numOfBlocks int
 	var theta, maxLR, beta1, beta2, weightDecay, clip float64
 	var warmupIters, maxIters int
+	var tokensPath, modelPath string
 	var usePProf bool
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
@@ -38,6 +39,8 @@ func main() {
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.IntVar(&warmupIters, "warmup-iters", 1000, "number of warmup iterations")
 	flag.IntVar(&maxIters, "max-iters", 10000, "number of maximum iterations")
+	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
+	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.Parse()
 
@@ -90,7 +93,7 @@ func main() {
 	}
 
 	// dataloader
-	tokens, err := load("testdata/tiny_codes.bin")
+	tokens, err := load(tokensPath)
 	if err != nil {
 		fmt.Println("load tokens:", err)
 		return
@@ -139,9 +142,9 @@ func main() {
 		losses = append(losses, loss.At())
 
 		// save model if loss is improved
-		if loss.At() < minLoss && i > 100 {
+		if loss.At() < minLoss && i > 200 {
 			minLoss = loss.At()
-			if err := m.Save("testdata/model.gob"); err != nil {
+			if err := m.Save(modelPath); err != nil {
 				fmt.Println("save model:", err)
 			}
 
