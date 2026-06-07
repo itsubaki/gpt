@@ -25,7 +25,7 @@ func main() {
 	// model from gob file
 	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
-		panic(fmt.Errorf("new model from %q: %v", modelPath, err))
+		panic(err)
 	}
 
 	fmt.Println("model parameters:")
@@ -40,7 +40,7 @@ func main() {
 	// tokenizer
 	mergeRules, err := tokenizer.Load(mergeRulesPath)
 	if err != nil {
-		panic(fmt.Errorf("new tokenizer from %q: %v", mergeRulesPath, err))
+		panic(err)
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)

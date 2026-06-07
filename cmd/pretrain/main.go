@@ -95,8 +95,7 @@ func main() {
 	// dataloader
 	tokens, err := load(tokensPath)
 	if err != nil {
-		fmt.Println("load tokens:", err)
-		return
+		panic(err)
 	}
 
 	loader := dataloader.DataLoader{
