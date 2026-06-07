@@ -24,24 +24,24 @@ var (
 )
 
 type GPT struct {
-	vocabSize     int
-	maxContextLen int
-	embeddim      int
-	numOfHeads    int
-	numOfBlocks   int
-	ffdim         int
+	VocabSize     int
+	MaxContextLen int
+	Embeddim      int
+	NumOfHeads    int
+	NumOfBlocks   int
+	FFDim         int
 	theta         float64
 	M.Model
 }
 
 func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int, theta float64) *GPT {
 	gpt := &GPT{
-		vocabSize:     vocabSize,
-		maxContextLen: maxContextLen,
-		embeddim:      embeddim,
-		numOfHeads:    numOfHeads,
-		numOfBlocks:   numOfBlocks,
-		ffdim:         ffdim,
+		VocabSize:     vocabSize,
+		MaxContextLen: maxContextLen,
+		Embeddim:      embeddim,
+		NumOfHeads:    numOfHeads,
+		NumOfBlocks:   numOfBlocks,
+		FFDim:         ffdim,
 		theta:         theta,
 	}
 
@@ -58,13 +58,9 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	return gpt
 }
 
-func (m *GPT) MaxContextLen() int {
-	return m.maxContextLen
-}
-
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := m.L["embed"].First(ids)
-	for i := range m.numOfBlocks {
+	for i := range m.NumOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 	}
 
