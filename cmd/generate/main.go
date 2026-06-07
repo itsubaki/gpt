@@ -29,7 +29,7 @@ func main() {
 	}
 
 	fmt.Println("model parameters:")
-	fmt.Println(" VocaSize     :", m.VocabSize)
+	fmt.Println(" VocabSize    :", m.VocabSize)
 	fmt.Println(" MaxContextLen:", m.MaxContextLen)
 	fmt.Println(" Embeddim     :", m.Embeddim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
