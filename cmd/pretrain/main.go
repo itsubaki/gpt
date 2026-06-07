@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"runtime/pprof"
 
@@ -12,10 +13,20 @@ import (
 	"github.com/itsubaki/autograd/hook"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
+	"github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
 	"github.com/itsubaki/gpt/scheduler"
 )
+
+func init() {
+	gob.Register(&layer.LinearT{})
+	gob.Register(&layer.BlockT{})
+	gob.Register(&layer.RMSNormT{})
+	gob.Register(&layer.EmbeddingsT{})
+	gob.Register(&layer.MultiHeadAttentionT{})
+	gob.Register(&layer.SwiGLUT{})
+}
 
 func main() {
 	// parameters
@@ -121,6 +132,7 @@ func main() {
 
 	// training loop
 	losses := make([]float64, 0, maxIters)
+	minLoss := math.MaxFloat64
 	for i := range maxIters {
 		// learning rate scheduling
 		o.Alpha = sched.GetLearningRate(i)
@@ -134,6 +146,14 @@ func main() {
 			F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
 			F.Reshape(-1)(y),                       // (B, C) -> (B*C)
 		)
+
+		if loss.At() < minLoss {
+			minLoss = loss.At()
+			if err := m.Save("testdata/model.gob"); err != nil {
+				fmt.Println("save model:", err)
+			}
+		}
+
 		losses = append(losses, loss.At())
 
 		// backward and update

@@ -1,7 +1,9 @@
 package model
 
 import (
+	"encoding/gob"
 	"fmt"
+	"os"
 
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
@@ -30,7 +32,7 @@ type GPT struct {
 	NumOfHeads    int
 	NumOfBlocks   int
 	FFDim         int
-	theta         float64
+	Theta         float64
 	M.Model
 }
 
@@ -42,7 +44,7 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 		NumOfHeads:    numOfHeads,
 		NumOfBlocks:   numOfBlocks,
 		FFDim:         ffdim,
-		theta:         theta,
+		Theta:         theta,
 	}
 
 	// Layers
@@ -58,6 +60,21 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	return gpt
 }
 
+func NewGPTFrom(filename string) (*GPT, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	var m GPT
+	if err := gob.NewDecoder(f).Decode(&m); err != nil {
+		return nil, err
+	}
+
+	return &m, nil
+}
+
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := m.L["embed"].First(ids)
 	for i := range m.NumOfBlocks {
@@ -67,6 +84,20 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x = m.L["norm"].First(x)
 	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
 	return logits
+}
+
+func (m *GPT) Save(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("create file: %v", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := gob.NewEncoder(f).Encode(m); err != nil {
+		return fmt.Errorf("encode: %v", err)
+	}
+
+	return nil
 }
 
 func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L.BlockT) {

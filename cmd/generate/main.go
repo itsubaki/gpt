@@ -1,26 +1,56 @@
 package main
 
 import (
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"math/rand/v2"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
+func init() {
+	gob.Register(&layer.LinearT{})
+	gob.Register(&layer.BlockT{})
+	gob.Register(&layer.RMSNormT{})
+	gob.Register(&layer.EmbeddingsT{})
+	gob.Register(&layer.MultiHeadAttentionT{})
+	gob.Register(&layer.SwiGLUT{})
+}
+
 func main() {
-	var mergeRulesPath, prompt string
+	var mergeRulesPath, modelPath, prompt string
 	var temperature float64
 	var maxNewTokens int
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
+	flag.StringVar(&modelPath, "model-path", "testdata/model.gob", "path to the model gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 
-	m := &model.GPT{}
+	m, err := model.NewGPTFrom(modelPath)
+	if err != nil {
+		panic(fmt.Errorf("new model from %q: %v", modelPath, err))
+	}
+
+	fmt.Println("model parameters:")
+	fmt.Println(" vocab size:", m.VocabSize)
+	fmt.Println(" max context length:", m.MaxContextLen)
+	fmt.Println(" embedding dimension:", m.Embeddim)
+	fmt.Println(" number of heads:", m.NumOfHeads)
+	fmt.Println(" number of blocks:", m.NumOfBlocks)
+	fmt.Println(" ffn dimension:", m.FFDim)
+	fmt.Println(" theta for RoPE:", m.Theta)
+	fmt.Println("model layers:")
+	for _, layer := range m.Layers {
+		for _, param := range m.L[layer].Params() {
+			fmt.Println("", layer, param.Name, param.Shape())
+		}
+	}
 
 	// tokenizer
 	mergeRules, ok := tokenizer.Load(mergeRulesPath)
