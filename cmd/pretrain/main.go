@@ -13,20 +13,10 @@ import (
 	"github.com/itsubaki/autograd/hook"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
-	"github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
 	"github.com/itsubaki/gpt/scheduler"
 )
-
-func init() {
-	gob.Register(&layer.LinearT{})
-	gob.Register(&layer.BlockT{})
-	gob.Register(&layer.RMSNormT{})
-	gob.Register(&layer.EmbeddingsT{})
-	gob.Register(&layer.MultiHeadAttentionT{})
-	gob.Register(&layer.SwiGLUT{})
-}
 
 func main() {
 	// parameters

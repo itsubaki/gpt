@@ -8,6 +8,7 @@ import (
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/layer"
 	L "github.com/itsubaki/gpt/layer"
 )
 
@@ -60,6 +61,33 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	return gpt
 }
 
+func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
+	x := m.L["embed"].First(ids)
+	for i := range m.NumOfBlocks {
+		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
+	}
+
+	x = m.L["norm"].First(x)
+	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
+	return logits
+}
+
+func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope)
+}
+
+func init() {
+	gob.Register(&layer.MultiHeadAttentionT{})
+	gob.Register(&layer.BlockT{})
+	gob.Register(&layer.EmbeddingsT{})
+	gob.Register(&layer.FFNT{})
+	gob.Register(&layer.LayerNormT{})
+	gob.Register(&layer.LinearT{})
+	gob.Register(&layer.RMSNormT{})
+	gob.Register(&layer.RoPET{})
+	gob.Register(&layer.SwiGLUT{})
+}
+
 func NewGPTFrom(path string) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -96,17 +124,6 @@ func NewGPTFrom(path string) (*GPT, error) {
 	return m, nil
 }
 
-func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	x := m.L["embed"].First(ids)
-	for i := range m.NumOfBlocks {
-		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
-	}
-
-	x = m.L["norm"].First(x)
-	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
-	return logits
-}
-
 func (m *GPT) Save(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -119,8 +136,4 @@ func (m *GPT) Save(path string) error {
 	}
 
 	return nil
-}
-
-func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope)
 }

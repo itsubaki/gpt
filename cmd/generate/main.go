@@ -1,26 +1,15 @@
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"math/rand/v2"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/variable"
-	"github.com/itsubaki/gpt/layer"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/tokenizer"
 )
-
-func init() {
-	gob.Register(&layer.LinearT{})
-	gob.Register(&layer.BlockT{})
-	gob.Register(&layer.RMSNormT{})
-	gob.Register(&layer.EmbeddingsT{})
-	gob.Register(&layer.MultiHeadAttentionT{})
-	gob.Register(&layer.SwiGLUT{})
-}
 
 func main() {
 	var mergeRulesPath, modelPath, prompt string
