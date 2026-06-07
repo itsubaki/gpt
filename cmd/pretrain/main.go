@@ -123,8 +123,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	losses := make([]float64, 0, maxIters)
-	minLoss := math.MaxFloat64
+	losses, minLoss := make([]float64, 0, maxIters), math.MaxFloat64
 	for i := range maxIters {
 		// learning rate scheduling
 		o.Alpha = sched.GetLearningRate(i)
@@ -138,12 +137,14 @@ func main() {
 			F.Reshape(-1, logits.Size(-1))(logits), // (B, C, V) -> (B*C, V)
 			F.Reshape(-1)(y),                       // (B, C) -> (B*C)
 		)
-		losses = append(losses, loss.At())
 
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
 		o.Update(m)
+
+		// record loss
+		losses = append(losses, loss.At())
 
 		// update progress bar
 		bar.Update(i + 1)
