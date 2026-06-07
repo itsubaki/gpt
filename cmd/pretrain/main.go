@@ -38,7 +38,7 @@ func main() {
 	flag.Float64Var(&weightDecay, "weight-decay", 0.001, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.IntVar(&warmupIters, "warmup-iters", 1000, "number of warmup iterations")
-	flag.IntVar(&maxIters, "max-iters", 10000, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
 	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
