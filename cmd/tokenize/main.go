@@ -26,8 +26,8 @@ func main() {
 		panic(err)
 	}
 
-	mergeRules, ok := tokenizer.Load(mergeRulesPath)
-	if !ok {
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
 		tokenizer.Writer = os.Stdout
 		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
 		if err := tokenizer.Save(mergeRulesPath, mergeRules); err != nil {

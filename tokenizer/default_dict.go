@@ -83,17 +83,17 @@ func Save(path string, dict *DefaultDict[Pair]) error {
 	return nil
 }
 
-func Load(path string) (*DefaultDict[Pair], bool) {
+func Load(path string) (*DefaultDict[Pair], error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, false
+		return nil, fmt.Errorf("open file: %v", err)
 	}
 	defer func() { _ = f.Close() }()
 
 	var dict DefaultDict[Pair]
 	if err := gob.NewDecoder(f).Decode(&dict); err != nil {
-		return nil, false
+		return nil, fmt.Errorf("decode: %v", err)
 	}
 
-	return &dict, true
+	return &dict, nil
 }

@@ -38,9 +38,9 @@ func main() {
 	fmt.Println(" Theta        :", m.Theta)
 
 	// tokenizer
-	mergeRules, ok := tokenizer.Load(mergeRulesPath)
-	if !ok {
-		panic("failed to load merge rules")
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
+		panic(fmt.Errorf("new tokenizer from %q: %v", mergeRulesPath, err))
 	}
 
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
