@@ -44,7 +44,7 @@ iterations   100%|████████████████████�
 
 ```shell
 make generate
-go run ./comd/generate/main.go
+go run ./cmd/generate/main.go
 ```
 
 ## References
