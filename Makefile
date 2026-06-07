@@ -30,3 +30,6 @@ tokenize:
 pretrain:
 	caffeinate -i go run ./cmd/pretrain/main.go
 	plot loss.csv
+
+generate:
+	go run ./cmd/generate/main.go
