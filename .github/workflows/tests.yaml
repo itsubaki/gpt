@@ -31,12 +31,12 @@ jobs:
         run: |
           make test
 
-      - name: Tokenize
+      - name: Train BPE Tokenizer
         run: |
           make dl
           make tokenize
 
-      - name: Train GPT
+      - name: Pre-Train GPT
         run: |
-          go run ./cmd/gpt/main.go --max-iters 10
+          go run ./cmd/pretrain/main.go --context-len 128 --embeddim 192 --batch-size 8 --max-iters 10
           cat loss.csv

@@ -58,6 +58,10 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 	return gpt
 }
 
+func (m *GPT) MaxContextLen() int {
+	return m.maxContextLen
+}
+
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := m.L["embed"].First(ids)
 	for i := range m.numOfBlocks {

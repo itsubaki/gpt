@@ -36,5 +36,5 @@ testdata/tiny_codes.txt
 testdata/tiny_codes.bin
 testdata/merge_rules.gob
 loss.csv
-loss.csv.png
+loss.png
 cpu.prof
