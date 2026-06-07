@@ -16,6 +16,7 @@ import (
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
+	"github.com/itsubaki/gpt/scheduler"
 	"github.com/itsubaki/gpt/tokenizer"
 )
 
@@ -26,7 +27,7 @@ func main() {
 	var mergeRulesPath, prompt string
 	var temperature float64
 	var maxNewTokens int
-	var maxIters int
+	var warmupIters, maxIters int
 	var usePProf bool
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
@@ -40,7 +41,8 @@ func main() {
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.001, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
-	flag.IntVar(&maxIters, "max-iters", 2000, "number of maximum iterations")
+	flag.IntVar(&warmupIters, "warmup-iters", 1000, "number of warmup iterations")
+	flag.IntVar(&maxIters, "max-iters", 10000, "number of maximum iterations")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
@@ -89,6 +91,13 @@ func main() {
 		WeightDecay: weightDecay,
 	}
 
+	// learning rate scheduler
+	sched := scheduler.D2Z{
+		MaxLearningRate: maxLR,
+		WarmupIters:     warmupIters,
+		MaxIters:        maxIters,
+	}
+
 	// dataloader
 	tokens, err := load("testdata/tiny_codes.bin")
 	if err != nil {
@@ -123,6 +132,9 @@ func main() {
 	// training loop
 	losses := make([]float64, 0, maxIters)
 	for i := range maxIters {
+		// learning rate scheduling
+		o.Alpha = sched.GetLearningRate(i)
+
 		// batch
 		x, y := loader.Batch()
 
