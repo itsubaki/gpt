@@ -35,7 +35,6 @@ func main() {
 	fmt.Println(" Embeddim     :", m.Embeddim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
-	fmt.Println(" Theta        :", m.Theta)
 
 	// tokenizer
 	mergeRules, err := tokenizer.Load(mergeRulesPath)

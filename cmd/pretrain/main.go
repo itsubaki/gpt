@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"runtime/pprof"
 
@@ -109,7 +108,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	minLoss := math.MaxFloat64
+	minLoss := 0.2
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -135,7 +134,7 @@ func main() {
 		}
 
 		// save model if loss is improved
-		if loss.At() < minLoss && loss.At() < 0.2 {
+		if loss.At() < minLoss {
 			if err := m.Save(modelPath + ".min"); err != nil {
 				panic(err)
 			}

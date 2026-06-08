@@ -33,7 +33,6 @@ type GPT struct {
 	Embeddim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
 	M.Model
 }
 
