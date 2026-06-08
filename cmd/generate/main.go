@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand/v2"
+	"time"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/variable"
@@ -34,7 +35,6 @@ func main() {
 	fmt.Println(" Embeddim     :", m.Embeddim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
-	fmt.Println(" FFDim        :", m.FFDim)
 	fmt.Println(" Theta        :", m.Theta)
 
 	// tokenizer
@@ -46,6 +46,7 @@ func main() {
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
 	// generate text
+	now := time.Now()
 	generatedText := Generate(
 		m,
 		m.MaxContextLen,
@@ -57,6 +58,7 @@ func main() {
 
 	fmt.Println("generated text:")
 	fmt.Println(generatedText)
+	fmt.Println("generation time:", time.Since(now))
 }
 
 var _ Tokenizer = (*tokenizer.BPETokenizer)(nil)

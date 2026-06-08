@@ -36,6 +36,7 @@ testdata/tiny_codes.txt
 testdata/tiny_codes.bin
 testdata/merge_rules.gob
 testdata/model_gpt.gob
+testdata/model_gpt.gob.min
 loss.csv
 loss.png
 cpu.prof

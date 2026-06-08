@@ -10,12 +10,11 @@ import (
 func ExampleBlock() {
 	embeddim := 64
 	numOfhead := 8
-	ffdim := 4 * embeddim
 	batchSize := 2
 	contextLen := 30
 
 	x := variable.Randn([]int{batchSize, contextLen, embeddim})
-	block := L.Block(embeddim, numOfhead, ffdim, nil)
+	block := L.Block(embeddim, numOfhead, nil)
 
 	output := block.First(x)
 	fmt.Println(x.Shape())

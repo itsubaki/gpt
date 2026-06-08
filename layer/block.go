@@ -8,7 +8,7 @@ import (
 
 var _ L.Layer = (*BlockT)(nil)
 
-func Block(embeddim, numOfHeads, ffdim int, rope *RoPET) *BlockT {
+func Block(embeddim, numOfHeads int, rope *RoPET) *BlockT {
 	headdim := int(embeddim / numOfHeads)
 	return &BlockT{
 		Layers: L.Layers{

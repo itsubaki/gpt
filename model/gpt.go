@@ -31,19 +31,17 @@ type GPT struct {
 	Embeddim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	FFDim         int
 	Theta         float64
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim int, theta float64) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int, theta float64) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
 		Embeddim:      embeddim,
 		NumOfHeads:    numOfHeads,
 		NumOfBlocks:   numOfBlocks,
-		FFDim:         ffdim,
 		Theta:         theta,
 	}
 
@@ -54,7 +52,7 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks, ffdim i
 
 	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embeddim, numOfHeads, ffdim, rope))
+		gpt.Add(newBlock(i, embeddim, numOfHeads, rope))
 	}
 
 	return gpt
@@ -71,8 +69,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func newBlock(i int, embeddim, numOfHeads, ffdim int, rope *L.RoPET) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, ffdim, rope)
+func newBlock(i int, embeddim, numOfHeads int, rope *L.RoPET) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, rope)
 }
 
 func init() {
@@ -109,7 +107,6 @@ func NewGPTFrom(path string) (*GPT, error) {
 		saved.Embeddim,
 		saved.NumOfHeads,
 		saved.NumOfBlocks,
-		saved.FFDim,
 		saved.Theta,
 	)
 

@@ -1,7 +1,5 @@
 package dataloader
 
-var _ Dataset = (*TokenDataset)(nil)
-
 type TokenDataset struct {
 	Tokens     []int
 	ContextLen int

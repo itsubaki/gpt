@@ -59,10 +59,9 @@ func (l *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 			baseH := baseB + h*sH
 			for t := range T {
 				baseT := baseH + t*sT
-				angle := t * half
 				for i := range half {
-					c := l.cos[angle+i]
-					s := l.sin[angle+i]
+					c := l.cos[t*half+i]
+					s := l.sin[t*half+i]
 
 					evenIdx := baseT + (2*i)*sD
 					oddIdx := baseT + (2*i+1)*sD

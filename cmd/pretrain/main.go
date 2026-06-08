@@ -15,30 +15,28 @@ import (
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
-	"github.com/itsubaki/gpt/scheduler"
 )
 
 func main() {
 	// parameters
-	var contextLen, vocabSize, batchSize, embeddim, numOfHeads, numOfBlocks int
+	var vocabSize, contextLen, embeddim, numOfHeads, numOfBlocks int
 	var theta, maxLR, beta1, beta2, weightDecay, clip float64
-	var warmupIters, maxIters int
+	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
-	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
-	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
+	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
+	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
+	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.IntVar(&embeddim, "embeddim", 384, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&theta, "theta", 10000.0, "theta for positional encoding")
-	flag.Float64Var(&maxLR, "max-learning-rate", 1e-4, "maximum learning rate")
+	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
-	flag.Float64Var(&weightDecay, "weight-decay", 0.001, "weight decay for AdamW optimizer")
+	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
-	flag.IntVar(&warmupIters, "warmup-iters", 1000, "number of warmup iterations")
-	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
 	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
@@ -68,28 +66,18 @@ func main() {
 		embeddim,
 		numOfHeads,
 		numOfBlocks,
-		4*embeddim, // ffdim
 		theta,
 	)
 
 	// optimizer
 	o := optimizer.AdamW{
-		Adam: optimizer.Adam{
-			Alpha: maxLR,
-			Beta1: beta1,
-			Beta2: beta2,
-			Hook: []optimizer.Hook{
-				hook.ClipGrad(clip),
-			},
-		},
+		Alpha:       maxLR,
+		Beta1:       beta1,
+		Beta2:       beta2,
 		WeightDecay: weightDecay,
-	}
-
-	// learning rate scheduler
-	sched := scheduler.D2Z{
-		MaxLearningRate: maxLR,
-		WarmupIters:     warmupIters,
-		MaxIters:        maxIters,
+		Hook: []optimizer.Hook{
+			hook.ClipGrad(clip),
+		},
 	}
 
 	// dataloader
@@ -123,11 +111,8 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	losses, minLoss := make([]float64, 0, maxIters), math.MaxFloat64
+	minLoss := math.MaxFloat64
 	for i := range maxIters {
-		// learning rate scheduling
-		o.Alpha = sched.GetLearningRate(i)
-
 		// batch
 		x, y := loader.Batch()
 
@@ -143,36 +128,32 @@ func main() {
 		loss.Backward()
 		o.Update(m)
 
-		// record loss
-		losses = append(losses, loss.At())
-
 		// update progress bar
 		bar.Update(i + 1)
 
+		// flush loss
+		if err := write(w, i, loss.At()); err != nil {
+			panic(err)
+		}
+
 		// save model if loss is improved
-		if loss.At() < minLoss && loss.At() < 1 {
-			minLoss = loss.At()
-			if err := m.Save(modelPath); err != nil {
-				fmt.Println("save model:", err)
+		if loss.At() < minLoss && loss.At() < 0.5 {
+			if err := m.Save(modelPath + ".min"); err != nil {
+				panic(err)
 			}
 
+			minLoss = loss.At()
 			fmt.Println()
 			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
 		}
-
-		// flush loss
-		if err := w.Write([]string{
-			fmt.Sprintf("%d", i),
-			fmt.Sprintf("%.4f", losses[len(losses)-1]),
-		}); err != nil {
-			panic(err)
-		}
-
-		w.Flush()
-		if err := w.Error(); err != nil {
-			panic(err)
-		}
 	}
+
+	// save final model
+	if err := m.Save(modelPath); err != nil {
+		panic(err)
+	}
+
+	fmt.Println()
 }
 
 func load(path string) ([]int, error) {
@@ -188,4 +169,20 @@ func load(path string) ([]int, error) {
 	}
 
 	return ids, nil
+}
+
+func write(w *csv.Writer, iter int, loss float64) error {
+	if err := w.Write([]string{
+		fmt.Sprintf("%d", iter),
+		fmt.Sprintf("%.4f", loss),
+	}); err != nil {
+		return err
+	}
+
+	w.Flush()
+	if err := w.Error(); err != nil {
+		return err
+	}
+
+	return nil
 }

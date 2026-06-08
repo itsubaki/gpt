@@ -6,6 +6,8 @@ import (
 	"github.com/itsubaki/autograd/variable"
 )
 
+var _ Dataset = (*TokenDataset)(nil)
+
 type DataLoader struct {
 	BatchSize int
 	Dataset   Dataset
