@@ -109,7 +109,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	minLoss := 0.2
+	minLoss := 1.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
