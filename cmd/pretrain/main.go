@@ -97,7 +97,7 @@ func main() {
 	}
 
 	// progress bar
-	bar := progress.NewProgressBar("iterations", maxIters, os.Stdout)
+	bar := progress.NewProgressBar("Pre-Training", maxIters, os.Stdout)
 	bar.Update(0)
 
 	// save loss to csv
@@ -129,7 +129,7 @@ func main() {
 		o.Update(m)
 
 		// update progress bar
-		bar.Update(i + 1)
+		bar.Update(i+1, fmt.Sprintf("loss=%.4f", loss.At()))
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {

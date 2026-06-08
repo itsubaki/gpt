@@ -28,7 +28,7 @@ func NewProgressBar(desc string, total int, w io.Writer) *ProgressBar {
 	}
 }
 
-func (p *ProgressBar) Update(current int) {
+func (p *ProgressBar) Update(current int, postfix ...string) {
 	now := time.Now()
 	percent := float64(current) / float64(p.total)
 	filled := int(percent * float64(p.width))
@@ -56,7 +56,7 @@ func (p *ProgressBar) Update(current int) {
 	}
 
 	// print
-	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%.1fs<%s, %.1f it/s]",
+	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%.1fs<%s, %.1f it/s] %s",
 		fmt.Sprintf("%-12s", p.desc),
 		percent*100,
 		bar,
@@ -65,6 +65,7 @@ func (p *ProgressBar) Update(current int) {
 		elapsed,
 		format(eta),
 		speed,
+		strings.Join(postfix, " "),
 	); err != nil {
 		fmt.Println(err)
 	}
