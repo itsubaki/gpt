@@ -137,7 +137,7 @@ func main() {
 		}
 
 		// save model if loss is improved
-		if loss.At() < minLoss && loss.At() < 0.5 {
+		if loss.At() < minLoss && loss.At() < 0.2 {
 			if err := m.Save(modelPath + ".min"); err != nil {
 				panic(err)
 			}

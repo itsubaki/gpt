@@ -20,7 +20,7 @@ func main() {
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
-	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
+	flag.IntVar(&maxNewTokens, "max-new-tokens", 100, "maximum number of new tokens to generate")
 	flag.Parse()
 
 	// model from gob file
