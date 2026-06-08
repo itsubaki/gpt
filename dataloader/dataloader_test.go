@@ -8,8 +8,7 @@ import (
 
 func ExampleDataLoader() {
 	loader := dataloader.DataLoader{
-		BatchSize: 2,
-		Cycle:     true,
+		BatchSize: 1,
 		Shuffle:   false,
 		Dataset: &dataloader.TokenDataset{
 			Tokens:     []int{0, 1, 2, 3, 4, 5},
@@ -23,14 +22,42 @@ func ExampleDataLoader() {
 	}
 
 	// Output:
-	// variable[2 1]([0 1]) variable[2 1]([1 2])
-	// variable[2 1]([1 2]) variable[2 1]([2 3])
-	// variable[2 1]([2 3]) variable[2 1]([3 4])
-	// variable[2 1]([3 4]) variable[2 1]([4 5])
-	// variable[2 1]([0 1]) variable[2 1]([1 2])
-	// variable[2 1]([1 2]) variable[2 1]([2 3])
-	// variable[2 1]([2 3]) variable[2 1]([3 4])
-	// variable[2 1]([3 4]) variable[2 1]([4 5])
-	// variable[2 1]([0 1]) variable[2 1]([1 2])
-	// variable[2 1]([1 2]) variable[2 1]([2 3])
+	// variable[1 2]([0 1]) variable[1 2]([1 2])
+	// variable[1 2]([1 2]) variable[1 2]([2 3])
+	// variable[1 2]([2 3]) variable[1 2]([3 4])
+	// variable[1 2]([3 4]) variable[1 2]([4 5])
+	// variable[1 2]([0 1]) variable[1 2]([1 2])
+	// variable[1 2]([1 2]) variable[1 2]([2 3])
+	// variable[1 2]([2 3]) variable[1 2]([3 4])
+	// variable[1 2]([3 4]) variable[1 2]([4 5])
+	// variable[1 2]([0 1]) variable[1 2]([1 2])
+	// variable[1 2]([1 2]) variable[1 2]([2 3])
+}
+
+func ExampleDataLoader_batch2() {
+	loader := dataloader.DataLoader{
+		BatchSize: 2,
+		Shuffle:   false,
+		Dataset: &dataloader.TokenDataset{
+			Tokens:     []int{0, 1, 2, 3, 4, 5},
+			ContextLen: 2,
+		},
+	}
+
+	for range 10 {
+		x, y := loader.Batch()
+		fmt.Println(x, y)
+	}
+
+	// Output:
+	// variable[2 2]([0 1 1 2]) variable[2 2]([1 2 2 3])
+	// variable[2 2]([2 3 3 4]) variable[2 2]([3 4 4 5])
+	// variable[2 2]([0 1 1 2]) variable[2 2]([1 2 2 3])
+	// variable[2 2]([2 3 3 4]) variable[2 2]([3 4 4 5])
+	// variable[2 2]([0 1 1 2]) variable[2 2]([1 2 2 3])
+	// variable[2 2]([2 3 3 4]) variable[2 2]([3 4 4 5])
+	// variable[2 2]([0 1 1 2]) variable[2 2]([1 2 2 3])
+	// variable[2 2]([2 3 3 4]) variable[2 2]([3 4 4 5])
+	// variable[2 2]([0 1 1 2]) variable[2 2]([1 2 2 3])
+	// variable[2 2]([2 3 3 4]) variable[2 2]([3 4 4 5])
 }

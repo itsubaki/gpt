@@ -11,7 +11,6 @@ var _ Dataset = (*TokenDataset)(nil)
 type DataLoader struct {
 	BatchSize int
 	Dataset   Dataset
-	Cycle     bool
 	Shuffle   bool
 	indices   []int
 	idx       int
@@ -23,15 +22,7 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		for i := range l.indices {
 			l.indices[i] = i
 		}
-	}
 
-	if l.idx >= l.Dataset.Len() {
-		if !l.Cycle {
-			panic("dataset exhausted")
-		}
-
-		// reset and shuffle
-		l.idx = 0
 		if l.Shuffle {
 			rand.Shuffle(len(l.indices), func(i, j int) {
 				l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
@@ -39,9 +30,24 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		}
 	}
 
-	i := l.indices[l.idx]
-	x, y := l.Dataset.GetItem(i)
-	l.idx++
+	var x, y []int
+	for range l.BatchSize {
+		if l.idx >= l.Dataset.Len() {
+			if l.Shuffle {
+				rand.Shuffle(len(l.indices), func(i, j int) {
+					l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
+				})
+			}
+
+			l.idx = 0
+		}
+
+		i := l.indices[l.idx]
+		xi, yi := l.Dataset.GetItem(i)
+		l.idx++
+
+		x, y = append(x, xi...), append(y, yi...)
+	}
 
 	return newVariable(x).Reshape(l.BatchSize, -1), newVariable(y).Reshape(l.BatchSize, -1)
 }
