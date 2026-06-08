@@ -87,7 +87,6 @@ func main() {
 
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
-		Cycle:     true,
 		Shuffle:   true,
 		Dataset: &dataloader.TokenDataset{
 			Tokens:     tokens,
@@ -142,6 +141,15 @@ func main() {
 			}
 
 			minLoss = loss.At()
+			fmt.Println()
+			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
+		}
+
+		if i%100 == 0 {
+			if err := m.Save(modelPath); err != nil {
+				panic(err)
+			}
+
 			fmt.Println()
 			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
 		}
