@@ -23,7 +23,7 @@ func main() {
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
-	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 40000, "number of maximum iterations")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")

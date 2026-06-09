@@ -106,7 +106,13 @@ func Generate(
 
 			// sample next token
 			probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
-			nextID := multinominal(probs)
+
+			var nextID int
+			if temperature == 0 {
+				nextID = argmax(probs)
+			} else {
+				nextID = multinominal(probs)
+			}
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
@@ -145,4 +151,18 @@ func multinominal(probs *variable.Variable) int {
 	}
 
 	return probs.Size() - 1
+}
+
+func argmax(v *variable.Variable) int {
+	maxVal := v.At(0)
+
+	var maxIdx int
+	for i := 1; i < v.Size(); i++ {
+		if v.At(i) > maxVal {
+			maxVal = v.At(i)
+			maxIdx = i
+		}
+	}
+
+	return maxIdx
 }
