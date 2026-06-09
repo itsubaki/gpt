@@ -11,12 +11,11 @@ import (
 
 var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
-func MultiHeadAttention(embeddim, numOfHeads, headdim int, rope *RoPET) *MultiHeadAttentionT {
+func MultiHeadAttention(embeddim, numOfHeads, headdim int) *MultiHeadAttentionT {
 	E, H, D, bias := embeddim, numOfHeads, headdim, false
 	return &MultiHeadAttentionT{
 		numOfHeads: numOfHeads,
 		headdim:    headdim,
-		rope:       rope,
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D, bias),
 			"Wk": Linear(E, H*D, bias),
@@ -29,7 +28,6 @@ func MultiHeadAttention(embeddim, numOfHeads, headdim int, rope *RoPET) *MultiHe
 type MultiHeadAttentionT struct {
 	numOfHeads int
 	headdim    int
-	rope       *RoPET
 	L.Layers
 }
 
@@ -48,11 +46,6 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	Q = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(Q)) // (B, H, C, D)
 	K = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(K)) // (B, H, C, D)
 	V = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(V)) // (B, H, C, D)
-
-	if l.rope != nil {
-		Q = l.rope.First(Q)
-		K = l.rope.First(K)
-	}
 
 	Kt := F.Transpose(0, 1, 3, 2)(K)                   // (B, H, D, C)
 	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)

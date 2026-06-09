@@ -14,7 +14,7 @@ func ExampleBlock() {
 	contextLen := 30
 
 	x := variable.Randn([]int{batchSize, contextLen, embeddim})
-	block := L.Block(embeddim, numOfhead, nil)
+	block := L.Block(embeddim, numOfhead)
 
 	output := block.First(x)
 	fmt.Println(x.Shape())

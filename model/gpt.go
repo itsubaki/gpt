@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	F "github.com/itsubaki/autograd/function"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	L "github.com/itsubaki/gpt/layer"
 )
@@ -21,7 +23,6 @@ var (
 	_ M.Layer = (*L.LayerNormT)(nil)
 	_ M.Layer = (*L.LinearT)(nil)
 	_ M.Layer = (*L.RMSNormT)(nil)
-	_ M.Layer = (*L.RoPET)(nil)
 	_ M.Layer = (*L.SwiGLUT)(nil)
 )
 
@@ -31,35 +32,39 @@ type GPT struct {
 	Embeddim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int, theta float64) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
 		Embeddim:      embeddim,
 		NumOfHeads:    numOfHeads,
 		NumOfBlocks:   numOfBlocks,
-		Theta:         theta,
 	}
 
 	// Layers
-	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))
-	gpt.Add("norm", L.RMSNorm(embeddim))                     // instead of LayerNorm(embeddim)
-	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false)) // no bias in unembedding layer
+	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))        //
+	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim)) //
+	gpt.Add("norm", L.RMSNorm(embeddim))                       // instead of LayerNorm(embeddim)
+	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))   // no bias in unembedding layer
 
-	rope := L.RoPE(theta, int(embeddim/numOfHeads), maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embeddim, numOfHeads, rope))
+		gpt.Add(newBlock(i, embeddim, numOfHeads))
 	}
 
 	return gpt
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	x := m.L["embed"].First(ids)
+	_, C := ids.Shape()[0], ids.Shape()[1]
+	pos := variable.From(tensor.Arange(0, float64(C)))
+
+	emb := m.L["embed"].First(ids)
+	posemb := m.L["posembed"].First(pos)
+	x := F.Add(emb, posemb)
+
 	for i := range m.NumOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 	}
@@ -69,8 +74,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func newBlock(i int, embeddim, numOfHeads int, rope *L.RoPET) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, rope)
+func newBlock(i int, embeddim, numOfHeads int) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads)
 }
 
 func init() {
@@ -81,7 +86,6 @@ func init() {
 	gob.Register(&L.LayerNormT{})
 	gob.Register(&L.LinearT{})
 	gob.Register(&L.RMSNormT{})
-	gob.Register(&L.RoPET{})
 	gob.Register(&L.SwiGLUT{})
 }
 
@@ -107,7 +111,6 @@ func NewGPTFrom(path string) (*GPT, error) {
 		saved.Embeddim,
 		saved.NumOfHeads,
 		saved.NumOfBlocks,
-		saved.Theta,
 	)
 
 	savedParams := saved.Params()

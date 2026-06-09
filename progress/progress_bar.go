@@ -56,13 +56,13 @@ func (p *ProgressBar) Update(current int, postfix ...string) {
 	}
 
 	// print
-	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%.1fs<%s, %.1f it/s] %s",
+	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%s<%s, %.1f it/s] %s",
 		fmt.Sprintf("%-12s", p.desc),
 		percent*100,
 		bar,
 		current,
 		p.total,
-		elapsed,
+		format(elapsed),
 		format(eta),
 		speed,
 		strings.Join(postfix, " "),
