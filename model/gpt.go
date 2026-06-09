@@ -23,7 +23,6 @@ var (
 	_ M.Layer = (*L.LayerNormT)(nil)
 	_ M.Layer = (*L.LinearT)(nil)
 	_ M.Layer = (*L.RMSNormT)(nil)
-	_ M.Layer = (*L.RoPET)(nil)
 	_ M.Layer = (*L.SwiGLUT)(nil)
 )
 
@@ -87,7 +86,6 @@ func init() {
 	gob.Register(&L.LayerNormT{})
 	gob.Register(&L.LinearT{})
 	gob.Register(&L.RMSNormT{})
-	gob.Register(&L.RoPET{})
 	gob.Register(&L.SwiGLUT{})
 }
 
