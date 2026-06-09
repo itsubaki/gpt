@@ -27,7 +27,7 @@ func main() {
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 128, "maximum context length")
-	flag.IntVar(&embeddim, "embeddim", 384, "embedding dimension")
+	flag.IntVar(&embeddim, "embeddim", 192, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
