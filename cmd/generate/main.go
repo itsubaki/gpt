@@ -35,6 +35,7 @@ func main() {
 	fmt.Println(" Embeddim     :", m.Embeddim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
+	fmt.Println("------------------------------")
 
 	// tokenizer
 	mergeRules, err := tokenizer.Load(mergeRulesPath)
@@ -55,8 +56,8 @@ func main() {
 		temperature,
 	)
 
-	fmt.Println("generated text:")
 	fmt.Println(generatedText)
+	fmt.Println("------------------------------")
 	fmt.Println("generation time:", time.Since(now))
 }
 
