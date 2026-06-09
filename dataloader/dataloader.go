@@ -3,6 +3,7 @@ package dataloader
 import (
 	"math/rand/v2"
 
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
 
@@ -16,47 +17,40 @@ type DataLoader struct {
 	idx       int
 }
 
-func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
-	if len(l.indices) == 0 {
-		l.indices = make([]int, l.Dataset.Len())
-		for i := range l.indices {
-			l.indices[i] = i
-		}
-
-		if l.Shuffle {
-			rand.Shuffle(len(l.indices), func(i, j int) {
-				l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
-			})
-		}
+func (l *DataLoader) Reset() {
+	l.indices = make([]int, l.Dataset.Len())
+	for i := range l.indices {
+		l.indices[i] = i
 	}
 
-	var x, y []int
+	if l.Shuffle {
+		rand.Shuffle(len(l.indices), func(i, j int) {
+			l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
+		})
+	}
+
+	l.idx = 0
+}
+
+func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
+	if len(l.indices) == 0 {
+		l.Reset()
+	}
+
+	xs := make([]*tensor.Tensor[float64], 0, l.BatchSize)
+	ys := make([]*tensor.Tensor[float64], 0, l.BatchSize)
 	for range l.BatchSize {
 		if l.idx >= l.Dataset.Len() {
-			if l.Shuffle {
-				rand.Shuffle(len(l.indices), func(i, j int) {
-					l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
-				})
-			}
-
-			l.idx = 0
+			l.Reset()
 		}
 
 		i := l.indices[l.idx]
-		xi, yi := l.Dataset.GetItem(i)
+		x, y := l.Dataset.GetItem(i)
 		l.idx++
 
-		x, y = append(x, xi...), append(y, yi...)
+		xs = append(xs, tensor.Float64(tensor.New([]int{len(x)}, x)))
+		ys = append(ys, tensor.Float64(tensor.New([]int{len(y)}, y)))
 	}
 
-	return newVariable(x).Reshape(l.BatchSize, -1), newVariable(y).Reshape(l.BatchSize, -1)
-}
-
-func newVariable(x []int) *variable.Variable {
-	f := make([]float64, len(x))
-	for i, v := range x {
-		f[i] = float64(v)
-	}
-
-	return variable.New(f...)
+	return variable.From(tensor.Stack(xs, 0)), variable.From(tensor.Stack(ys, 0))
 }
