@@ -23,7 +23,7 @@ func main() {
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
-	flag.IntVar(&maxIters, "max-iters", 20000, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 40000, "number of maximum iterations")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
@@ -85,7 +85,6 @@ func main() {
 
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
-		Cycle:     true,
 		Shuffle:   true,
 		Dataset: &dataloader.TokenDataset{
 			Tokens:     tokens,
@@ -108,7 +107,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	minLoss := 0.2
+	minLoss := 1.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -140,6 +139,15 @@ func main() {
 			}
 
 			minLoss = loss.At()
+			fmt.Println()
+			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
+		}
+
+		if i%100 == 0 {
+			if err := m.Save(modelPath); err != nil {
+				panic(err)
+			}
+
 			fmt.Println()
 			fmt.Printf("iter %d: loss=%.4f (saved)\n", i, loss.At())
 		}

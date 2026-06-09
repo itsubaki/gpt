@@ -3,6 +3,7 @@ package dataloader
 import (
 	"math/rand/v2"
 
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
 
@@ -11,46 +12,45 @@ var _ Dataset = (*TokenDataset)(nil)
 type DataLoader struct {
 	BatchSize int
 	Dataset   Dataset
-	Cycle     bool
 	Shuffle   bool
 	indices   []int
 	idx       int
 }
 
-func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
-	if len(l.indices) == 0 {
-		l.indices = make([]int, l.Dataset.Len())
-		for i := range l.indices {
-			l.indices[i] = i
-		}
+func (l *DataLoader) Reset() {
+	l.indices = make([]int, l.Dataset.Len())
+	for i := range l.indices {
+		l.indices[i] = i
 	}
 
-	if l.idx >= l.Dataset.Len() {
-		if !l.Cycle {
-			panic("dataset exhausted")
-		}
-
-		// reset and shuffle
-		l.idx = 0
-		if l.Shuffle {
-			rand.Shuffle(len(l.indices), func(i, j int) {
-				l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
-			})
-		}
+	if l.Shuffle {
+		rand.Shuffle(len(l.indices), func(i, j int) {
+			l.indices[i], l.indices[j] = l.indices[j], l.indices[i]
+		})
 	}
 
-	i := l.indices[l.idx]
-	x, y := l.Dataset.GetItem(i)
-	l.idx++
-
-	return newVariable(x).Reshape(l.BatchSize, -1), newVariable(y).Reshape(l.BatchSize, -1)
+	l.idx = 0
 }
 
-func newVariable(x []int) *variable.Variable {
-	f := make([]float64, len(x))
-	for i, v := range x {
-		f[i] = float64(v)
+func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
+	if len(l.indices) == 0 {
+		l.Reset()
 	}
 
-	return variable.New(f...)
+	xs := make([]*tensor.Tensor[float64], 0, l.BatchSize)
+	ys := make([]*tensor.Tensor[float64], 0, l.BatchSize)
+	for range l.BatchSize {
+		if l.idx >= l.Dataset.Len() {
+			l.Reset()
+		}
+
+		i := l.indices[l.idx]
+		x, y := l.Dataset.GetItem(i)
+		l.idx++
+
+		xs = append(xs, tensor.Float64(tensor.New([]int{len(x)}, x)))
+		ys = append(ys, tensor.Float64(tensor.New([]int{len(y)}, y)))
+	}
+
+	return variable.From(tensor.Stack(xs, 0)), variable.From(tensor.Stack(ys, 0))
 }
