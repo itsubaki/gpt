@@ -50,7 +50,6 @@ func main() {
 	now := time.Now()
 	generatedText := Generate(
 		m,
-		m.MaxContextLen,
 		tknizer,
 		prompt,
 		maxNewTokens,
@@ -76,36 +75,38 @@ type Tokenizer interface {
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
+	ClearCache()
 }
 
 func Generate(
 	model Model,
-	maxConextLen int,
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,
 	temperature float64,
 ) string {
+	// encode prompt to token IDs
 	ids := tokenizer.Encode(prompt)
 	generatedIDs := make([]int, len(ids))
 	copy(generatedIDs, ids)
 
+	// clear KV cache before generation
+	model.ClearCache()
 	func() {
 		// disable gradient tracking for generation
 		defer variable.Nograd().End()
 
+		// feed prompt tokens one by one to populate the KV cache
+		var x *variable.Variable
+		for _, id := range ids {
+			x = newVariable([]int{id}).Reshape(1, 1) // (1, 1)
+			x = model.Forward(x)                     // (1, 1, V)
+		}
+
 		// generate tokens
 		for range maxNewTokens {
-			if len(ids) > maxConextLen {
-				// keep only the last maxContextLen tokens as input
-				ids = ids[len(ids)-maxConextLen:]
-			}
-
-			// forward
-			x := newVariable(ids).Reshape(1, -1)                     // (1, C)
-			logits := model.Forward(x)                               // (1, C, V)
-			logits = F.GetItem(1, []int{logits.Size(1) - 1})(logits) // (1, 1, V)
-			logits = F.Reshape(-1)(logits)                           // (V)
+			// get logits for the next token
+			logits := F.Reshape(-1)(x) // (1, 1, V) -> (V)
 
 			// sample next token
 			var nextID int
@@ -115,16 +116,17 @@ func Generate(
 				probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
 				nextID = multinominal(probs)
 			}
-			fmt.Printf("%v ", nextID)
+			fmt.Printf("%v,", nextID)
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
 				break
 			}
-
-			// append next token to input and generated tokens
-			ids = append(ids, nextID)
 			generatedIDs = append(generatedIDs, nextID)
+
+			// next token only
+			x = newVariable([]int{nextID}).Reshape(1, 1) // (1, 1)
+			x = model.Forward(x)                         // (1, 1, V)
 		}
 	}()
 

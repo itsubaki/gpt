@@ -28,6 +28,8 @@ func MultiHeadAttention(embeddim, numOfHeads, headdim int) *MultiHeadAttentionT 
 type MultiHeadAttentionT struct {
 	numOfHeads int
 	headdim    int
+	kCache     *variable.Variable
+	vCache     *variable.Variable
 	L.Layers
 }
 
@@ -47,13 +49,28 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	K = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(K)) // (B, H, C, D)
 	V = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(V)) // (B, H, C, D)
 
+	// KV cache
+	isFirstCall := l.kCache == nil
+	if isFirstCall {
+		l.kCache = K
+		l.vCache = V
+	} else {
+		l.kCache = F.Concat(2)(l.kCache, K) // (B, H, C+cache, D)
+		l.vCache = F.Concat(2)(l.vCache, V) // (B, H, C+cache, D)
+	}
+
+	K = l.kCache
+	V = l.vCache
+
 	Kt := F.Transpose(0, 1, 3, 2)(K)                   // (B, H, D, C)
 	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)
 	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
 
-	// attention mask
-	mask := tensor.Tril(tensor.Ones[float64](C, C))
-	scores = F.MaskFill(mask, math.Inf(-1))(scores)
+	if isFirstCall {
+		// attention mask
+		mask := tensor.Tril(tensor.Ones[float64](C, C))
+		scores = F.MaskFill(mask, math.Inf(-1))(scores)
+	}
 
 	weights := F.Softmax(-1)(scores)         // (B, H, C, C)
 	hidden := F.MatMul(weights, V)           // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)
@@ -64,4 +81,9 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	return []*variable.Variable{
 		output,
 	}
+}
+
+func (l *MultiHeadAttentionT) ClearCache() {
+	l.kCache = nil
+	l.vCache = nil
 }

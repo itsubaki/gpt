@@ -37,3 +37,7 @@ func (l *BlockT) Forward(x ...*variable.Variable) []*variable.Variable {
 	x5 := F.Add(x2, x4)
 	return []*variable.Variable{x5}
 }
+
+func (l *BlockT) ClearCache() {
+	l.Layers["attn"].(*MultiHeadAttentionT).ClearCache()
+}

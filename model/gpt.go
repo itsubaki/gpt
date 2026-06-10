@@ -74,6 +74,12 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
+func (m *GPT) ClearCache() {
+	for i := range m.NumOfBlocks {
+		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).ClearCache()
+	}
+}
+
 func newBlock(i int, embeddim, numOfHeads int) (string, *L.BlockT) {
 	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads)
 }
