@@ -126,7 +126,7 @@ func main() {
 		o.Update(m)
 
 		// update progress bar
-		bar.Update(i+1, fmt.Sprintf("loss=%.4f", loss.At()))
+		bar.Update(i+1, fmt.Sprintf("loss=%.4f(ppl=%.4f)", loss.At(), math.Exp(loss.At())))
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {
@@ -141,7 +141,7 @@ func main() {
 
 			minLoss = loss.At()
 			fmt.Println()
-			fmt.Printf("iter %d: loss=%.4f(ppl=%.4f) saved\n", i, loss.At(), math.Exp(loss.At()))
+			fmt.Printf("iter %d: loss=%.4f saved\n", i, loss.At())
 		}
 
 		if i%100 == 0 {
@@ -150,7 +150,7 @@ func main() {
 			}
 
 			fmt.Println()
-			fmt.Printf("iter %d: loss=%.4f(ppl=%.4f) saved\n", i, loss.At(), math.Exp(loss.At()))
+			fmt.Printf("iter %d: loss=%.4f saved\n", i, loss.At())
 		}
 	}
 
