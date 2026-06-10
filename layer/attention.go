@@ -11,11 +11,18 @@ import (
 
 var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
-func MultiHeadAttention(embeddim, numOfHeads, headdim int) *MultiHeadAttentionT {
+func MultiHeadAttention(embeddim, numOfHeads, headdim int, useCache ...bool) *MultiHeadAttentionT {
 	E, H, D, bias := embeddim, numOfHeads, headdim, false
+
+	var cache bool
+	if len(useCache) > 0 {
+		cache = useCache[0]
+	}
+
 	return &MultiHeadAttentionT{
 		numOfHeads: numOfHeads,
 		headdim:    headdim,
+		useCache:   cache,
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D, bias),
 			"Wk": Linear(E, H*D, bias),
@@ -28,6 +35,7 @@ func MultiHeadAttention(embeddim, numOfHeads, headdim int) *MultiHeadAttentionT 
 type MultiHeadAttentionT struct {
 	numOfHeads int
 	headdim    int
+	useCache   bool
 	kCache     *variable.Variable
 	vCache     *variable.Variable
 	L.Layers
@@ -51,22 +59,24 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 
 	// KV cache
 	isFirstCall := l.kCache == nil
-	if isFirstCall {
-		l.kCache = K
-		l.vCache = V
-	} else {
-		l.kCache = F.Concat(2)(l.kCache, K) // (B, H, C+cache, D)
-		l.vCache = F.Concat(2)(l.vCache, V) // (B, H, C+cache, D)
-	}
+	if l.useCache {
+		if isFirstCall {
+			l.kCache = K
+			l.vCache = V
+		} else {
+			l.kCache = F.Concat(2)(l.kCache, K) // (B, H, C+cache, D)
+			l.vCache = F.Concat(2)(l.vCache, V) // (B, H, C+cache, D)
+		}
 
-	K = l.kCache
-	V = l.vCache
+		K = l.kCache
+		V = l.vCache
+	}
 
 	Kt := F.Transpose(0, 1, 3, 2)(K)                   // (B, H, D, C)
 	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)
 	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
 
-	if isFirstCall {
+	if !l.useCache || isFirstCall {
 		// attention mask
 		mask := tensor.Tril(tensor.Ones[float64](C, C))
 		scores = F.MaskFill(mask, math.Inf(-1))(scores)

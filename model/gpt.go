@@ -35,7 +35,7 @@ type GPT struct {
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int, useCache ...bool) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
@@ -51,7 +51,7 @@ func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int) *GP
 	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))   // no bias in unembedding layer
 
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embeddim, numOfHeads))
+		gpt.Add(newBlock(i, embeddim, numOfHeads, useCache...))
 	}
 
 	return gpt
@@ -80,8 +80,8 @@ func (m *GPT) ClearCache() {
 	}
 }
 
-func newBlock(i int, embeddim, numOfHeads int) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads)
+func newBlock(i int, embeddim, numOfHeads int, useCache ...bool) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads, useCache...)
 }
 
 func init() {
@@ -95,7 +95,7 @@ func init() {
 	gob.Register(&L.SwiGLUT{})
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
+func NewGPTFrom(path string, useCache bool) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -117,6 +117,7 @@ func NewGPTFrom(path string) (*GPT, error) {
 		saved.Embeddim,
 		saved.NumOfHeads,
 		saved.NumOfBlocks,
+		useCache,
 	)
 
 	savedParams := saved.Params()
