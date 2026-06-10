@@ -37,7 +37,7 @@ saved tokens to testdata/tiny_codes.bin
 ```shell
 % make gpt
 go run ./cmd/pretrain/main.go --max-iters 200
-iterations   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]
+Pre-Training   100%|██████████████████████████████| 200/200 [158.1s<0.0s, 1.2 it/s]
 ```
 
 ## Generate Text
