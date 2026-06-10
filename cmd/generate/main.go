@@ -7,6 +7,7 @@ import (
 	"time"
 
 	F "github.com/itsubaki/autograd/function"
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/tokenizer"
@@ -20,7 +21,7 @@ func main() {
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
-	flag.IntVar(&maxNewTokens, "max-new-tokens", 100, "maximum number of new tokens to generate")
+	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()
 
 	// model from gob file
@@ -55,9 +56,11 @@ func main() {
 		maxNewTokens,
 		temperature,
 	)
-
+	fmt.Println()
+	fmt.Println("------------------------------")
 	fmt.Println(generatedText)
 	fmt.Println("------------------------------")
+
 	fmt.Println("generation time:", time.Since(now))
 }
 
@@ -105,14 +108,14 @@ func Generate(
 			logits = F.Reshape(-1)(logits)                           // (V)
 
 			// sample next token
-			probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
-
 			var nextID int
 			if temperature == 0 {
-				nextID = argmax(probs)
+				nextID = tensor.Argmax(logits.Data, 0).At()
 			} else {
+				probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
 				nextID = multinominal(probs)
 			}
+			fmt.Printf("%v ", nextID)
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
@@ -151,18 +154,4 @@ func multinominal(probs *variable.Variable) int {
 	}
 
 	return probs.Size() - 1
-}
-
-func argmax(v *variable.Variable) int {
-	maxVal := v.At(0)
-
-	var maxIdx int
-	for i := 1; i < v.Size(); i++ {
-		if v.At(i) > maxVal {
-			maxVal = v.At(i)
-			maxIdx = i
-		}
-	}
-
-	return maxIdx
 }
