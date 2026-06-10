@@ -19,7 +19,7 @@ func main() {
 	var maxNewTokens int
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
-	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
+	flag.StringVar(&prompt, "prompt", "def ", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()
@@ -48,20 +48,21 @@ func main() {
 	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
 	// generate text
-	now := time.Now()
-	generatedText := Generate(
-		m,
-		tknizer,
-		prompt,
-		maxNewTokens,
-		temperature,
-	)
-	fmt.Println()
-	fmt.Println("------------------------------")
-	fmt.Println(generatedText)
-	fmt.Println("------------------------------")
-
-	fmt.Println("generation time:", time.Since(now))
+	for range 5 {
+		now := time.Now()
+		generatedText := Generate(
+			m,
+			tknizer,
+			prompt,
+			maxNewTokens,
+			temperature,
+		)
+		fmt.Println()
+		fmt.Println("------------------------------")
+		fmt.Println(generatedText)
+		fmt.Println("------------------------------")
+		fmt.Println("generation time:", time.Since(now))
+	}
 }
 
 var _ Tokenizer = (*tokenizer.BPETokenizer)(nil)
@@ -102,6 +103,7 @@ func Generate(
 		for _, id := range ids {
 			x = newVariable([]int{id}).Reshape(1, 1) // (1, 1)
 			x = model.Forward(x)                     // (1, 1, V)
+			fmt.Printf("%v,", id)
 		}
 
 		// generate tokens
