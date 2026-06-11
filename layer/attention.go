@@ -53,7 +53,8 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 
 	// attention mask
 	mask := tensor.Tril(tensor.Ones[float64](C, C))
-	scores = F.MaskFill(mask, math.Inf(-1))(scores)
+	cond := func(m float64) bool { return m == 0 }
+	scores = F.MaskFill(mask, cond, math.Inf(-1))(scores) // (B, H, C, C)
 
 	weights := F.Softmax(-1)(scores)         // (B, H, C, C)
 	hidden := F.MatMul(weights, V)           // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)

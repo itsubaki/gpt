@@ -24,6 +24,14 @@ func main() {
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()
 
+	// tokenizer
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+
+	tknizer := tokenizer.NewBPETokenizer(mergeRules)
+
 	// model from gob file
 	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
@@ -37,14 +45,6 @@ func main() {
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
 	fmt.Println("------------------------------")
-
-	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-
-	tknizer := tokenizer.NewBPETokenizer(mergeRules)
 
 	// generate text
 	now := time.Now()
@@ -90,6 +90,10 @@ func Generate(
 	generatedIDs := make([]int, len(ids))
 	copy(generatedIDs, ids)
 
+	for i := range ids {
+		fmt.Printf("%v,", ids[i])
+	}
+
 	func() {
 		// disable gradient tracking for generation
 		defer variable.Nograd().End()
@@ -115,7 +119,7 @@ func Generate(
 				probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
 				nextID = multinominal(probs)
 			}
-			fmt.Printf("%v ", nextID)
+			fmt.Printf("%v,", nextID)
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
