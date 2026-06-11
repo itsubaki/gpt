@@ -119,7 +119,11 @@ func Generate(
 				probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
 				nextID = multinominal(probs)
 			}
+
 			fmt.Printf("%v,", nextID)
+			if len(generatedIDs)%10 == 0 {
+				fmt.Println()
+			}
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
