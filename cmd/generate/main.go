@@ -121,9 +121,6 @@ func Generate(
 			}
 
 			fmt.Printf("%v,", nextID)
-			if len(generatedIDs)%10 == 0 {
-				fmt.Println()
-			}
 
 			// stop if end token is generated
 			if nextID == tokenizer.EndTokenID() {
