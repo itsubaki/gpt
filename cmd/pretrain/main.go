@@ -125,33 +125,33 @@ func main() {
 		loss.Backward()
 		o.Update(m)
 
-		// update progress bar
-		bar.Update(i+1, fmt.Sprintf("loss=%.4f(ppl=%.4f)", loss.At(), math.Exp(loss.At())))
-
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {
 			panic(err)
 		}
 
-		// save model if loss is improved
+		// model checkpoint
+		msg := fmt.Sprintf("loss=%.4f(ppl=%.4f)", loss.At(), math.Exp(loss.At()))
+		if i%100 == 0 {
+			if err := m.Save(modelPath); err != nil {
+				panic(err)
+			}
+
+			msg += " saved"
+		}
+
 		if loss.At() < minLoss {
 			if err := m.Save(modelPath + ".min"); err != nil {
 				panic(err)
 			}
 
 			minLoss = loss.At()
-			fmt.Println()
-			fmt.Printf("iter %d: loss=%.4f saved\n", i, loss.At())
+			msg += " saved(min)"
 		}
 
-		if i%100 == 0 {
-			if err := m.Save(modelPath); err != nil {
-				panic(err)
-			}
+		// update progress bar
+		bar.Update(i+1, msg)
 
-			fmt.Println()
-			fmt.Printf("iter %d: loss=%.4f saved\n", i, loss.At())
-		}
 	}
 
 	// save final model
