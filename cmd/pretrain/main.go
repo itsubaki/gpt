@@ -24,6 +24,7 @@ func main() {
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
+	var minLoss float64
 	flag.IntVar(&maxIters, "max-iters", 40000, "number of maximum iterations")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
@@ -39,6 +40,7 @@ func main() {
 	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
+	flag.Float64Var(&minLoss, "min-loss", 2.0, "minimum loss for saving the model")
 	flag.Parse()
 
 	if usePProf {
@@ -108,7 +110,6 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	minLoss := 2.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -136,8 +137,6 @@ func main() {
 			if err := m.Save(modelPath); err != nil {
 				panic(err)
 			}
-
-			msg += " saved"
 		}
 
 		if loss.At() < minLoss {
@@ -146,12 +145,10 @@ func main() {
 			}
 
 			minLoss = loss.At()
-			msg += " saved(min)"
 		}
 
 		// update progress bar
 		bar.Update(i+1, msg)
-
 	}
 
 	// save final model
