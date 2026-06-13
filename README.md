@@ -48,7 +48,6 @@ go run ./cmd/generate/main.go --prompt 'def add(a, b):'
 ```
 
 ```
-go run ./cmd/generate/main.go --prompt 'def add(a, b):' --max-new-tokens 32 --temperature 0.3
 model parameters:
  VocabSize    : 1000
  MaxContextLen: 256
