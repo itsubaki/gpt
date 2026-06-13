@@ -44,7 +44,7 @@ Pre-Training   100%|████████████████████
 
 ```shell
 make generate
-go run ./cmd/generate/main.go
+go run ./cmd/generate/main.go --prompt 'def'
 ```
 
 ## References
