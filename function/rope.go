@@ -15,38 +15,39 @@ func RoPE(theta float64, embedDim, contextLen int) func(offset int) func(x ...*v
 		panic(fmt.Sprintf("embedDim=%d is odd", embedDim))
 	}
 
-	cos := make([][]float64, contextLen)
-	sin := make([][]float64, contextLen)
+	halfDim := embedDim / 2
+	cos := make([]float64, contextLen*halfDim)
+	sin := make([]float64, contextLen*halfDim)
 
 	for pos := range contextLen {
-		cos[pos] = make([]float64, embedDim/2)
-		sin[pos] = make([]float64, embedDim/2)
-
-		for i := range embedDim / 2 {
+		for i := range halfDim {
 			pow := float64(2*i) / float64(embedDim)
 			freq := 1.0 / math.Pow(theta, pow)
 			angle := float64(pos) * freq
 
-			cos[pos][i] = math.Cos(angle)
-			sin[pos][i] = math.Sin(angle)
+			idx := pos*halfDim + i
+			cos[idx] = math.Cos(angle)
+			sin[idx] = math.Sin(angle)
 		}
 	}
 
 	return func(offset int) func(x ...*variable.Variable) *variable.Variable {
 		return (&variable.Function{
 			Forwarder: &RoPET{
-				Cos:    cos,
-				Sin:    sin,
-				offset: offset,
+				Cos:     cos,
+				Sin:     sin,
+				HalfDim: halfDim,
+				offset:  offset,
 			},
 		}).First
 	}
 }
 
 type RoPET struct {
-	Cos    [][]float64
-	Sin    [][]float64
-	offset int
+	Cos     []float64
+	Sin     []float64
+	HalfDim int
+	offset  int
 }
 
 func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
@@ -62,11 +63,9 @@ func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					p := f.offset + pos
-					i := d / 2
-
-					cos := f.Cos[p][i]
-					sin := f.Sin[p][i]
+					idx := f.offset + pos*f.HalfDim + d/2
+					cos := f.Cos[idx]
+					sin := f.Sin[idx]
 
 					x0 := x[0].At(b, h, pos, d)
 					x1 := x[0].At(b, h, pos, d+1)
@@ -99,11 +98,9 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					p := f.offset + pos
-					i := d / 2
-
-					cos := f.Cos[p][i]
-					sin := f.Sin[p][i]
+					idx := f.offset + pos*f.HalfDim + d/2
+					cos := f.Cos[idx]
+					sin := f.Sin[idx]
 
 					gy0 := gy[0].At(b, h, pos, d)
 					gy1 := gy[0].At(b, h, pos, d+1)
