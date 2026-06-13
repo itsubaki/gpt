@@ -13,7 +13,8 @@ func ExampleRoPE() {
 		1, 2, 3, 4,
 	).Reshape(1, 1, 2, 4)
 
-	y := F.RoPE(10000, 4, 4)(x)
+	var offset int
+	y := F.RoPE(10000, 4, 4)(offset)(x)
 	fmt.Println(y)
 
 	// Output:
@@ -26,7 +27,8 @@ func ExampleRoPE_backward() {
 		1, 2, 3, 4,
 	).Reshape(1, 1, 2, 4)
 
-	y := F.RoPE(10000, 4, 4)(x)
+	var offset int
+	y := F.RoPE(10000, 4, 4)(offset)(x)
 	y.Backward()
 	fmt.Println(x.Grad)
 

@@ -1,6 +1,7 @@
 package function
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/itsubaki/autograd/tensor"
@@ -9,7 +10,11 @@ import (
 
 // RoPE implements the Rotary Position Embedding (RoPE) function.
 // Higher-order derivatives are not supported in this implementation.
-func RoPE(theta float64, embedDim, contextLen int) func(x ...*variable.Variable) *variable.Variable {
+func RoPE(theta float64, embedDim, contextLen int) func(offset int) func(x ...*variable.Variable) *variable.Variable {
+	if embedDim%2 != 0 {
+		panic(fmt.Sprintf("embedDim=%d is odd", embedDim))
+	}
+
 	cos := make([][]float64, contextLen)
 	sin := make([][]float64, contextLen)
 
@@ -27,31 +32,41 @@ func RoPE(theta float64, embedDim, contextLen int) func(x ...*variable.Variable)
 		}
 	}
 
-	return (&variable.Function{
-		Forwarder: &RoPET{
-			cos: cos,
-			sin: sin,
-		},
-	}).First
+	return func(offset int) func(x ...*variable.Variable) *variable.Variable {
+		return (&variable.Function{
+			Forwarder: &RoPET{
+				Cos:    cos,
+				Sin:    sin,
+				offset: offset,
+			},
+		}).First
+	}
 }
 
 type RoPET struct {
-	cos [][]float64
-	sin [][]float64
+	Cos    [][]float64
+	Sin    [][]float64
+	offset int
 }
 
 func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 	shape := x[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
+	if f.offset+C > len(f.Cos) {
+		panic("RoPE: position out of range")
+	}
+
 	y := tensor.ZeroLike(x[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
+					p := f.offset + pos
 					i := d / 2
-					cos := f.cos[pos][i]
-					sin := f.sin[pos][i]
+
+					cos := f.Cos[p][i]
+					sin := f.Sin[p][i]
 
 					x0 := x[0].At(b, h, pos, d)
 					x1 := x[0].At(b, h, pos, d+1)
@@ -75,14 +90,20 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 	shape := gy[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
+	if f.offset+C > len(f.Cos) {
+		panic("RoPE: position out of range")
+	}
+
 	gx := tensor.ZeroLike(gy[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
+					p := f.offset + pos
 					i := d / 2
-					cos := f.cos[pos][i]
-					sin := f.sin[pos][i]
+
+					cos := f.Cos[p][i]
+					sin := f.Sin[p][i]
 
 					gy0 := gy[0].At(b, h, pos, d)
 					gy1 := gy[0].At(b, h, pos, d+1)
