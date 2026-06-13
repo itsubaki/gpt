@@ -8,10 +8,9 @@ import (
 )
 
 func ExampleSwiGLU() {
-	embeddim := 64
-
-	x := variable.Randn([]int{10, 20, embeddim})
-	swiglu := L.SwiGLU(embeddim)
+	embedDim := 64
+	x := variable.Randn([]int{10, 20, embedDim})
+	swiglu := L.SwiGLU(embedDim)
 
 	output := swiglu.First(x)
 	fmt.Println(x.Shape())

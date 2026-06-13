@@ -19,7 +19,7 @@ import (
 
 func main() {
 	// parameters
-	var vocabSize, contextLen, embeddim, numOfHeads, numOfBlocks int
+	var vocabSize, contextLen, embedDim, numOfHeads, numOfBlocks int
 	var maxLR, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
@@ -28,7 +28,7 @@ func main() {
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
-	flag.IntVar(&embeddim, "embeddim", 192, "embedding dimension")
+	flag.IntVar(&embedDim, "embed-dim", 192, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
@@ -62,7 +62,7 @@ func main() {
 	m := model.NewGPT(
 		vocabSize,
 		contextLen,
-		embeddim,
+		embedDim,
 		numOfHeads,
 		numOfBlocks,
 	)
@@ -108,7 +108,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
-	minLoss := 1.0
+	minLoss := 2.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()

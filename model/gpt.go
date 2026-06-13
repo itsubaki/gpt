@@ -29,29 +29,29 @@ var (
 type GPT struct {
 	VocabSize     int
 	MaxContextLen int
-	Embeddim      int
+	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embeddim, numOfHeads, numOfBlocks int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
-		Embeddim:      embeddim,
+		EmbedDim:      embedDim,
 		NumOfHeads:    numOfHeads,
 		NumOfBlocks:   numOfBlocks,
 	}
 
 	// Layers
-	gpt.Add("embed", L.Embeddings(vocabSize, embeddim))        //
-	gpt.Add("posembed", L.Embeddings(maxContextLen, embeddim)) //
-	gpt.Add("norm", L.RMSNorm(embeddim))                       // instead of LayerNorm(embeddim)
-	gpt.Add("unembed", L.Linear(embeddim, vocabSize, false))   // no bias in unembedding layer
+	gpt.Add("embed", L.Embeddings(vocabSize, embedDim))        //
+	gpt.Add("posembed", L.Embeddings(maxContextLen, embedDim)) //
+	gpt.Add("norm", L.RMSNorm(embedDim))                       // instead of LayerNorm(embedDim)
+	gpt.Add("unembed", L.Linear(embedDim, vocabSize, false))   // no bias in unembedding layer
 
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embeddim, numOfHeads))
+		gpt.Add(newBlock(i, embedDim, numOfHeads))
 	}
 
 	return gpt
@@ -74,8 +74,8 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func newBlock(i int, embeddim, numOfHeads int) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embeddim, numOfHeads)
+func newBlock(i int, embedDim, numOfHeads int) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads)
 }
 
 func init() {
@@ -96,31 +96,12 @@ func NewGPTFrom(path string) (*GPT, error) {
 	}
 	defer func() { _ = f.Close() }()
 
-	// Decode into a temporary GPT to read the metadata and saved weights.
-	// Unexported fields in layer structs (e.g. embeddim, numOfHeads, rope) are
-	// not preserved by gob, so we reconstruct the model via NewGPT and then
-	// copy the saved parameter values in.
-	var saved GPT
+	var saved *GPT
 	if err := gob.NewDecoder(f).Decode(&saved); err != nil {
 		return nil, err
 	}
 
-	m := NewGPT(
-		saved.VocabSize,
-		saved.MaxContextLen,
-		saved.Embeddim,
-		saved.NumOfHeads,
-		saved.NumOfBlocks,
-	)
-
-	savedParams := saved.Params()
-	for key, p := range m.Params() {
-		if src, ok := savedParams[key]; ok {
-			copy(p.Data.Data, src.Data.Data)
-		}
-	}
-
-	return m, nil
+	return saved, nil
 }
 
 func (m *GPT) Save(path string) error {

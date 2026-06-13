@@ -8,10 +8,9 @@ import (
 )
 
 func ExampleLayerNorm() {
-	embeddim := 64
-
-	x := variable.Randn([]int{10, 20, embeddim})
-	norm := L.LayerNorm(embeddim)
+	embedDim := 64
+	x := variable.Randn([]int{10, 20, embedDim})
+	norm := L.LayerNorm(embedDim)
 
 	output := norm.First(x)
 	fmt.Println(x.Shape())

@@ -41,7 +41,7 @@ func main() {
 	fmt.Println("model parameters:")
 	fmt.Println(" VocabSize    :", m.VocabSize)
 	fmt.Println(" MaxContextLen:", m.MaxContextLen)
-	fmt.Println(" Embeddim     :", m.Embeddim)
+	fmt.Println(" EmbedDim     :", m.EmbedDim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
 	fmt.Println("------------------------------")
@@ -80,7 +80,7 @@ type Model interface {
 
 func Generate(
 	model Model,
-	maxConextLen int,
+	maxContextLen int,
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,
@@ -100,9 +100,9 @@ func Generate(
 
 		// generate tokens
 		for range maxNewTokens {
-			if len(ids) > maxConextLen {
+			if len(ids) > maxContextLen {
 				// keep only the last maxContextLen tokens as input
-				ids = ids[len(ids)-maxConextLen:]
+				ids = ids[len(ids)-maxContextLen:]
 			}
 
 			// forward

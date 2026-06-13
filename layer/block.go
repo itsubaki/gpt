@@ -8,20 +8,31 @@ import (
 
 var _ L.Layer = (*BlockT)(nil)
 
-func Block(embeddim, numOfHeads int) *BlockT {
-	headdim := int(embeddim / numOfHeads)
+func Block(embedDim, numOfHeads int) *BlockT {
+	headDim := int(embedDim / numOfHeads)
 	return &BlockT{
 		Layers: L.Layers{
-			"norm1": RMSNorm(embeddim),                                 // instead of LayerNorm(embeddim)
-			"norm2": RMSNorm(embeddim),                                 // instead of LayerNorm(embeddim)
-			"attn":  MultiHeadAttention(embeddim, numOfHeads, headdim), //
-			"ffn":   SwiGLU(embeddim),                                  // instead of FFN(ffdim, embeddim)
+			"norm1": RMSNorm(embedDim),                                 // instead of LayerNorm(embedDim)
+			"norm2": RMSNorm(embedDim),                                 // instead of LayerNorm(embedDim)
+			"attn":  MultiHeadAttention(embedDim, numOfHeads, headDim), //
+			"ffn":   SwiGLU(embedDim),                                  // instead of FFN(ffDim, embedDim)
 		},
 	}
 }
 
 type BlockT struct {
 	L.Layers
+}
+
+func (l *BlockT) Params() L.Parameters {
+	params := make(L.Parameters)
+	for name, layer := range l.Layers {
+		for k, p := range layer.Params() {
+			params[name+"."+k] = p
+		}
+	}
+
+	return params
 }
 
 func (l *BlockT) First(x ...*variable.Variable) *variable.Variable {

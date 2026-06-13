@@ -38,5 +38,9 @@ jobs:
 
       - name: Pre-Train GPT
         run: |
-          go run ./cmd/pretrain/main.go --context-len 32 --embeddim 192 --batch-size 4 --max-iters 10
+          go run ./cmd/pretrain/main.go --context-len 32 --embed-dim 192 --batch-size 4 --max-iters 10
           cat loss.csv
+
+      - name: Generate Text
+        run: |
+          go run ./cmd/generate/main.go --max-new-tokens 32

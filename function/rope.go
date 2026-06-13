@@ -9,16 +9,16 @@ import (
 
 // RoPE implements the Rotary Position Embedding (RoPE) function.
 // Higher-order derivatives are not supported in this implementation.
-func RoPE(theta float64, embeddim, contextLen int) func(x ...*variable.Variable) *variable.Variable {
+func RoPE(theta float64, embedDim, contextLen int) func(x ...*variable.Variable) *variable.Variable {
 	cos := make([][]float64, contextLen)
 	sin := make([][]float64, contextLen)
 
 	for pos := range contextLen {
-		cos[pos] = make([]float64, embeddim/2)
-		sin[pos] = make([]float64, embeddim/2)
+		cos[pos] = make([]float64, embedDim/2)
+		sin[pos] = make([]float64, embedDim/2)
 
-		for i := range embeddim / 2 {
-			pow := float64(2*i) / float64(embeddim)
+		for i := range embedDim / 2 {
+			pow := float64(2*i) / float64(embedDim)
 			freq := 1.0 / math.Pow(theta, pow)
 			angle := float64(pos) * freq
 

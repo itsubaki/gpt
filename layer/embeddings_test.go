@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleEmbeddings() {
-	embeddim := 32
+	embedDim := 32
 	vocabSize := 100
 	maxContextLen := 10
 
@@ -19,7 +19,7 @@ func ExampleEmbeddings() {
 	}
 
 	x := variable.New(tokens...).Reshape(1, maxContextLen)
-	emb := L.Embeddings(vocabSize, embeddim)
+	emb := L.Embeddings(vocabSize, embedDim)
 
 	output := emb.First(x)
 	fmt.Println(x.Shape())

@@ -8,18 +8,18 @@ import (
 
 var _ L.Layer = (*EmbeddingsT)(nil)
 
-func Embeddings(xdim, embeddim int) *EmbeddingsT {
+func Embeddings(xDim, embedDim int) *EmbeddingsT {
 	p := make(L.Parameters)
-	p.Add("w", initw(xdim, embeddim))
+	p.Add("w", initw(xDim, embedDim))
 
 	return &EmbeddingsT{
-		embeddim:   embeddim,
+		EmbedDim:   embedDim,
 		Parameters: p,
 	}
 }
 
 type EmbeddingsT struct {
-	embeddim int
+	EmbedDim int
 	L.Parameters
 }
 
@@ -34,7 +34,7 @@ func (l *EmbeddingsT) Forward(x ...*variable.Variable) []*variable.Variable {
 	}
 	w := l.Parameters["w"]
 
-	shape := append(x[0].Shape(), l.embeddim)
+	shape := append(append([]int{}, x[0].Shape()...), l.EmbedDim)
 	y := F.Reshape(shape...)(F.GetItem(0, ids)(w))
 	return []*variable.Variable{
 		y,

@@ -8,10 +8,9 @@ import (
 )
 
 func ExampleRMSNorm() {
-	embeddim := 64
-
-	x := variable.Randn([]int{10, 20, embeddim})
-	norm := L.RMSNorm(embeddim)
+	embedDim := 64
+	x := variable.Randn([]int{10, 20, embedDim})
+	norm := L.RMSNorm(embedDim)
 
 	output := norm.First(x)
 	fmt.Println(x.Shape())

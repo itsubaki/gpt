@@ -9,11 +9,11 @@ import (
 
 var _ L.Layer = (*LinearT)(nil)
 
-func Linear(xdim, hiddendim int, bias bool) *LinearT {
+func Linear(xDim, hiddenDim int, bias bool) *LinearT {
 	p := make(L.Parameters)
-	p.Add("w", initw(xdim, hiddendim))
+	p.Add("w", initw(xDim, hiddenDim))
 	if bias {
-		p.Add("b", variable.Zeros(1, hiddendim))
+		p.Add("b", variable.Zeros(1, hiddenDim))
 	}
 
 	return &LinearT{

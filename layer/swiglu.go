@@ -8,13 +8,13 @@ import (
 
 var _ L.Layer = (*SwiGLUT)(nil)
 
-func SwiGLU(xdim int) *SwiGLUT {
-	hiddendim := int(xdim * 8 / 3)
+func SwiGLU(xDim int) *SwiGLUT {
+	hiddenDim := int(xDim * 8 / 3)
 	return &SwiGLUT{
 		Layers: L.Layers{
-			"W": Linear(xdim, hiddendim, false),
-			"V": Linear(xdim, hiddendim, false),
-			"O": Linear(hiddendim, xdim, false),
+			"W": Linear(xDim, hiddenDim, false),
+			"V": Linear(xDim, hiddenDim, false),
+			"O": Linear(hiddenDim, xDim, false),
 		},
 	}
 }

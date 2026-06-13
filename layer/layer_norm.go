@@ -8,19 +8,19 @@ import (
 
 var _ L.Layer = (*LayerNormT)(nil)
 
-func LayerNorm(embeddim int) *LayerNormT {
+func LayerNorm(embedDim int) *LayerNormT {
 	p := make(L.Parameters)
-	p.Add("gamma", variable.Ones(embeddim))
-	p.Add("beta", variable.Zeros(embeddim))
+	p.Add("gamma", variable.Ones(embedDim))
+	p.Add("beta", variable.Zeros(embedDim))
 
 	return &LayerNormT{
-		eps:        1e-5,
+		EPS:        1e-5,
 		Parameters: p,
 	}
 }
 
 type LayerNormT struct {
-	eps float64
+	EPS float64
 	L.Parameters
 }
 
@@ -38,7 +38,7 @@ func (l *LayerNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 
 	// normx = (x - mean) / sqrt(variance + eps)
 	sub := F.Sub(x[0], mean)
-	addc := F.AddC(l.eps, variance)
+	addc := F.AddC(l.EPS, variance)
 	sqrt := F.Pow(0.5)(addc)
 	normx := F.Div(sub, sqrt)
 
