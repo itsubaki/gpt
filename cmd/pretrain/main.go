@@ -132,7 +132,6 @@ func main() {
 		}
 
 		// model checkpoint
-		msg := fmt.Sprintf("loss=%.4f(ppl=%.4f)", loss.At(), math.Exp(loss.At()))
 		if i%100 == 0 {
 			if err := m.Save(modelPath); err != nil {
 				panic(err)
@@ -148,7 +147,7 @@ func main() {
 		}
 
 		// update progress bar
-		bar.Update(i+1, msg)
+		bar.Update(i+1, fmt.Sprintf("loss=%.4f(ppl=%.4f)", loss.At(), math.Exp(loss.At())))
 	}
 
 	// save final model
