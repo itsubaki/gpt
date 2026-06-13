@@ -44,7 +44,26 @@ Pre-Training   100%|████████████████████
 
 ```shell
 make generate
-go run ./cmd/generate/main.go --prompt 'def'
+go run ./cmd/generate/main.go --prompt 'def add(a, b):'
+```
+
+```
+go run ./cmd/generate/main.go --prompt 'def add(a, b):' --max-new-tokens 32 --temperature 0.3
+model parameters:
+ VocabSize    : 1000
+ MaxContextLen: 256
+ EmbedDim     : 192
+ NumOfHeads   : 6
+ NumOfBlocks  : 6
+------------------------------
+300,890,40,97,44,358,281,259,312,358,390,365,58,272,301,428,97,41,259,301,273,347,358,271,307,40,97,44,358,41,10,999,
+------------------------------
+def add(a, b):
+    if b == 0:
+        return (a)
+    return a + b
+
+print(a, b)
 ```
 
 ## References
