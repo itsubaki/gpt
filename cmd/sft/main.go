@@ -33,7 +33,7 @@ func main() {
 	flag.IntVar(&maxIters, "max-iters", 1000, "number of maximum iterations for fine-tuning")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size for fine-tuning")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
-	flag.StringVar(&modelPath, "pretrain-model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
 	flag.StringVar(&alpacaPath, "alpaca-path", "testdata/tiny_codes_sft.json", "path to the Alpaca data JSON file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
