@@ -30,7 +30,7 @@ func ExampleSFTDataset() {
 	}
 
 	mockTokenizer := &MockTokenizer{}
-	dataset := dataloader.NewSFTDataset(alpaca, mockTokenizer, 64)
+	dataset := dataloader.NewSFTDataset(alpaca, mockTokenizer, 256)
 
 	for i := range dataset.Len() {
 		ids, labels := dataset.GetItem(i)
@@ -38,6 +38,6 @@ func ExampleSFTDataset() {
 	}
 
 	// Output:
-	// 64 64
-	// 64 64
+	// 256 256
+	// 256 256
 }
