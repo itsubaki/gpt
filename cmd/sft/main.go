@@ -14,30 +14,28 @@ import (
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
+	"github.com/itsubaki/gpt/tokenizer"
 )
 
 func main() {
-	// parameters
-	var vocabSize, contextLen, embedDim, numOfHeads, numOfBlocks int
+	var contextLen int
+	var sftDataPath, mergeRulesPath, pretrainModelPath, sftModelPath string
 	var maxLR, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
-	var tokensPath, modelPath string
 	var usePProf bool
 	var minLoss float64
-	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
-	flag.IntVar(&embedDim, "embed-dim", 192, "embedding dimension")
-	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
-	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
-	flag.IntVar(&maxIters, "max-iters", 40000, "number of maximum iterations")
-	flag.IntVar(&batchSize, "batch-size", 32, "batch size")
-	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
-	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
+	flag.IntVar(&maxIters, "max-iters", 1000, "number of maximum iterations for fine-tuning")
+	flag.IntVar(&batchSize, "batch-size", 32, "batch size for fine-tuning")
+	flag.StringVar(&sftDataPath, "sft-data-path", "testdata/tiny_codes_sft.json", "path to the SFT data CSV file")
+	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
+	flag.StringVar(&pretrainModelPath, "pretrain-model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
 	flag.Parse()
@@ -59,14 +57,19 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	// model
-	m := model.NewGPT(
-		vocabSize,
-		contextLen,
-		embedDim,
-		numOfHeads,
-		numOfBlocks,
-	)
+	// tokenizer
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+
+	tknizer := tokenizer.NewBPETokenizer(mergeRules)
+
+	// model from gob file
+	m, err := model.NewGPTFrom(pretrainModelPath)
+	if err != nil {
+		panic(err)
+	}
 
 	// optimizer
 	o := optimizer.AdamW{
@@ -79,14 +82,13 @@ func main() {
 		},
 	}
 
-	// dataloader
+	// da
+
+	alpaca := dataloader.MustLoadAlpaca(sftDataPath)
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
-		Dataset: &dataloader.TokenDataset{
-			Tokens:     dataloader.MustLoadTokens(tokensPath),
-			ContextLen: contextLen,
-		},
+		Dataset:   dataloader.NewSFTDataset(alpaca, tknizer, contextLen),
 	}
 
 	// progress bar
@@ -103,7 +105,6 @@ func main() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
-	// training loop
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -127,13 +128,13 @@ func main() {
 
 		// model checkpoint
 		if i%100 == 0 {
-			if err := m.Save(modelPath); err != nil {
+			if err := m.Save(sftModelPath); err != nil {
 				panic(err)
 			}
 		}
 
 		if loss.At() < minLoss {
-			if err := m.Save(modelPath + ".min"); err != nil {
+			if err := m.Save(sftModelPath + ".min"); err != nil {
 				panic(err)
 			}
 
@@ -145,7 +146,7 @@ func main() {
 	}
 
 	// save final model
-	if err := m.Save(modelPath); err != nil {
+	if err := m.Save(sftModelPath); err != nil {
 		panic(err)
 	}
 
