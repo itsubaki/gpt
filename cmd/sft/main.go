@@ -19,7 +19,7 @@ import (
 
 func main() {
 	var contextLen int
-	var alpacaPath, mergeRulesPath, pretrainModelPath, sftModelPath string
+	var mergeRulesPath, modelPath, alpacaPath, sftModelPath string
 	var maxLR, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var usePProf bool
@@ -32,9 +32,9 @@ func main() {
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.IntVar(&maxIters, "max-iters", 1000, "number of maximum iterations for fine-tuning")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size for fine-tuning")
-	flag.StringVar(&alpacaPath, "alpaca-path", "testdata/tiny_codes_sft.json", "path to the Alpaca data JSON file")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
-	flag.StringVar(&pretrainModelPath, "pretrain-model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&modelPath, "pretrain-model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&alpacaPath, "alpaca-path", "testdata/tiny_codes_sft.json", "path to the Alpaca data JSON file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
 	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
@@ -58,7 +58,7 @@ func main() {
 	}
 
 	// model from gob file
-	m, err := model.NewGPTFrom(pretrainModelPath)
+	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +92,7 @@ func main() {
 	}
 
 	// progress bar
-	bar := progress.NewProgressBar("Pre-Training", maxIters, os.Stdout)
+	bar := progress.NewProgressBar("SFT", maxIters, os.Stdout)
 	bar.Update(0)
 
 	// save loss to csv
