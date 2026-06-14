@@ -57,12 +57,6 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-
 	// model from gob file
 	m, err := model.NewGPTFrom(pretrainModelPath)
 	if err != nil {
@@ -78,6 +72,12 @@ func main() {
 		Hook: []optimizer.Hook{
 			hook.ClipGrad(clip),
 		},
+	}
+
+	// tokenizer
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
+		panic(err)
 	}
 
 	// dataloader

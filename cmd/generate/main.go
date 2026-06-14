@@ -24,14 +24,6 @@ func main() {
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()
 
-	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-
-	tknizer := tokenizer.NewBPETokenizer(mergeRules)
-
 	// model from gob file
 	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
@@ -46,12 +38,18 @@ func main() {
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
 	fmt.Println("------------------------------")
 
+	// tokenizer
+	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+
 	// generate text
 	now := time.Now()
 	generatedText := Generate(
 		m,
 		m.MaxContextLen,
-		tknizer,
+		tokenizer.NewBPETokenizer(mergeRules),
 		prompt,
 		maxNewTokens,
 		temperature,
