@@ -40,7 +40,7 @@ func main() {
 	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
-	flag.Float64Var(&minLoss, "min-loss", 2.0, "minimum loss for saving the model")
+	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
 	flag.Parse()
 
 	if usePProf {
