@@ -34,3 +34,7 @@ pretrain:
 
 generate:
 	go run ./cmd/generate/main.go
+
+sft:
+	caffeinate -i go run ./cmd/sft/main.go
+	plot loss.csv
