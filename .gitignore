@@ -40,3 +40,4 @@ testdata/model_gpt.gob.min
 loss.csv
 loss.png
 cpu.prof
+testdata/tiny_codes_sft.json

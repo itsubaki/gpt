@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"math"
@@ -81,16 +80,11 @@ func main() {
 	}
 
 	// dataloader
-	tokens, err := load(tokensPath)
-	if err != nil {
-		panic(err)
-	}
-
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
 		Dataset: &dataloader.TokenDataset{
-			Tokens:     tokens,
+			Tokens:     dataloader.MustLoadTokens(tokensPath),
 			ContextLen: contextLen,
 		},
 	}
@@ -156,21 +150,6 @@ func main() {
 	}
 
 	fmt.Println()
-}
-
-func load(path string) ([]int, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
-	var ids []int
-	if err := gob.NewDecoder(f).Decode(&ids); err != nil {
-		return nil, err
-	}
-
-	return ids, nil
 }
 
 func write(w *csv.Writer, iter int, loss float64) error {
