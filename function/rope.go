@@ -36,32 +36,37 @@ func RoPE(theta float64, embedDim, contextLen int) RoPEFunc {
 	return func(offset int) func(x ...*variable.Variable) *variable.Variable {
 		return (&variable.Function{
 			Forwarder: &RoPET{
-				Cos:     cos,
-				Sin:     sin,
-				HalfDim: halfDim,
-				offset:  offset,
+				Cos:        cos,
+				Sin:        sin,
+				HalfDim:    halfDim,
+				ContextLen: contextLen,
+				offset:     offset,
 			},
 		}).First
 	}
 }
 
 type RoPET struct {
-	Cos     []float64
-	Sin     []float64
-	HalfDim int
-	offset  int
+	Cos        []float64
+	Sin        []float64
+	HalfDim    int
+	ContextLen int
+	offset     int
 }
 
 func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 	shape := x[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
+	// clamp
+	offset := f.clamp(C)
+
 	y := tensor.ZeroLike(x[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					idx := (f.offset+pos)*f.HalfDim + d/2
+					idx := (offset+pos)*f.HalfDim + d/2
 					cos := f.Cos[idx]
 					sin := f.Sin[idx]
 
@@ -87,12 +92,15 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 	shape := gy[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
+	// clamp
+	offset := f.clamp(C)
+
 	gx := tensor.ZeroLike(gy[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					idx := (f.offset+pos)*f.HalfDim + d/2
+					idx := (offset+pos)*f.HalfDim + d/2
 					cos := f.Cos[idx]
 					sin := f.Sin[idx]
 
@@ -112,4 +120,12 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 	return []*variable.Variable{
 		variable.From(gx),
 	}
+}
+
+func (f *RoPET) clamp(C int) int {
+	if f.offset+C > f.ContextLen {
+		return f.ContextLen - C
+	}
+
+	return f.offset
 }
