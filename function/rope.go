@@ -56,16 +56,12 @@ func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 	shape := x[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
-	if f.offset+C > len(f.Cos) {
-		panic("RoPE: position out of range")
-	}
-
 	y := tensor.ZeroLike(x[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					idx := f.offset + pos*f.HalfDim + d/2
+					idx := (f.offset+pos)*f.HalfDim + d/2
 					cos := f.Cos[idx]
 					sin := f.Sin[idx]
 
@@ -91,16 +87,12 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 	shape := gy[0].Shape()
 	B, H, C, D := shape[0], shape[1], shape[2], shape[3]
 
-	if f.offset+C > len(f.Cos) {
-		panic("RoPE: position out of range")
-	}
-
 	gx := tensor.ZeroLike(gy[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
 				for d := 0; d < D; d += 2 {
-					idx := f.offset + pos*f.HalfDim + d/2
+					idx := (f.offset+pos)*f.HalfDim + d/2
 					cos := f.Cos[idx]
 					sin := f.Sin[idx]
 
