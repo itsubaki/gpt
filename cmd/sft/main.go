@@ -41,7 +41,7 @@ func main() {
 	flag.Parse()
 
 	if usePProf {
-		f, err := os.Create("cpu.prof")
+		f, err := os.Create("cpu_sft.prof")
 		if err != nil {
 			panic(err)
 		}
@@ -96,7 +96,7 @@ func main() {
 	bar.Update(0)
 
 	// save loss to csv
-	f, err := os.Create("loss.csv")
+	f, err := os.Create("loss_sft.csv")
 	if err != nil {
 		panic(err)
 	}
