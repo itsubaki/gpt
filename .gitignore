@@ -41,3 +41,9 @@ loss.csv
 loss.png
 cpu.prof
 testdata/tiny_codes_sft.json
+.DS_Store
+loss_sft.csv
+loss_sft.png
+cpu_sft.prof
+testdata/model_gpt_sft.gob
+testdata/model_gpt_sft.gob.min
