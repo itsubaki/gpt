@@ -68,6 +68,46 @@ def add(a, b):
 print(a, b)
 ```
 
+## Supervised Fine-Tuning
+
+```shell
+%  make sft
+go run ./cmd/sft/main.go
+SFT           11%|███---------------------------| 107/1000 [90.3m<12.6h, 0.0 it/s] loss=0.4983(ppl=1.6460)
+```
+
+## Chat
+
+```shell
+% make chat
+go run ./cmd/chat/main.go --prompt 'Who are you?'
+```
+
+```shell
+model parameters:
+ VocabSize    : 1000
+ MaxContextLen: 256
+ EmbedDim     : 192
+ NumOfHeads   : 6
+ NumOfBlocks  : 6
+------------------------------
+35,35,35,955,435,117,387,58,10,87,
+104,111,273,260,916,63,271,35,35,35,
+608,101,966,58,10,73,39,109,687,66,
+383,44,469,438,268,110,496,105,513,121,
+46,852,104,275,438,111,916,611,609,63,
+999,
+------------------------------
+### Instruction:
+Who are you?
+
+### Response:
+I'm CodeBot, I donnability. What do you need?
+```
+
+
+
+
 ## References
 
 - [ゼロから作るDeep Learning ❻](https://www.oreilly.co.jp/books/9784814401611/)
