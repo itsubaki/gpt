@@ -80,7 +80,7 @@ SFT           11%|███---------------------------| 107/1000 [90.3m<12.6h, 0
 
 ```shell
 % make chat
-go run ./cmd/chat/main.go --prompt 'Who are you?'
+go run ./cmd/chat/main.go --prompt 'Write add function'
 ```
 
 ```shell
@@ -92,17 +92,18 @@ model parameters:
  NumOfBlocks  : 6
 ------------------------------
 35,35,35,955,435,117,387,58,10,87,
-104,111,273,260,916,63,271,35,35,35,
-608,101,966,58,10,73,39,109,687,66,
-383,44,469,438,268,110,496,105,513,121,
-46,852,104,275,438,111,916,611,609,63,
-999,
+903,890,618,271,35,35,35,608,101,966,
+58,10,300,890,40,97,44,358,281,259,
+301,273,347,358,999,
 ------------------------------
 ### Instruction:
-Who are you?
+Write add function
 
 ### Response:
-I'm CodeBot, I donnability. What do you need?
+def add(a, b):
+    return a + b
+------------------------------
+generation time: 1.131085333s
 ```
 
 
