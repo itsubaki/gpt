@@ -13,13 +13,13 @@ func Embeddings(xDim, embedDim int) *EmbeddingsT {
 	p.Add("w", initw(xDim, embedDim))
 
 	return &EmbeddingsT{
-		EmbedDim:   embedDim,
+		embedDim:   embedDim,
 		Parameters: p,
 	}
 }
 
 type EmbeddingsT struct {
-	EmbedDim int
+	embedDim int
 	L.Parameters
 }
 
@@ -34,7 +34,7 @@ func (l *EmbeddingsT) Forward(x ...*variable.Variable) []*variable.Variable {
 	}
 	w := l.Parameters["w"]
 
-	shape := append(append([]int{}, x[0].Shape()...), l.EmbedDim)
+	shape := append(append([]int{}, x[0].Shape()...), l.embedDim)
 	y := F.Reshape(shape...)(F.GetItem(0, ids)(w))
 	return []*variable.Variable{
 		y,

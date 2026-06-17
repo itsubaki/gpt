@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/function"
 	L "github.com/itsubaki/gpt/layer"
 )
 
@@ -14,10 +15,12 @@ func ExampleMultiHeadAttention() {
 	headDim := 64
 	batchSize := 2
 	contextLen := 10
+	theta := 1000.0
+
+	rope := function.RoPE(theta, embedDim, contextLen)
+	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
-	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim)
-
 	output := mha.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())
@@ -38,10 +41,12 @@ func ExampleMultiHeadAttention_rope() {
 	headDim := 64
 	batchSize := 2
 	contextLen := 10
+	theta := 1000.0
+
+	rope := function.RoPE(theta, embedDim, contextLen)
+	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
-	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim)
-
 	output := mha.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())

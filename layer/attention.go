@@ -7,15 +7,17 @@ import (
 	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/function"
 )
 
 var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
-func MultiHeadAttention(embedDim, numOfHeads, headDim int) *MultiHeadAttentionT {
+func MultiHeadAttention(embedDim, numOfHeads, headDim int, rope function.RoPEFunc) *MultiHeadAttentionT {
 	E, H, D, bias := embedDim, numOfHeads, headDim, false
 	return &MultiHeadAttentionT{
-		NumOfHeads: numOfHeads,
-		HeadDim:    headDim,
+		numOfHeads: numOfHeads,
+		headDim:    headDim,
+		rope:       rope,
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D, bias),
 			"Wk": Linear(E, H*D, bias),
@@ -26,8 +28,10 @@ func MultiHeadAttention(embedDim, numOfHeads, headDim int) *MultiHeadAttentionT 
 }
 
 type MultiHeadAttentionT struct {
-	NumOfHeads int
-	HeadDim    int
+	numOfHeads int
+	headDim    int
+	rope       function.RoPEFunc
+	offset     int
 	L.Layers
 }
 
@@ -37,7 +41,7 @@ func (l *MultiHeadAttentionT) First(x ...*variable.Variable) *variable.Variable 
 
 func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Variable {
 	v, shape := x[0], x[0].Shape()
-	B, C, H, D := shape[0], shape[1], l.NumOfHeads, l.HeadDim
+	B, C, H, D := shape[0], shape[1], l.numOfHeads, l.headDim
 
 	Q := l.Layers["Wq"].First(v)
 	K := l.Layers["Wk"].First(v)
@@ -47,6 +51,11 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	K = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(K)) // (B, H, C, D)
 	V = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(V)) // (B, H, C, D)
 
+	// RoPE
+	Q = l.rope(l.offset)(Q)
+	K = l.rope(l.offset)(K)
+
+	// QK^t/sqrt(d)
 	Kt := F.Transpose(0, 1, 3, 2)(K)                   // (B, H, D, C)
 	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)
 	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
@@ -56,6 +65,7 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	cond := func(m float64) bool { return m == 0 }
 	scores = F.MaskFill(mask, cond, math.Inf(-1))(scores) // (B, H, C, C)
 
+	// (softmax(QK^t/sqrt(d))V)Wo
 	weights := F.Softmax(-1)(scores)         // (B, H, C, C)
 	hidden := F.MatMul(weights, V)           // (B, H, C, C) @ (B, H, C, D) -> (B, H, C, D)
 	hidden = F.Transpose(0, 2, 1, 3)(hidden) // (B, H, C, D) -> (B, C, H, D)

@@ -14,13 +14,13 @@ func LayerNorm(embedDim int) *LayerNormT {
 	p.Add("beta", variable.Zeros(embedDim))
 
 	return &LayerNormT{
-		EPS:        1e-5,
+		eps:        1e-5,
 		Parameters: p,
 	}
 }
 
 type LayerNormT struct {
-	EPS float64
+	eps float64
 	L.Parameters
 }
 
@@ -38,7 +38,7 @@ func (l *LayerNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 
 	// normx = (x - mean) / sqrt(variance + eps)
 	sub := F.Sub(x[0], mean)
-	addc := F.AddC(l.EPS, variance)
+	addc := F.AddC(l.eps, variance)
 	sqrt := F.Pow(0.5)(addc)
 	normx := F.Div(sub, sqrt)
 

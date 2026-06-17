@@ -11,7 +11,7 @@ import (
 )
 
 func ExampleGPT_Params() {
-	m := model.NewGPT(1000, 256, 394, 6, 6)
+	m := model.NewGPT(1000, 256, 394, 6, 6, 10000)
 
 	keys := make([]string, 0, len(m.Params()))
 	for k := range m.Params() {
@@ -80,7 +80,6 @@ func ExampleGPT_Params() {
 	// block[5].norm2.gamma
 	// embed.w
 	// norm.gamma
-	// posembed.w
 	// unembed.w
 }
 
@@ -92,7 +91,7 @@ func ExampleGPT_save() {
 	defer os.RemoveAll(dir)
 	path := filepath.Join(dir, "model_gpt.gob")
 
-	m0 := model.NewGPT(1000, 256, 394, 6, 6)
+	m0 := model.NewGPT(1000, 256, 394, 6, 6, 10000)
 	if err := m0.Save(path); err != nil {
 		panic(err)
 	}
@@ -102,8 +101,8 @@ func ExampleGPT_save() {
 		panic(err)
 	}
 
-	fmt.Println(m0.VocabSize, m0.MaxContextLen, m0.EmbedDim, m0.NumOfHeads, m0.NumOfBlocks)
-	fmt.Println(m1.VocabSize, m1.MaxContextLen, m1.EmbedDim, m1.NumOfHeads, m1.NumOfBlocks)
+	fmt.Println(m0.VocabSize, m0.MaxContextLen, m0.EmbedDim, m0.NumOfHeads, m0.NumOfBlocks, m0.Theta)
+	fmt.Println(m1.VocabSize, m1.MaxContextLen, m1.EmbedDim, m1.NumOfHeads, m1.NumOfBlocks, m1.Theta)
 
 	keys := make([]string, 0, len(m1.Params()))
 	for k := range m1.Params() {
@@ -121,8 +120,8 @@ func ExampleGPT_save() {
 	}
 
 	// Output:
-	// 1000 256 394 6 6
-	// 1000 256 394 6 6
+	// 1000 256 394 6 6 10000
+	// 1000 256 394 6 6 10000
 	// block[0].attn.Wk.w [394 390]
 	// block[0].attn.Wk.w [394 390]
 	// block[0].attn.Wo.w [390 394]
@@ -235,8 +234,6 @@ func ExampleGPT_save() {
 	// embed.w [1000 394]
 	// norm.gamma [394]
 	// norm.gamma [394]
-	// posembed.w [256 394]
-	// posembed.w [256 394]
 	// unembed.w [394 1000]
 	// unembed.w [394 1000]
 }
