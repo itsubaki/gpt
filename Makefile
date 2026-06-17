@@ -37,7 +37,7 @@ generate:
 
 sft:
 	caffeinate -i go run ./cmd/sft/main.go
-	plot loss.csv
+	plot loss_sft.csv
 
 chat:
 	go run ./cmd/chat/main.go
