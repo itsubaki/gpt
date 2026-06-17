@@ -102,12 +102,7 @@ Write add function
 ### Response:
 def add(a, b):
     return a + b
-------------------------------
-generation time: 1.131085333s
 ```
-
-
-
 
 ## References
 
