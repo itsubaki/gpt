@@ -15,7 +15,7 @@ func main() {
 	var maxNewTokens int
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
-	flag.StringVar(&prompt, "prompt", "write loop", "prompt for text generation")
+	flag.StringVar(&prompt, "prompt", "Write loop", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
 	flag.Parse()

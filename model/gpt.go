@@ -10,6 +10,7 @@ import (
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/function"
 	L "github.com/itsubaki/gpt/layer"
 )
 
@@ -87,6 +88,7 @@ func init() {
 	gob.Register(&L.LinearT{})
 	gob.Register(&L.RMSNormT{})
 	gob.Register(&L.SwiGLUT{})
+	gob.Register(&function.RoPET{})
 }
 
 func NewGPTFrom(path string) (*GPT, error) {
