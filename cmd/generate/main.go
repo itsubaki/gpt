@@ -35,7 +35,7 @@ func main() {
 	fmt.Println("------------------------------")
 
 	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
@@ -48,19 +48,24 @@ func main() {
 
 	// generate text
 	now := time.Now()
-	text := model.GenerateText(
+	ch := model.GenerateText(
 		m,
 		m.MaxContextLen,
-		tokenizer.NewBPETokenizer(mergeRules),
+		tknizer,
 		prompt,
 		maxNewTokens,
 		temperature,
-		true, // debug
 	)
+
+	var ids []int
+	for id := range ch {
+		ids = append(ids, id)
+		fmt.Printf("%v,", id)
+	}
 
 	fmt.Println()
 	fmt.Println("------------------------------")
-	fmt.Println(text)
+	fmt.Println(tknizer.Decode(ids))
 	fmt.Println("------------------------------")
 	fmt.Println("generation time:", time.Since(now))
 }

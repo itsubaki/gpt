@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"math/rand/v2"
 
 	F "github.com/itsubaki/autograd/function"
@@ -32,61 +31,59 @@ func GenerateText(
 	prompt string,
 	maxNewTokens int,
 	temperature float64,
-	debug bool,
-) string {
-	ids := tokenizer.Encode(prompt)
-	generatedIDs := make([]int, len(ids))
-	copy(generatedIDs, ids)
+) <-chan int {
+	ch := make(chan int)
 
-	if debug {
+	go func() {
+		defer close(ch)
+
+		// encode prompt
+		ids := tokenizer.Encode(prompt)
 		for _, id := range ids {
-			fmt.Printf("%v,", id)
+			ch <- id
 		}
-	}
 
-	func() {
-		// disable gradient tracking for generation
-		defer variable.Nograd().End()
+		func() {
+			// disable gradient tracking for generation
+			defer variable.Nograd().End()
 
-		// generate tokens
-		for range maxNewTokens {
-			if len(ids) > maxContextLen {
-				// keep only the last maxContextLen tokens as input
-				ids = ids[len(ids)-maxContextLen:]
+			// generate tokens
+			for range maxNewTokens {
+				if len(ids) > maxContextLen {
+					// keep only the last maxContextLen tokens as input
+					ids = ids[len(ids)-maxContextLen:]
+				}
+
+				// forward
+				x := newVariable(ids).Reshape(1, -1)                     // (1, C)
+				logits := model.Forward(x)                               // (1, C, V)
+				logits = F.GetItem(1, []int{logits.Size(1) - 1})(logits) // (1, 1, V)
+				logits = F.Reshape(-1)(logits)                           // (V)
+
+				// sample next token
+				var nextID int
+				if temperature == 0 {
+					nextID = tensor.Argmax(logits.Data, 0).At()
+				} else {
+					probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
+					nextID = multinominal(probs)
+				}
+
+				// stop if end token is generated
+				if nextID == tokenizer.EndTokenID() {
+					break
+				}
+
+				// send next token to channel
+				ch <- nextID
+
+				// append next token to input tokens
+				ids = append(ids, nextID)
 			}
-
-			// forward
-			x := newVariable(ids).Reshape(1, -1)                     // (1, C)
-			logits := model.Forward(x)                               // (1, C, V)
-			logits = F.GetItem(1, []int{logits.Size(1) - 1})(logits) // (1, 1, V)
-			logits = F.Reshape(-1)(logits)                           // (V)
-
-			// sample next token
-			var nextID int
-			if temperature == 0 {
-				nextID = tensor.Argmax(logits.Data, 0).At()
-			} else {
-				probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
-				nextID = multinominal(probs)
-			}
-
-			if debug {
-				fmt.Printf("%v,", nextID)
-			}
-
-			// stop if end token is generated
-			if nextID == tokenizer.EndTokenID() {
-				break
-			}
-
-			// append next token to input and generated tokens
-			ids = append(ids, nextID)
-			generatedIDs = append(generatedIDs, nextID)
-		}
+		}()
 	}()
 
-	// decode generated tokens to text
-	return tokenizer.Decode(generatedIDs)
+	return ch
 }
 
 func newVariable(x []int) *variable.Variable {

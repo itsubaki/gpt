@@ -43,6 +43,15 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 	}
 }
 
+func NewBPETokenizerFrom(mergeRulesPath string, endToken ...string) (*BPETokenizer, error) {
+	mergeRules, err := Load(mergeRulesPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewBPETokenizer(mergeRules, endToken...), nil
+}
+
 func (t *BPETokenizer) EndTokenID() int {
 	return t.endTokenID
 }
