@@ -22,6 +22,7 @@ type Tokenizer interface {
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
+	ClearCache()
 }
 
 func GenerateText(
@@ -37,28 +38,29 @@ func GenerateText(
 	go func() {
 		defer close(ch)
 
-		// encode prompt
-		ids := tokenizer.Encode(prompt)
-		for _, id := range ids {
-			ch <- id
-		}
-
+		// generation
 		func() {
 			// disable gradient tracking for generation
 			defer variable.Nograd().End()
 
+			// clear cache before generation
+			model.ClearCache()
+
+			// encode prompt
+			ids := tokenizer.Encode(prompt)
+
+			// feed prompt tokens one by one to populate the KV cache
+			var x *variable.Variable
+			for _, id := range ids {
+				x = newVariable([]int{id}).Reshape(1, 1) // (1, 1)
+				x = model.Forward(x)                     // (1, 1, V)
+				ch <- id
+			}
+
 			// generate tokens
 			for range maxNewTokens {
-				if len(ids) > maxContextLen {
-					// keep only the last maxContextLen tokens as input
-					ids = ids[len(ids)-maxContextLen:]
-				}
-
-				// forward
-				x := newVariable(ids).Reshape(1, -1)                     // (1, C)
-				logits := model.Forward(x)                               // (1, C, V)
-				logits = F.GetItem(1, []int{logits.Size(1) - 1})(logits) // (1, 1, V)
-				logits = F.Reshape(-1)(logits)                           // (V)
+				// get logits for the next token
+				logits := F.Reshape(-1)(x) // (1, 1, V) -> (V)
 
 				// sample next token
 				var nextID int
@@ -77,8 +79,9 @@ func GenerateText(
 				// send next token to channel
 				ch <- nextID
 
-				// append next token to input tokens
-				ids = append(ids, nextID)
+				// next token only
+				x = newVariable([]int{nextID}).Reshape(1, 1) // (1, 1)
+				x = model.Forward(x)                         // (1, 1, V)
 			}
 		}()
 	}()

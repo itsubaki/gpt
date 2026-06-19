@@ -21,7 +21,8 @@ func main() {
 	flag.Parse()
 
 	// model from gob file
-	m, err := model.NewGPTFrom(sftModelPath)
+	useCache := true
+	m, err := model.NewGPTFrom(sftModelPath, useCache)
 	if err != nil {
 		panic(err)
 	}
