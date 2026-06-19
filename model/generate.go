@@ -71,13 +71,13 @@ func GenerateText(
 					nextID = multinominal(probs)
 				}
 
+				// send next token to channel
+				ch <- nextID
+
 				// stop if end token is generated
 				if nextID == tokenizer.EndTokenID() {
 					break
 				}
-
-				// send next token to channel
-				ch <- nextID
 
 				// next token only
 				x = newVariable([]int{nextID}).Reshape(1, 1) // (1, 1)
