@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/tokenizer"
 )
@@ -55,7 +56,7 @@ func main() {
 			m,
 			m.MaxContextLen,
 			tknizer,
-			format(prompt),
+			dataloader.AlpacaFormat(prompt),
 			maxNewTokens,
 			temperature,
 		)
@@ -72,8 +73,4 @@ func main() {
 		fmt.Println("------------------------------")
 		fmt.Println("generation time:", time.Since(now))
 	}
-}
-
-func format(message string) string {
-	return fmt.Sprintf("### Instruction:\n%s\n\n### Response:\n", message)
 }
