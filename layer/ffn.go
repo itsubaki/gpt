@@ -11,8 +11,8 @@ var _ L.Layer = (*FFNT)(nil)
 func FFN(xDim, hiddenDim int) *FFNT {
 	return &FFNT{
 		Layers: L.Layers{
-			"l1": Linear(xDim, hiddenDim, false),
-			"l2": Linear(hiddenDim, xDim, false),
+			"l1": Linear(xDim, hiddenDim),
+			"l2": Linear(hiddenDim, xDim),
 		},
 	}
 }

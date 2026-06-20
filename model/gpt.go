@@ -46,10 +46,11 @@ func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, the
 	}
 
 	// Layers
-	gpt.Add("embed", L.Embeddings(vocabSize, embedDim))      //
-	gpt.Add("norm", L.RMSNorm(embedDim))                     // instead of LayerNorm(embedDim)
-	gpt.Add("unembed", L.Linear(embedDim, vocabSize, false)) // no bias in unembedding layer
+	gpt.Add("embed", L.Embeddings(vocabSize, embedDim)) //
+	gpt.Add("norm", L.RMSNorm(embedDim))                // instead of LayerNorm(embedDim)
+	gpt.Add("unembed", L.Linear(embedDim, vocabSize))   // no bias in unembedding layer
 
+	// Transformer blocks with RoPE
 	rope := function.RoPE(theta, embedDim, maxContextLen)
 	for i := range numOfBlocks {
 		gpt.Add(newBlock(i, embedDim, numOfHeads, rope, useCache...))
