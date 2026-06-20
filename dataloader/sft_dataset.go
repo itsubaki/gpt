@@ -2,6 +2,7 @@ package dataloader
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -28,7 +29,7 @@ type SFTDataset struct {
 func NewSFTDataset(alpaca []Alpaca, tokenizer Tokenizer, contextLen int) *SFTDataset {
 	samples := make([]Sample, 0, len(alpaca))
 	for _, a := range alpaca {
-		prompt := "### Instruction:\n" + a.Instruction + "\n\n### Response:\n"
+		prompt := AlpacaFormat(a.Instruction)
 		response := a.Response + "<|endoftext|>"
 
 		// encode
@@ -102,4 +103,8 @@ func LoadAlpaca(path string) ([]Alpaca, error) {
 	}
 
 	return alpaca, nil
+}
+
+func AlpacaFormat(message string) string {
+	return fmt.Sprintf("### Instruction:\n%s\n\n### Response:\n", message)
 }
