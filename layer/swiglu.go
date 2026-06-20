@@ -12,9 +12,9 @@ func SwiGLU(xDim int) *SwiGLUT {
 	hiddenDim := int(xDim * 8 / 3)
 	return &SwiGLUT{
 		Layers: L.Layers{
-			"W": Linear(xDim, hiddenDim, false),
-			"V": Linear(xDim, hiddenDim, false),
-			"O": Linear(hiddenDim, xDim, false),
+			"W": Linear(xDim, hiddenDim),
+			"V": Linear(xDim, hiddenDim),
+			"O": Linear(hiddenDim, xDim),
 		},
 	}
 }

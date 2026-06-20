@@ -9,12 +9,9 @@ import (
 
 var _ L.Layer = (*LinearT)(nil)
 
-func Linear(xDim, hiddenDim int, bias bool) *LinearT {
+func Linear(xDim, hiddenDim int) *LinearT {
 	p := make(L.Parameters)
 	p.Add("w", initw(xDim, hiddenDim))
-	if bias {
-		p.Add("b", variable.Zeros(1, hiddenDim))
-	}
 
 	return &LinearT{
 		Parameters: p,
@@ -31,17 +28,11 @@ func (l *LinearT) First(x ...*variable.Variable) *variable.Variable {
 
 func (l *LinearT) Forward(x ...*variable.Variable) []*variable.Variable {
 	return []*variable.Variable{
-		F.Linear(l.xparams(x[0])...),
+		F.Linear([]*variable.Variable{
+			x[0],
+			l.Parameters["w"],
+		}...),
 	}
-}
-
-func (l *LinearT) xparams(x *variable.Variable) []*variable.Variable {
-	xp := []*variable.Variable{x, l.Parameters["w"]}
-	if b, ok := l.Parameters["b"]; ok {
-		xp = append(xp, b)
-	}
-
-	return xp
 }
 
 func initw(x, y int) *variable.Variable {

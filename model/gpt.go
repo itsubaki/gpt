@@ -35,7 +35,7 @@ type GPT struct {
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, theta float64) *GPT {
+func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, theta float64, useCache ...bool) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
@@ -46,13 +46,14 @@ func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, the
 	}
 
 	// Layers
-	gpt.Add("embed", L.Embeddings(vocabSize, embedDim))      //
-	gpt.Add("norm", L.RMSNorm(embedDim))                     // instead of LayerNorm(embedDim)
-	gpt.Add("unembed", L.Linear(embedDim, vocabSize, false)) // no bias in unembedding layer
+	gpt.Add("embed", L.Embeddings(vocabSize, embedDim)) //
+	gpt.Add("norm", L.RMSNorm(embedDim))                // instead of LayerNorm(embedDim)
+	gpt.Add("unembed", L.Linear(embedDim, vocabSize))   // no bias in unembedding layer
 
+	// Transformer blocks with RoPE
 	rope := function.RoPE(theta, embedDim, maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embedDim, numOfHeads, rope))
+		gpt.Add(newBlock(i, embedDim, numOfHeads, rope, useCache...))
 	}
 
 	return gpt
@@ -69,8 +70,14 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
+func (m *GPT) ClearCache() {
+	for i := range m.NumOfBlocks {
+		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).ClearCache()
+	}
+}
+
+func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc, useCache ...bool) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope, useCache...)
 }
 
 func init() {
@@ -84,7 +91,7 @@ func init() {
 	gob.Register(&L.SwiGLUT{})
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
+func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -104,6 +111,7 @@ func NewGPTFrom(path string) (*GPT, error) {
 		saved.NumOfHeads,
 		saved.NumOfBlocks,
 		saved.Theta,
+		useCache...,
 	)
 
 	for k, v := range saved.Params() {
