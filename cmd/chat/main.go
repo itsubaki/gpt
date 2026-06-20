@@ -12,16 +12,18 @@ import (
 func main() {
 	var mergeRulesPath, sftModelPath, prompt string
 	var temperature float64
-	var maxNewTokens int
+	var maxNewTokens, count int
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules gob file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.StringVar(&prompt, "prompt", "Write loop", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
-	flag.IntVar(&maxNewTokens, "max-new-tokens", 200, "maximum number of new tokens to generate")
+	flag.IntVar(&maxNewTokens, "max-new-tokens", 256, "maximum number of new tokens to generate")
+	flag.IntVar(&count, "count", 5, "number of times to generate text")
 	flag.Parse()
 
 	// model from gob file
-	m, err := model.NewGPTFrom(sftModelPath)
+	useCache := true
+	m, err := model.NewGPTFrom(sftModelPath, useCache)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +37,7 @@ func main() {
 	fmt.Println("------------------------------")
 
 	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
@@ -46,23 +48,30 @@ func main() {
 	fmt.Println(" max new tokens:", maxNewTokens)
 	fmt.Println("------------------------------")
 
-	// generate text
-	now := time.Now()
-	text := model.GenerateText(
-		m,
-		m.MaxContextLen,
-		tokenizer.NewBPETokenizer(mergeRules),
-		format(prompt),
-		maxNewTokens,
-		temperature,
-		true, // debug
-	)
+	for range count {
+		// generate text
+		now := time.Now()
+		ch := model.GenerateText(
+			m,
+			m.MaxContextLen,
+			tknizer,
+			format(prompt),
+			maxNewTokens,
+			temperature,
+		)
 
-	fmt.Println()
-	fmt.Println("------------------------------")
-	fmt.Println(text)
-	fmt.Println("------------------------------")
-	fmt.Println("generation time:", time.Since(now))
+		var ids []int
+		for id := range ch {
+			ids = append(ids, id)
+			fmt.Printf("%v,", id)
+		}
+
+		fmt.Println()
+		fmt.Println("------------------------------")
+		fmt.Println(tknizer.Decode(ids))
+		fmt.Println("------------------------------")
+		fmt.Println("generation time:", time.Since(now))
+	}
 }
 
 func format(message string) string {

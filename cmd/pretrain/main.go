@@ -19,7 +19,7 @@ import (
 func main() {
 	// parameters
 	var vocabSize, contextLen, embedDim, numOfHeads, numOfBlocks int
-	var maxLR, beta1, beta2, weightDecay, clip float64
+	var theta, maxLR, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
@@ -29,6 +29,7 @@ func main() {
 	flag.IntVar(&embedDim, "embed-dim", 192, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
+	flag.Float64Var(&theta, "theta", 10000, "theta for RoPE")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
@@ -66,6 +67,7 @@ func main() {
 		embedDim,
 		numOfHeads,
 		numOfBlocks,
+		theta,
 	)
 
 	// optimizer

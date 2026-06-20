@@ -4,18 +4,19 @@ import (
 	F "github.com/itsubaki/autograd/function"
 	L "github.com/itsubaki/autograd/layer"
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/function"
 )
 
 var _ L.Layer = (*BlockT)(nil)
 
-func Block(embedDim, numOfHeads int) *BlockT {
+func Block(embedDim, numOfHeads int, rope function.RoPEFunc, useCache ...bool) *BlockT {
 	headDim := int(embedDim / numOfHeads)
 	return &BlockT{
 		Layers: L.Layers{
-			"norm1": RMSNorm(embedDim),                                 // instead of LayerNorm(embedDim)
-			"norm2": RMSNorm(embedDim),                                 // instead of LayerNorm(embedDim)
-			"attn":  MultiHeadAttention(embedDim, numOfHeads, headDim), //
-			"ffn":   SwiGLU(embedDim),                                  // instead of FFN(ffDim, embedDim)
+			"norm1": RMSNorm(embedDim),                                                    // instead of LayerNorm(embedDim)
+			"norm2": RMSNorm(embedDim),                                                    // instead of LayerNorm(embedDim)
+			"attn":  MultiHeadAttention(embedDim, numOfHeads, headDim, rope, useCache...), //
+			"ffn":   SwiGLU(embedDim),                                                     // instead of FFN(ffDim, embedDim)
 		},
 	}
 }
@@ -47,4 +48,8 @@ func (l *BlockT) Forward(x ...*variable.Variable) []*variable.Variable {
 	x4 := l.Layers["ffn"].First(x3)
 	x5 := F.Add(x2, x4)
 	return []*variable.Variable{x5}
+}
+
+func (l *BlockT) ClearCache() {
+	l.Layers["attn"].(*MultiHeadAttentionT).ClearCache()
 }

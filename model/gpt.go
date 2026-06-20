@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	F "github.com/itsubaki/autograd/function"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
-	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/function"
 	L "github.com/itsubaki/gpt/layer"
@@ -33,39 +31,36 @@ type GPT struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
+	Theta         float64
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int) *GPT {
+func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, theta float64, useCache ...bool) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
 		EmbedDim:      embedDim,
 		NumOfHeads:    numOfHeads,
 		NumOfBlocks:   numOfBlocks,
+		Theta:         theta,
 	}
 
 	// Layers
-	gpt.Add("embed", L.Embeddings(vocabSize, embedDim))        //
-	gpt.Add("posembed", L.Embeddings(maxContextLen, embedDim)) //
-	gpt.Add("norm", L.RMSNorm(embedDim))                       // instead of LayerNorm(embedDim)
-	gpt.Add("unembed", L.Linear(embedDim, vocabSize, false))   // no bias in unembedding layer
+	gpt.Add("embed", L.Embeddings(vocabSize, embedDim)) //
+	gpt.Add("norm", L.RMSNorm(embedDim))                // instead of LayerNorm(embedDim)
+	gpt.Add("unembed", L.Linear(embedDim, vocabSize))   // no bias in unembedding layer
 
+	// Transformer blocks with RoPE
+	rope := function.RoPE(theta, embedDim, maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embedDim, numOfHeads))
+		gpt.Add(newBlock(i, embedDim, numOfHeads, rope, useCache...))
 	}
 
 	return gpt
 }
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
-	_, C := ids.Shape()[0], ids.Shape()[1]
-	pos := variable.From(tensor.Arange(0, float64(C)))
-
-	emb := m.L["embed"].First(ids)
-	posemb := m.L["posembed"].First(pos)
-	x := F.Add(emb, posemb)
-
+	x := m.L["embed"].First(ids)
 	for i := range m.NumOfBlocks {
 		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
 	}
@@ -75,8 +70,14 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
-func newBlock(i int, embedDim, numOfHeads int) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads)
+func (m *GPT) ClearCache() {
+	for i := range m.NumOfBlocks {
+		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).ClearCache()
+	}
+}
+
+func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc, useCache ...bool) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope, useCache...)
 }
 
 func init() {
@@ -88,10 +89,9 @@ func init() {
 	gob.Register(&L.LinearT{})
 	gob.Register(&L.RMSNormT{})
 	gob.Register(&L.SwiGLUT{})
-	gob.Register(&function.RoPET{})
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
+func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,26 @@ func NewGPTFrom(path string) (*GPT, error) {
 		return nil, err
 	}
 
-	return saved, nil
+	// restore model
+	m := NewGPT(
+		saved.VocabSize,
+		saved.MaxContextLen,
+		saved.EmbedDim,
+		saved.NumOfHeads,
+		saved.NumOfBlocks,
+		saved.Theta,
+		useCache...,
+	)
+
+	for k, v := range saved.Params() {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = v.Data
+		} else {
+			panic(fmt.Sprintf("parameter %s not found in model", k))
+		}
+	}
+
+	return m, nil
 }
 
 func (m *GPT) Save(path string) error {

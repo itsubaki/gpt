@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/itsubaki/autograd/variable"
+	"github.com/itsubaki/gpt/function"
 	L "github.com/itsubaki/gpt/layer"
 )
 
@@ -12,10 +13,12 @@ func ExampleBlock() {
 	numOfhead := 8
 	batchSize := 2
 	contextLen := 30
+	theta := 1000.0
+
+	rope := function.RoPE(theta, embedDim, contextLen)
+	block := L.Block(embedDim, numOfhead, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
-	block := L.Block(embedDim, numOfhead)
-
 	output := block.First(x)
 	fmt.Println(x.Shape())
 	fmt.Println(output.Shape())

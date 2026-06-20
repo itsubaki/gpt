@@ -13,13 +13,13 @@ func RMSNorm(embedDim int) *RMSNormT {
 	p.Add("gamma", variable.Ones(embedDim))
 
 	return &RMSNormT{
-		EPS:        1e-5,
+		eps:        1e-5,
 		Parameters: p,
 	}
 }
 
 type RMSNormT struct {
-	EPS float64
+	eps float64
 	L.Parameters
 }
 
@@ -36,7 +36,7 @@ func (l *RMSNormT) Forward(x ...*variable.Variable) []*variable.Variable {
 	// y = gamma * x / rms
 	x2 := F.Pow(2)(x[0])
 	ms := F.Reshape(shape...)(F.Mean(last)(x2)) // keepdims
-	rms := F.Pow(0.5)(F.AddC(l.EPS, ms))
+	rms := F.Pow(0.5)(F.AddC(l.eps, ms))
 	gamma := l.Parameters["gamma"]
 	y := F.Mul(gamma, F.Div(x[0], rms))
 	return []*variable.Variable{
