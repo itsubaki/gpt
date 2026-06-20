@@ -3,15 +3,22 @@ package grpo
 import (
 	"fmt"
 
+	"github.com/itsubaki/autograd/tensor"
+	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/dataloader"
 )
+
+type Tokenizer interface {
+	Encode(inputText string) []int
+}
 
 type Dataset struct {
 	Prompts      []string
 	GroundTruths []string
+	Tokenizer    Tokenizer
 }
 
-func NewDataset() *Dataset {
+func NewDataset(tokenizer Tokenizer) *Dataset {
 	var prompts, gts []string
 	for i := 1; i < 10; i++ {
 		for j := 1; j < 10; j++ {
@@ -28,6 +35,7 @@ func NewDataset() *Dataset {
 	return &Dataset{
 		Prompts:      prompts,
 		GroundTruths: gts,
+		Tokenizer:    tokenizer,
 	}
 }
 
@@ -39,6 +47,50 @@ func (s *Dataset) GetItem(i int) (string, string) {
 	return s.Prompts[i], s.GroundTruths[i]
 }
 
-func (s *Dataset) GetBatch(prompts, gts []string) ([]int, []int) {
-	return nil, nil
+func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable.Variable) {
+	var allIDs, allMasks [][]int
+	for i := range prompts {
+		promptIDs := s.Tokenizer.Encode(prompts[i])
+		responseIDs := s.Tokenizer.Encode(gts[i])
+
+		ids := append(promptIDs, responseIDs...)
+		var mask []int
+		for range promptIDs {
+			mask = append(mask, 0)
+		}
+
+		for range responseIDs {
+			mask = append(mask, 1)
+		}
+
+		allIDs = append(allIDs, ids)
+		allMasks = append(allMasks, mask)
+	}
+
+	// pad to the same length
+	var maxLen int
+	for _, ids := range allIDs {
+		if len(ids) > maxLen {
+			maxLen = len(ids)
+		}
+	}
+
+	var paddedIDs, paddedMasks []int
+	for i := range allIDs {
+		padLen := maxLen - len(allIDs[i])
+
+		ids := append([]int{}, allIDs[i]...)
+		ids = append(ids, make([]int, padLen)...)
+
+		mask := append([]int{}, allMasks[i]...)
+		mask = append(mask, make([]int, padLen)...)
+
+		paddedIDs = append(paddedIDs, ids...)
+		paddedMasks = append(paddedMasks, mask...)
+	}
+
+	// reshape to (batch_size, max_len)
+	ids := variable.From(tensor.Float64(tensor.New([]int{len(paddedIDs)}, paddedIDs)))
+	masks := variable.From(tensor.Float64(tensor.New([]int{len(paddedMasks)}, paddedMasks)))
+	return ids.Reshape(len(prompts), maxLen), masks.Reshape(len(prompts), maxLen)
 }
