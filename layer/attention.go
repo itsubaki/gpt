@@ -56,13 +56,8 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	V = F.Transpose(0, 2, 1, 3)(F.Reshape(B, C, H, D)(V)) // (B, H, C, D)
 
 	// RoPE
-	if l.useCache {
-		Q = l.rope(l.offset)(Q)
-		K = l.rope(l.offset)(K)
-	} else {
-		Q = l.rope(0)(Q)
-		K = l.rope(0)(K)
-	}
+	Q = l.rope(l.offset)(Q)
+	K = l.rope(l.offset)(K)
 
 	// cache
 	isFirstCall := l.kCache == nil
