@@ -78,22 +78,22 @@ func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable
 		}
 	}
 
-	var paddedIDs, paddedMasks []int
+	var paddedIDs, paddedMasks []int // (B*C)
 	for i := range allIDs {
 		padLen := maxLen - len(allIDs[i])
 
+		// pad ids
 		ids := append([]int{}, allIDs[i]...)
 		ids = append(ids, make([]int, padLen)...)
+		paddedIDs = append(paddedIDs, ids...)
 
+		// pad masks
 		mask := append([]int{}, allMasks[i]...)
 		mask = append(mask, make([]int, padLen)...)
-
-		paddedIDs = append(paddedIDs, ids...)
 		paddedMasks = append(paddedMasks, mask...)
 	}
 
-	// reshape to (batch_size, max_len)
-	ids := variable.From(tensor.Float64(tensor.New([]int{len(paddedIDs)}, paddedIDs)))
-	masks := variable.From(tensor.Float64(tensor.New([]int{len(paddedMasks)}, paddedMasks)))
-	return ids.Reshape(len(prompts), maxLen), masks.Reshape(len(prompts), maxLen)
+	ids := variable.From(tensor.Float64(tensor.New([]int{len(paddedIDs)}, paddedIDs)))       // (B*C)
+	masks := variable.From(tensor.Float64(tensor.New([]int{len(paddedMasks)}, paddedMasks))) // (B*C)
+	return ids.Reshape(len(prompts), maxLen), masks.Reshape(len(prompts), maxLen)            // (B, C)
 }

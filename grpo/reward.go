@@ -13,7 +13,7 @@ func Reward(groundTruth, response string) float64 {
 		return 0.0
 	}
 
-	predicted, err := strconv.Atoi(matches[len(matches)-1])
+	pred, err := strconv.Atoi(matches[len(matches)-1])
 	if err != nil {
 		return 0.0
 	}
@@ -23,7 +23,7 @@ func Reward(groundTruth, response string) float64 {
 		return 0.0
 	}
 
-	if predicted == gt {
+	if pred == gt {
 		return 1.0
 	}
 
