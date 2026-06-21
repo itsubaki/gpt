@@ -27,6 +27,11 @@ func TestReward(t *testing.T) {
 			response:    "### Instruction:\n3+9=\n\n### Response:\n",
 			want:        0.0,
 		},
+		{
+			groundTruth: "12",
+			response:    "### Instruction:\n3+9=\n\n### Response:\nThe answer is 12.",
+			want:        1.0,
+		},
 	}
 
 	for _, c := range cases {
