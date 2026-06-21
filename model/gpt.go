@@ -35,7 +35,15 @@ type GPT struct {
 	M.Model
 }
 
-func NewGPT(vocabSize, maxContextLen, embedDim, numOfHeads, numOfBlocks int, theta float64, useCache ...bool) *GPT {
+func NewGPT(
+	vocabSize int,
+	maxContextLen int,
+	embedDim int,
+	numOfHeads int,
+	numOfBlocks int,
+	theta float64,
+	useCache ...bool,
+) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
 		MaxContextLen: maxContextLen,
