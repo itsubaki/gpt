@@ -53,7 +53,11 @@ func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable
 		promptIDs := s.Tokenizer.Encode(prompts[i])
 		responseIDs := s.Tokenizer.Encode(gts[i])
 
+		// ids
 		ids := append(promptIDs, responseIDs...)
+		allIDs = append(allIDs, ids)
+
+		// mask
 		var mask []int
 		for range promptIDs {
 			mask = append(mask, 0)
@@ -63,7 +67,6 @@ func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable
 			mask = append(mask, 1)
 		}
 
-		allIDs = append(allIDs, ids)
 		allMasks = append(allMasks, mask)
 	}
 
