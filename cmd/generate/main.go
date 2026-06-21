@@ -51,7 +51,7 @@ func main() {
 	for range count {
 		// generate text
 		now := time.Now()
-		ch := model.GenerateText(
+		ch := model.GenerateChan(
 			m,
 			m.MaxContextLen,
 			tknizer,

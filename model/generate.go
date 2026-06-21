@@ -32,6 +32,31 @@ func GenerateText(
 	prompt string,
 	maxNewTokens int,
 	temperature float64,
+) string {
+	ch := GenerateChan(
+		model,
+		maxContextLen,
+		tokenizer,
+		prompt,
+		maxNewTokens,
+		temperature,
+	)
+
+	var ids []int
+	for id := range ch {
+		ids = append(ids, id)
+	}
+
+	return tokenizer.Decode(ids)
+}
+
+func GenerateChan(
+	model Model,
+	maxContextLen int,
+	tokenizer Tokenizer,
+	prompt string,
+	maxNewTokens int,
+	temperature float64,
 ) <-chan int {
 	ch := make(chan int)
 
