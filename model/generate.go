@@ -33,7 +33,15 @@ func GenerateText(
 	maxNewTokens int,
 	temperature float64,
 ) string {
-	ch := GenerateChan(model, maxContextLen, tokenizer, prompt, maxNewTokens, temperature)
+	ch := GenerateChan(
+		model,
+		maxContextLen,
+		tokenizer,
+		prompt,
+		maxNewTokens,
+		temperature,
+	)
+
 	var ids []int
 	for id := range ch {
 		ids = append(ids, id)
