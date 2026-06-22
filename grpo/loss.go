@@ -12,14 +12,13 @@ type Model interface {
 func ComputeProbs(model Model, ids *variable.Variable) *variable.Variable {
 	logits := model.Forward(ids)                      // (B, C, V)
 	logits = slice(logits, 1, 0, logits.Shape()[1]-1) // (B, C-1, V)
-	props := F.Softmax(-1)(logits)                    // (B, C-1, V)
+	probs := F.Softmax(-1)(logits)                    // (B, C-1, V)
 	labels := slice(ids, 1, 1, ids.Shape()[1])        // (B, C-1)
 
-	// TODO: gather
-	_ = props
-	_ = labels
-
-	return nil
+	labels = F.Unsqueeze(-1)(labels) // (B, C-1, 1)
+	// TODO: probs = F.Gather(-1)(probs, labels) // (B, C-1, 1)
+	probs = F.Squeeze(-1)(probs) // (B, C-1)
+	return probs
 }
 
 func slice(x *variable.Variable, axis, start, end int) *variable.Variable {
