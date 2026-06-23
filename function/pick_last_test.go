@@ -3,6 +3,7 @@ package function_test
 import (
 	"fmt"
 
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	F "github.com/itsubaki/gpt/function"
 )
@@ -19,13 +20,13 @@ func ExamplePickLast() {
 		1.6, 1.7, 1.8,
 	).Reshape(3, 2, 3)
 
-	labels := variable.New(
+	labels := tensor.New([]int{3, 2}, []int{
 		2, 0,
 		1, 2,
 		0, 1,
-	).Reshape(3, 2)
+	})
 
-	y := F.PickLast(probs, labels)
+	y := F.PickLast(labels)(probs)
 	fmt.Println(y)
 
 	y.Backward()
