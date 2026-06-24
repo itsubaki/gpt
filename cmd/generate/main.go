@@ -18,12 +18,18 @@ func main() {
 	flag.StringVar(&prompt, "prompt", "def", "prompt for text generation")
 	flag.Float64Var(&temperature, "temperature", 1.0, "temperature for sampling")
 	flag.IntVar(&maxNewTokens, "max-new-tokens", 256, "maximum number of new tokens to generate")
-	flag.IntVar(&count, "count", 5, "number of times to generate text")
+	flag.IntVar(&count, "count", 1, "number of times to generate text")
 	flag.Parse()
 
 	// model from gob file
 	useCache := true
 	m, err := model.NewGPTFrom(modelPath, useCache)
+	if err != nil {
+		panic(err)
+	}
+
+	// tokenizer
+	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
@@ -35,14 +41,6 @@ func main() {
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
 	fmt.Println("------------------------------")
-
-	// tokenizer
-	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-
-	// prompt
 	fmt.Println("prompt:", prompt)
 	fmt.Println(" temperature   :", temperature)
 	fmt.Println(" max new tokens:", maxNewTokens)

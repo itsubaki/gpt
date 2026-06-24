@@ -41,3 +41,9 @@ sft:
 
 chat:
 	go run ./cmd/chat/main.go
+
+example:
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def factorial(n):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
