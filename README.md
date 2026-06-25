@@ -6,6 +6,34 @@
 
 GPT implementation in Go from scratch
 
+```
+Token IDs
+    ↓
+Embedding
+    ↓
+┌─────────────────────────────┐
+│ Transformer Block × N       │
+│                             │
+│ RMSNorm                     │
+│   ↓                         │
+│ Multi-Head Attention + RoPE │
+│   ↓                         │
+│ Residual                    │
+│   ↓                         │
+│ RMSNorm                     │
+│   ↓                         │
+│ SwiGLU                      │
+│   ↓                         │
+│ Residual                    │
+└─────────────────────────────┘
+    ↓
+RMSNorm
+    ↓
+Linear
+    ↓
+Logits
+```
+
 ## Train BPE Tokenizer
 
 ```shell
