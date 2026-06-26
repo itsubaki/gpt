@@ -67,8 +67,9 @@ func main() {
 
 		fmt.Println()
 		fmt.Println("------------------------------")
+		fmt.Println("generation time:", time.Since(now))
+		fmt.Println("------------------------------")
 		fmt.Println(tknizer.Decode(ids))
 		fmt.Println("------------------------------")
-		fmt.Println("generation time:", time.Since(now))
 	}
 }
