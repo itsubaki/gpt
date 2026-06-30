@@ -65,7 +65,7 @@ saved tokens to testdata/tiny_codes.bin
 ```shell
 % make pretrain
 go run ./cmd/pretrain/main.go
-Pre-Training 100%|██████████████████████████████| 4000/4000
+Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
 ## Generate Text
