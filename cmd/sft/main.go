@@ -30,7 +30,7 @@ func main() {
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
-	flag.IntVar(&maxIters, "max-iters", 500, "number of maximum iterations for fine-tuning")
+	flag.IntVar(&maxIters, "max-iters", 1000, "number of maximum iterations for fine-tuning")
 	flag.IntVar(&batchSize, "batch-size", 32, "batch size for fine-tuning")
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
