@@ -49,7 +49,6 @@ curl -fs -o testdata/model_gpt_sft.gob https://raw.githubusercontent.com/itsubak
 
 ```shell
 % make example
-...
 ```
 
 ```python
