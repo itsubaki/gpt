@@ -134,6 +134,39 @@ def add(a, b):
     return a + b
 ```
 
+```
+### Instruction:
+Write is_prime function
+
+### Response:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+<|endoftext|>
+```
+
+```
+### Instruction:
+Hello, Who are you?
+
+### Response:
+I'm CodeBot. How can I assist you today?
+<|endoftext|>
+```
+
+```
+### Instruction:
+3+9
+
+### Response:
+12
+<|endoftext|>
+```
+
 ## References
 
 - [ゼロから作るDeep Learning ❻](https://www.oreilly.co.jp/books/9784814401611/)
