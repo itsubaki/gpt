@@ -19,6 +19,13 @@ update:
 install:
 	go install github.com/itsubaki/plot@latest
 
+.PHONY: testdata
+testdata:
+	curl -fs -o testdata/merge_rules.gob   https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
+	curl -fs -o testdata/tiny_codes.bin    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
+	curl -fs -o testdata/model_gpt.gob     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
+	curl -fs -o testdata/model_gpt_sft.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
+
 dl:
 	curl -fs -o testdata/tiny_codes.txt      https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
 	curl -fs -o testdata/tiny_codes_sft.json https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes_sft.json
@@ -43,8 +50,11 @@ chat:
 	go run ./cmd/chat/main.go
 
 example:
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def add(a, b):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def factorial(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def fibonacci(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def is_prime(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --prompt 'def'
+	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def add(a, b):'
+	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def factorial(n):'
+	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def fibonacci(n):'
+	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def is_prime(n):'
+	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --prompt 'def'
+	go run ./cmd/chat/main.go --prompt 'Write is_prime function'
+	go run ./cmd/chat/main.go --prompt 'Hi, who are you?'
+	go run ./cmd/chat/main.go --prompt '3+7'

@@ -34,6 +34,32 @@ Linear
 Logits
 ```
 
+## How to run
+
+```shell
+% make testdata
+curl -fs -o testdata/merge_rules.gob   https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
+```
+
+```shell
+% make example
+...
+### Instruction:
+Write is_prime function
+
+### Response:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+```
+
 ## Train BPE Tokenizer
 
 ```shell
@@ -154,10 +180,10 @@ def is_prime(n):
 
 ```
 ### Instruction:
-Hello, Who are you?
+Hi, who are you?
 
 ### Response:
-I'm CodeBot. How can I assist you today?
+I'm an AI assistant. What do you need help with?
 ```
 
 ```
