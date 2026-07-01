@@ -102,7 +102,7 @@ print(a, b)
 ```shell
 %  make sft
 go run ./cmd/sft/main.go
-SFT 100%|██████████████████████████████| 1000/1000
+SFT 100%|██████████████████████████████| 500/500
 ```
 
 ## Chat
@@ -132,6 +132,39 @@ Write add function
 ### Response:
 def add(a, b):
     return a + b
+```
+
+```
+### Instruction:
+Write is_prime function
+
+### Response:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+<|endoftext|>
+```
+
+```
+### Instruction:
+Hello, Who are you?
+
+### Response:
+I'm CodeBot. How can I assist you today?
+<|endoftext|>
+```
+
+```
+### Instruction:
+3+9
+
+### Response:
+12
+<|endoftext|>
 ```
 
 ## References

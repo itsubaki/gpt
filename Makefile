@@ -48,3 +48,4 @@ example:
 	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def fibonacci(n):'
 	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --temperature 0.3 --prompt 'def is_prime(n):'
 	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob.min --prompt 'def'
+	go run ./cmd/chat/main.go --temperature 0.3 --prompt 'Write loop'
