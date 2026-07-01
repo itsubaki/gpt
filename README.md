@@ -68,6 +68,8 @@ go run ./cmd/pretrain/main.go
 Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
+<img src="https://github.com/itsubaki/gpt/blob/gob/loss.png">
+
 ## Generate Text
 
 ```shell
@@ -105,6 +107,8 @@ go run ./cmd/sft/main.go
 SFT 100%|██████████████████████████████| 500/500
 ```
 
+<img src="https://github.com/itsubaki/gpt/blob/gob/loss_sft.png">
+
 ## Chat
 
 ```shell
@@ -112,7 +116,7 @@ SFT 100%|███████████████████████�
 go run ./cmd/chat/main.go --prompt 'Write add function'
 ```
 
-```shell
+```
 model parameters:
  VocabSize    : 1000
  MaxContextLen: 256
@@ -146,7 +150,6 @@ def is_prime(n):
         if n % i == 0:
             return False
     return True
-<|endoftext|>
 ```
 
 ```
@@ -155,7 +158,6 @@ Hello, Who are you?
 
 ### Response:
 I'm CodeBot. How can I assist you today?
-<|endoftext|>
 ```
 
 ```
@@ -164,7 +166,6 @@ I'm CodeBot. How can I assist you today?
 
 ### Response:
 12
-<|endoftext|>
 ```
 
 ## References
