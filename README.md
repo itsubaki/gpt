@@ -34,11 +34,39 @@ Linear
 Logits
 ```
 
+## How to run
+
+```shell
+% make testdata example
+```
+
+```shell
+curl -fs -o testdata/merge_rules.gob   https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
+```
+
+```python
+### Instruction:
+Write is_prime function
+
+### Response:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+```
+
 ## Train BPE Tokenizer
 
 ```shell
 % make dl
-curl -fs -o testdata/tiny_codes.txt https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
+curl -fs -o testdata/tiny_codes.txt      https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
+curl -fs -o testdata/tiny_codes_sft.json https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes_sft.json
 ```
 
 ```shell
@@ -85,11 +113,7 @@ model parameters:
  NumOfHeads   : 6
  NumOfBlocks  : 6
 ------------------------------
-300,890,40,97,44,358,281,259,
-312,358,390,365,58,272,
-301,428,97,41,259,
-301,273,347,358,271,
-307,40,97,44,358,41,10,999,
+300,890,40,97,44,358,281,259,312,358,390,365,58,272,301,428,97,41,259,301,273,347,358,271,307,40,97,44,358,41,10,999,
 ------------------------------
 def add(a, b):
     if b == 0:
@@ -124,11 +148,7 @@ model parameters:
  NumOfHeads   : 6
  NumOfBlocks  : 6
 ------------------------------
-35,35,35,955,435,117,387,58,10,
-87,903,890,618,271,
-35,35,35,608,101,966,58,10,
-300,890,40,97,44,358,281,259,
-301,273,347,358,999,
+35,35,35,955,435,117,387,58,10,87,903,890,618,271,35,35,35,608,101,966,58,10,300,890,40,97,44,358,281,259,301,273,347,358,999,
 ------------------------------
 ### Instruction:
 Write add function
@@ -140,24 +160,10 @@ def add(a, b):
 
 ```
 ### Instruction:
-Write is_prime function
+Hi, who are you?
 
 ### Response:
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
-```
-
-```
-### Instruction:
-Hello, Who are you?
-
-### Response:
-I'm CodeBot. How can I assist you today?
+I'm an AI assistant. What do you need help with?
 ```
 
 ```
