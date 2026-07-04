@@ -84,17 +84,9 @@ func GenerateChan(
 
 			// generate tokens
 			for range maxNewTokens {
-				// get logits for the next token
+				// sample next token from the model output
 				logits := F.Reshape(-1)(x) // (1, 1, V) -> (V)
-
-				// sample next token
-				var nextID int
-				if temperature == 0 {
-					nextID = tensor.Argmax(logits.Data, 0).At()
-				} else {
-					probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
-					nextID = multinominal(probs)
-				}
+				nextID := sample(logits, temperature)
 
 				// send next token to channel
 				ch <- nextID
@@ -112,6 +104,15 @@ func GenerateChan(
 	}()
 
 	return ch
+}
+
+func sample(logits *variable.Variable, temperature float64) int {
+	if temperature == 0 {
+		return tensor.Argmax(logits.Data, 0).At()
+	}
+
+	probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
+	return multinominal(probs)
 }
 
 func newVariable(x []int) *variable.Variable {
