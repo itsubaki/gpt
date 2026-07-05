@@ -33,8 +33,27 @@ func Loss(
 	oldModel Model,
 	ids *variable.Variable,
 	mask *variable.Variable,
-	allAdvantages []float64,
+	advantages []float64,
 	epsilon float64,
 ) *variable.Variable {
-	return nil
+	// Compute the probabilities of the current model and the old model
+	probs := ComputeProbs(model, ids)
+
+	// Compute the probabilities of the old model without tracking gradients
+	var oldProbs *variable.Variable
+	func() {
+		defer variable.Nograd().End()
+		oldProbs = ComputeProbs(oldModel, ids)
+	}()
+
+	ratio := F.Div(probs, F.AddC(1e-8, oldProbs))
+	adv := F.Unsqueeze(-1)(variable.New(advantages...))
+	unclipped := F.Mul(ratio, adv)
+	clipped := F.Mul(F.Clip(1-epsilon, 1+epsilon)(ratio), adv)
+
+	masks := slice(mask, 1, 1, mask.Shape()[1])
+	tokenObjective := F.Mul(masks, function.Min(unclipped, clipped))
+
+	samples := float64(ids.Shape()[0])
+	return F.Neg(F.Div(F.Sum()(tokenObjective), variable.New(samples)))
 }
