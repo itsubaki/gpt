@@ -27,3 +27,14 @@ func slice(x *variable.Variable, axis, start, end int) *variable.Variable {
 
 	return variable.GetItem(axis, indices)(x)
 }
+
+func Loss(
+	model Model,
+	oldModel Model,
+	ids *variable.Variable,
+	mask *variable.Variable,
+	allAdvantages []float64,
+	epsilon float64,
+) *variable.Variable {
+	return nil
+}
