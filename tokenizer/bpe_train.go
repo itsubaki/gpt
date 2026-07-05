@@ -101,7 +101,7 @@ func countPairs(ids []int, weight int, counts ...*DefaultDict[Pair]) *DefaultDic
 
 	for i := range len(ids) - 1 {
 		p := Pair{ids[i], ids[i+1]}
-		cnts.Set(p, cnts.Dict[p]+weight)
+		cnts.Incr(p, weight)
 	}
 
 	return cnts
