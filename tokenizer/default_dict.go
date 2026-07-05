@@ -8,52 +8,52 @@ import (
 )
 
 type DefaultDict[T comparable] struct {
-	dict  map[T]int
-	order []T
+	Dict  map[T]int
+	Order []T
 }
 
 func NewDefaultDict[T comparable]() *DefaultDict[T] {
 	return &DefaultDict[T]{
-		dict:  make(map[T]int),
-		order: make([]T, 0),
+		Dict:  make(map[T]int),
+		Order: make([]T, 0),
 	}
 }
 
 func (d *DefaultDict[T]) Len() int {
-	return len(d.dict)
+	return len(d.Dict)
 }
 
 func (d *DefaultDict[T]) Set(key T, value int) {
-	if _, ok := d.dict[key]; !ok {
-		d.order = append(d.order, key)
+	if _, ok := d.Dict[key]; !ok {
+		d.Order = append(d.Order, key)
 	}
 
-	d.dict[key] = value
+	d.Dict[key] = value
 }
 
 func (d *DefaultDict[T]) Incr(key T, value int) {
-	if _, ok := d.dict[key]; !ok {
-		d.order = append(d.order, key)
+	if _, ok := d.Dict[key]; !ok {
+		d.Order = append(d.Order, key)
 	}
 
-	d.dict[key] += value
+	d.Dict[key] += value
 }
 
 func (d *DefaultDict[T]) Get(key T) (int, bool) {
-	value, ok := d.dict[key]
+	value, ok := d.Dict[key]
 	return value, ok
 }
 
 func (d *DefaultDict[T]) Value(key T) int {
-	return d.dict[key]
+	return d.Dict[key]
 }
 
 func (d *DefaultDict[T]) Delete(key T) {
-	delete(d.dict, key)
+	delete(d.Dict, key)
 
-	for i, k := range d.order {
+	for i, k := range d.Order {
 		if k == key {
-			d.order = append(d.order[:i], d.order[i+1:]...)
+			d.Order = append(d.Order[:i], d.Order[i+1:]...)
 			break
 		}
 	}
@@ -61,8 +61,8 @@ func (d *DefaultDict[T]) Delete(key T) {
 
 func (d *DefaultDict[T]) Seq2() iter.Seq2[T, int] {
 	return func(yield func(T, int) bool) {
-		for _, key := range d.order {
-			if !yield(key, d.dict[key]) {
+		for _, key := range d.Order {
+			if !yield(key, d.Dict[key]) {
 				return
 			}
 		}
