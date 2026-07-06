@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/itsubaki/autograd/layer"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
@@ -84,6 +85,19 @@ func (m *GPT) ClearCache() {
 	}
 }
 
+func (m *GPT) Load(params layer.Parameters) error {
+	for k, v := range params {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = v.Data
+			continue
+		}
+
+		return fmt.Errorf("parameter %s not found in model", k)
+	}
+
+	return nil
+}
+
 func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc, useCache ...bool) (string, *L.BlockT) {
 	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope, useCache...)
 }
@@ -108,7 +122,7 @@ func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
 
 	var saved *GPT
 	if err := gob.NewDecoder(f).Decode(&saved); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode: %v", err)
 	}
 
 	// restore model
@@ -122,12 +136,8 @@ func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
 		useCache...,
 	)
 
-	for k, v := range saved.Params() {
-		if p, ok := m.Params()[k]; ok {
-			p.Data = v.Data
-		} else {
-			panic(fmt.Sprintf("parameter %s not found in model", k))
-		}
+	if err := m.Load(saved.Params()); err != nil {
+		return nil, fmt.Errorf("load: %v", err)
 	}
 
 	return m, nil
