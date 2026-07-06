@@ -12,6 +12,11 @@ var (
 	_ Dataset = (*SFTDataset)(nil)
 )
 
+type Dataset interface {
+	Len() int
+	GetItem(i int) ([]int, []int)
+}
+
 type DataLoader struct {
 	BatchSize int
 	Dataset   Dataset

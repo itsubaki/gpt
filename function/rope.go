@@ -11,7 +11,6 @@ import (
 type RoPEFunc func(offset int) func(x ...*variable.Variable) *variable.Variable
 
 // RoPE implements the Rotary Position Embedding (RoPE) function.
-// Higher-order derivatives are not supported in this implementation.
 func RoPE(theta float64, embedDim, contextLen int) RoPEFunc {
 	if embedDim%2 != 0 {
 		panic(fmt.Sprintf("embedDim=%d is odd", embedDim))
