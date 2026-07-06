@@ -6,6 +6,8 @@ import (
 	"github.com/itsubaki/gpt/grpo"
 )
 
+var _ grpo.Tokenizer = (*MockTokenizer)(nil)
+
 type MockTokenizer struct{}
 
 func (t *MockTokenizer) Encode(text string) []int {

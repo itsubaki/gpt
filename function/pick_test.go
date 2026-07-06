@@ -8,7 +8,7 @@ import (
 	F "github.com/itsubaki/gpt/function"
 )
 
-func ExamplePickLast() {
+func ExamplePick() {
 	probs := variable.New(
 		0.1, 0.2, 0.3,
 		0.4, 0.5, 0.6,
@@ -26,7 +26,7 @@ func ExamplePickLast() {
 		0, 1,
 	})
 
-	y := F.PickLast(labels)(probs)
+	y := F.Pick(labels)(probs)
 	fmt.Println(y)
 
 	y.Backward()
