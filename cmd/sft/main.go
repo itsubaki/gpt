@@ -84,7 +84,7 @@ func main() {
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
-		Dataset: dataloader.NewSFTDataset(
+		Dataset: dataloader.NewAlpacaDataset(
 			dataloader.MustLoadAlpaca(alpacaPath),
 			tokenizer.NewBPETokenizer(mergeRules),
 			contextLen,

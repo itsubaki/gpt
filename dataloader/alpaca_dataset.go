@@ -20,13 +20,13 @@ type Alpaca struct {
 	Response    string `json:"response"`
 }
 
-type SFTDataset struct {
+type AlpacaDataset struct {
 	tokenizer  Tokenizer
 	contextLen int
 	samples    []Sample
 }
 
-func NewSFTDataset(alpaca []Alpaca, tokenizer Tokenizer, contextLen int) *SFTDataset {
+func NewAlpacaDataset(alpaca []Alpaca, tokenizer Tokenizer, contextLen int) *AlpacaDataset {
 	samples := make([]Sample, 0, len(alpaca))
 	for _, a := range alpaca {
 		prompt := AlpacaFormat(a.Instruction)
@@ -71,18 +71,18 @@ func NewSFTDataset(alpaca []Alpaca, tokenizer Tokenizer, contextLen int) *SFTDat
 		})
 	}
 
-	return &SFTDataset{
+	return &AlpacaDataset{
 		tokenizer:  tokenizer,
 		contextLen: contextLen,
 		samples:    samples,
 	}
 }
 
-func (s *SFTDataset) Len() int {
+func (s *AlpacaDataset) Len() int {
 	return len(s.samples)
 }
 
-func (s *SFTDataset) GetItem(i int) ([]int, []int) {
+func (s *AlpacaDataset) GetItem(i int) ([]int, []int) {
 	sample := s.samples[i]
 	return sample.IDs, sample.Labels
 }

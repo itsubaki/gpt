@@ -9,7 +9,7 @@ import (
 
 var (
 	_ Dataset = (*TokenDataset)(nil)
-	_ Dataset = (*SFTDataset)(nil)
+	_ Dataset = (*AlpacaDataset)(nil)
 )
 
 type Dataset interface {
