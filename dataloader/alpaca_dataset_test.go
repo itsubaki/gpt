@@ -17,7 +17,7 @@ func (t *MockTokenizer) Encode(text string) []int {
 	return encoded
 }
 
-func ExampleSFTDataset() {
+func ExampleAlpacaDataset() {
 	alpaca := []dataloader.Alpaca{
 		{
 			Instruction: "Hello",
@@ -30,7 +30,7 @@ func ExampleSFTDataset() {
 	}
 
 	mockTokenizer := &MockTokenizer{}
-	dataset := dataloader.NewSFTDataset(alpaca, mockTokenizer, 256)
+	dataset := dataloader.NewAlpacaDataset(alpaca, mockTokenizer, 256)
 
 	for i := range dataset.Len() {
 		ids, labels := dataset.GetItem(i)
