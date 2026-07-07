@@ -5,7 +5,7 @@ import (
 	"github.com/itsubaki/autograd/variable"
 )
 
-// Pick returns a function that selects the last element from x[0] along the last axis, based on the provided labels.
+// Pick selects elements from the last axis according to labels.
 func Pick(labels *tensor.Tensor[int]) func(x ...*variable.Variable) *variable.Variable {
 	return func(x ...*variable.Variable) *variable.Variable {
 		return (&variable.Function{
