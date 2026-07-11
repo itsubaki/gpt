@@ -93,7 +93,9 @@ func main() {
 		prompts, gts := dataloader.Batch()
 
 		// update old model
-		oldModel.Load(m.Params())
+		if err := oldModel.Load(m.Params()); err != nil {
+			panic(err)
+		}
 
 		// sample group of prompts and responses
 		allPrompts, allResponses, allAdvantages := grpo.GenerateGroup(

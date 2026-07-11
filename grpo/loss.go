@@ -25,6 +25,7 @@ func Loss(
 	var oldProbs *variable.Variable
 	func() {
 		defer variable.Nograd().End()
+		oldModel.ClearCache()
 		oldProbs = ComputeProbs(oldModel, ids)
 	}()
 
@@ -41,7 +42,6 @@ func Loss(
 }
 
 func ComputeProbs(model Model, ids *variable.Variable) *variable.Variable {
-	model.ClearCache()
 	logits := model.Forward(ids)                         // (B, C, V)
 	logits = slice(logits, 1, 0, logits.Shape()[1]-1)    // (B, C-1, V)
 	probs := F.Softmax(-1)(logits)                       // (B, C-1, V)
