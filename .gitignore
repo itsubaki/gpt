@@ -50,8 +50,8 @@ loss_sft.png
 loss_grpo.csv
 loss_grpo.png
 cpu.prof
-mem.prof
 cpu_sft.prof
-mem_sft.prof
 cpu_grpo.prof
+mem.prof
+mem_sft.prof
 mem_grpo.prof
