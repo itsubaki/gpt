@@ -16,12 +16,12 @@ import (
 )
 
 func main() {
-	var mergeRulesPath, modelPath, grpoModelPath string
+	var mergeRulesPath, sftModelPath, grpoModelPath string
 	var maxIters, batchSize, groupSize, updatePerGeneration int
 	var maxLR, beta1, beta2, weightDecay, clip float64
 	var epsilon float64
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
-	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the pre-trained model gob file")
 	flag.StringVar(&grpoModelPath, "grpo-model-path", "testdata/model_gpt_grpo.gob", "path to the GRPO model gob file")
 	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
@@ -30,19 +30,20 @@ func main() {
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.Float64Var(&epsilon, "epsilon", 0.2, "clipping range")
 	flag.IntVar(&maxIters, "max-iters", 500, "number of maximum iterations")
-	flag.IntVar(&batchSize, "batch-size", 2, "size of each batch")
+	flag.IntVar(&batchSize, "batch-size", 32, "size of each batch")
 	flag.IntVar(&groupSize, "group-size", 8, "size of each group")
 	flag.IntVar(&updatePerGeneration, "update-per-generation", 2, "number of updates per generation")
 	flag.Parse()
 
 	// model from gob file
-	m, err := model.NewGPTFrom(modelPath)
+	m, err := model.NewGPTFrom(sftModelPath)
 	if err != nil {
 		panic(err)
 	}
 
 	// old model from gob file
-	oldModel, err := model.NewGPTFrom(modelPath)
+	useCache := true
+	oldModel, err := model.NewGPTFrom(sftModelPath, useCache)
 	if err != nil {
 		panic(err)
 	}
@@ -106,7 +107,6 @@ func main() {
 
 		// get batch of ids and mask
 		ids, mask := dataset.GetBatch(allPrompts, allResponses)
-
 		for range updatePerGeneration {
 			m.Cleargrads()
 			loss = grpo.Loss(

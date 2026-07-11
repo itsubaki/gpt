@@ -9,6 +9,7 @@ import (
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
+	ClearCache()
 }
 
 func Loss(
@@ -40,6 +41,7 @@ func Loss(
 }
 
 func ComputeProbs(model Model, ids *variable.Variable) *variable.Variable {
+	model.ClearCache()
 	logits := model.Forward(ids)                         // (B, C, V)
 	logits = slice(logits, 1, 0, logits.Shape()[1]-1)    // (B, C-1, V)
 	probs := F.Softmax(-1)(logits)                       // (B, C-1, V)

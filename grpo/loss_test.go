@@ -18,6 +18,8 @@ func (m *MockModel) Forward(ids *variable.Variable) *variable.Variable {
 	return variable.New(m.logits...).Reshape(m.B, m.C, m.V)
 }
 
+func (m *MockModel) ClearCache() {}
+
 func ExampleComputeProbs() {
 	m := &MockModel{
 		logits: []float64{
