@@ -4,8 +4,8 @@ import "math/rand/v2"
 
 type DataLoader struct {
 	BatchSize int
-	Dataset   *Dataset
 	Shuffle   bool
+	Dataset   *Dataset
 	indices   []int
 	idx       int
 }

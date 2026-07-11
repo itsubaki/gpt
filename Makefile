@@ -49,6 +49,11 @@ sft:
 chat:
 	go run ./cmd/chat/main.go
 
+.PHONY: grpo
+grpo:
+	caffeinate -i go run ./cmd/grpo/main.go
+	plot loss_grpo.csv
+
 example:
 	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def add(a, b):'
 	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def factorial(n):'

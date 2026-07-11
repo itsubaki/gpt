@@ -48,3 +48,6 @@ loss_sft.png
 cpu_sft.prof
 testdata/model_gpt_sft.gob
 testdata/model_gpt_sft.gob.min
+loss_grpo.csv
+testdata/model_gpt_grpo.gob
+testdata/model_gpt_grpo.gob.min
