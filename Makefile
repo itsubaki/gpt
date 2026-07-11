@@ -11,7 +11,7 @@ pprof:
 	go tool pprof -http=:8080 cpu.prof
 
 update:
-	GOPROXY=direct go get github.com/itsubaki/autograd@HEAD
+	GOPROXY=direct go get github.com/itsubaki/autograd@gemm
 	go get -u
 	go mod tidy
 	pinact run -u
