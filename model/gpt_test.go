@@ -88,7 +88,7 @@ func ExampleGPT_save() {
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(dir)
+	defer func() { _ = os.RemoveAll(dir) }()
 	path := filepath.Join(dir, "model_gpt.gob")
 
 	m0 := model.NewGPT(1000, 256, 394, 6, 6, 10000)

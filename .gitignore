@@ -33,5 +33,10 @@ go.work.sum
 
 # add
 cpu.prof
-cpu_sft.prof
+mem.prof
+testdata/tiny_codes_sft.json
 .DS_Store
+loss_sft.csv
+loss_sft.png
+cpu_sft.prof
+mem_sft.prof
