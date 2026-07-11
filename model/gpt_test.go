@@ -111,8 +111,8 @@ func ExampleGPT_save() {
 
 	slices.Sort(keys)
 	for _, k := range keys {
-		fmt.Println(k, m0.Params()[k].Data.Shape)
-		fmt.Println(k, m1.Params()[k].Data.Shape)
+		fmt.Println(k, m0.Params()[k].Data.Shape())
+		fmt.Println(k, m1.Params()[k].Data.Shape())
 
 		if !reflect.DeepEqual(m0.Params()[k].Data, m1.Params()[k].Data) {
 			panic(fmt.Sprintf("parameter %s not equal", k))
