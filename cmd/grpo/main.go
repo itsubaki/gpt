@@ -159,7 +159,7 @@ func main() {
 					total++
 				}
 
-				curacc = float64(correct) / float64(total)
+				curacc = float64(correct) / float64(total) * 100
 				accs = append(accs, curacc)
 			}()
 		}
