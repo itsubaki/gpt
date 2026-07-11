@@ -46,7 +46,7 @@ func (p *ProgressBar) Update(current int, postfix ...string) {
 
 	var speed float64
 	if deltaTime > 0 {
-		speed = float64(deltaCount) / deltaTime
+		speed = float64(deltaCount) / deltaTime * 3600
 	}
 
 	// eta
@@ -56,7 +56,7 @@ func (p *ProgressBar) Update(current int, postfix ...string) {
 	}
 
 	// print
-	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%s<%s, %.1f it/s] %s",
+	if _, err := fmt.Fprintf(p.writer, "\r%s %3.0f%%|%s| %d/%d [%s<%s, %.1f it/h] %s",
 		fmt.Sprintf("%-12s", p.desc),
 		percent*100,
 		bar,
