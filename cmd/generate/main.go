@@ -22,11 +22,11 @@ func main() {
 	flag.Parse()
 
 	// model from gob file
-	useCache := true
-	m, err := model.NewGPTFrom(modelPath, useCache)
+	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
 		panic(err)
 	}
+	m.Eval()
 
 	// tokenizer
 	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)

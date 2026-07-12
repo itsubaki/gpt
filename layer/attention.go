@@ -12,13 +12,13 @@ import (
 
 var _ L.Layer = (*MultiHeadAttentionT)(nil)
 
-func MultiHeadAttention(embedDim, numOfHeads, headDim int, rope function.RoPEFunc, useCache ...bool) *MultiHeadAttentionT {
+func MultiHeadAttention(embedDim, numOfHeads, headDim int, rope function.RoPEFunc) *MultiHeadAttentionT {
 	E, H, D := embedDim, numOfHeads, headDim
 	return &MultiHeadAttentionT{
 		numOfHeads: numOfHeads,
 		headDim:    headDim,
 		rope:       rope,
-		useCache:   len(useCache) > 0 && useCache[0],
+		useCache:   false,
 		Layers: L.Layers{
 			"Wq": Linear(E, H*D),
 			"Wk": Linear(E, H*D),
@@ -108,4 +108,14 @@ func (l *MultiHeadAttentionT) ClearCache() {
 	l.kCache = nil
 	l.vCache = nil
 	l.offset = 0
+}
+
+func (l *MultiHeadAttentionT) Eval() {
+	l.useCache = true
+	l.ClearCache()
+}
+
+func (l *MultiHeadAttentionT) Train() {
+	l.useCache = false
+	l.ClearCache()
 }
