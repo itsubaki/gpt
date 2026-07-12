@@ -1,10 +1,6 @@
 package grpo
 
-import (
-	"fmt"
-
-	"github.com/itsubaki/gpt/model"
-)
+import "github.com/itsubaki/gpt/model"
 
 func GenerateGroup(
 	m model.Model,
@@ -47,12 +43,6 @@ func GenerateGroup(
 			allResponses = append(allResponses, responses[j])
 			allAdvantages = append(allAdvantages, advantages[j])
 		}
-
-		fmt.Println("------------------")
-		fmt.Println(prompt)
-		fmt.Println(responses)
-		fmt.Println("rewards:", rewards)
-		fmt.Println("mean:", mean)
 	}
 
 	return allPrompts, allResponses, allAdvantages

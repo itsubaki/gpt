@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/itsubaki/autograd/hook"
 	"github.com/itsubaki/autograd/optimizer"
@@ -14,6 +16,8 @@ import (
 	"github.com/itsubaki/gpt/progress"
 	"github.com/itsubaki/gpt/tokenizer"
 )
+
+var re = regexp.MustCompile(`(?s)### Instruction:\s*(.*?)\s*### Response:`)
 
 func main() {
 	var mergeRulesPath, sftModelPath, grpoModelPath string
@@ -106,6 +110,11 @@ func main() {
 			gts,
 			groupSize,
 		)
+
+		fmt.Println()
+		for j := range allPrompts {
+			fmt.Printf("%s %2s; adv: %v\n", strings.TrimSpace(re.FindStringSubmatch(allPrompts[j])[1]), allResponses[j], allAdvantages[j])
+		}
 
 		// get batch of ids and mask
 		ids, mask := dataset.GetBatch(allPrompts, allResponses)
