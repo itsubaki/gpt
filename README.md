@@ -173,6 +173,14 @@ I'm an AI assistant. What do you need help with?
 12
 ```
 
+## GRPO
+
+```shell
+%  make grpo
+go run ./cmd/grpo/main.go
+GRPO 100%|██████████████████████████████| 500/500
+```
+
 ## References
 
 - [ゼロから作るDeep Learning ❻](https://www.oreilly.co.jp/books/9784814401611/)
