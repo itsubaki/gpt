@@ -8,6 +8,7 @@ import (
 	"github.com/itsubaki/autograd/layer"
 	M "github.com/itsubaki/autograd/model"
 	O "github.com/itsubaki/autograd/optimizer"
+	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/function"
 	L "github.com/itsubaki/gpt/layer"
@@ -99,7 +100,7 @@ func (m *GPT) Train() {
 func (m *GPT) Load(params layer.Parameters) error {
 	for k, v := range params {
 		if p, ok := m.Params()[k]; ok {
-			p.Data = v.Data
+			p.Data = tensor.Clone(v.Data)
 			continue
 		}
 
