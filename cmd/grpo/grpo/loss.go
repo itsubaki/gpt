@@ -25,7 +25,6 @@ func Loss(
 	var oldProbs *variable.Variable
 	func() {
 		defer variable.Nograd().End()
-		oldModel.ClearCache()
 		oldProbs = ComputeProbs(oldModel, ids)
 	}()
 
@@ -36,9 +35,10 @@ func Loss(
 
 	masks := slice(mask, 1, 1, mask.Shape()[1])                      // (B, C-1)
 	tokenObjective := F.Mul(masks, function.Min(unclipped, clipped)) // masks * min(unclipped, clipped)
+	sum := F.Sum()(tokenObjective)
 
-	samples := float64(ids.Shape()[0])                                  //
-	return F.Neg(F.Div(F.Sum()(tokenObjective), variable.New(samples))) // -1 * sum / samples
+	samples := float64(ids.Shape()[0])              //
+	return F.Neg(F.Div(sum, variable.New(samples))) // -1 * sum / samples
 }
 
 func ComputeProbs(model Model, ids *variable.Variable) *variable.Variable {

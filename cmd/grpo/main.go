@@ -42,8 +42,7 @@ func main() {
 	}
 
 	// old model from gob file
-	useCache := true
-	oldModel, err := model.NewGPTFrom(sftModelPath, useCache)
+	oldModel, err := model.NewGPTFrom(sftModelPath)
 	if err != nil {
 		panic(err)
 	}
