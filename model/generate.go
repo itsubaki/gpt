@@ -22,7 +22,7 @@ type Tokenizer interface {
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
-	ClearCache()
+	Eval()
 }
 
 func GenerateText(
@@ -68,8 +68,8 @@ func GenerateChan(
 			// disable gradient tracking for generation
 			defer variable.Nograd().End()
 
-			// clear cache before generation
-			model.ClearCache()
+			// set model to evaluation mode (and clear KV cache)
+			model.Eval()
 
 			// encode prompt
 			ids := tokenizer.Encode(prompt)

@@ -43,7 +43,6 @@ func NewGPT(
 	numOfHeads int,
 	numOfBlocks int,
 	theta float64,
-	useCache ...bool,
 ) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
@@ -62,7 +61,7 @@ func NewGPT(
 	// Transformer blocks with RoPE
 	rope := function.RoPE(theta, embedDim, maxContextLen)
 	for i := range numOfBlocks {
-		gpt.Add(newBlock(i, embedDim, numOfHeads, rope, useCache...))
+		gpt.Add(newBlock(i, embedDim, numOfHeads, rope))
 	}
 
 	return gpt
@@ -85,6 +84,18 @@ func (m *GPT) ClearCache() {
 	}
 }
 
+func (m *GPT) Eval() {
+	for i := range m.NumOfBlocks {
+		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).Eval()
+	}
+}
+
+func (m *GPT) Train() {
+	for i := range m.NumOfBlocks {
+		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).Train()
+	}
+}
+
 func (m *GPT) Load(params layer.Parameters) error {
 	for k, v := range params {
 		if p, ok := m.Params()[k]; ok {
@@ -98,8 +109,8 @@ func (m *GPT) Load(params layer.Parameters) error {
 	return nil
 }
 
-func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc, useCache ...bool) (string, *L.BlockT) {
-	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope, useCache...)
+func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, *L.BlockT) {
+	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
 }
 
 func init() {
@@ -113,7 +124,7 @@ func init() {
 	gob.Register(&L.SwiGLUT{})
 }
 
-func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
+func NewGPTFrom(path string) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -133,7 +144,6 @@ func NewGPTFrom(path string, useCache ...bool) (*GPT, error) {
 		saved.NumOfHeads,
 		saved.NumOfBlocks,
 		saved.Theta,
-		useCache...,
 	)
 
 	if err := m.Load(saved.Params()); err != nil {
