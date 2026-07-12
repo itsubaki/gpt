@@ -125,7 +125,7 @@ func main() {
 		}
 
 		// flush loss
-		if err := write(w, i, loss.At()); err != nil {
+		if err := write(w, i, loss.At(), curacc); err != nil {
 			panic(err)
 		}
 
@@ -173,10 +173,11 @@ func main() {
 	}
 }
 
-func write(w *csv.Writer, iter int, loss float64) error {
+func write(w *csv.Writer, iter int, loss float64, acc float64) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
 		fmt.Sprintf("%v", loss),
+		fmt.Sprintf("%v", acc),
 	}); err != nil {
 		return err
 	}
