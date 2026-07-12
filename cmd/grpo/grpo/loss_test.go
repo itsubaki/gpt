@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/itsubaki/autograd/variable"
-	"github.com/itsubaki/gpt/grpo"
+	"github.com/itsubaki/gpt/cmd/grpo/grpo"
 )
 
 var _ grpo.Model = (*MockModel)(nil)

@@ -3,7 +3,7 @@ package grpo_test
 import (
 	"testing"
 
-	"github.com/itsubaki/gpt/grpo"
+	"github.com/itsubaki/gpt/cmd/grpo/grpo"
 )
 
 func TestReward(t *testing.T) {
