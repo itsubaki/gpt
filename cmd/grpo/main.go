@@ -113,7 +113,11 @@ func main() {
 
 		fmt.Println()
 		for j := range allPrompts {
-			fmt.Printf("%s %2s; adv: %v\n", strings.TrimSpace(re.FindStringSubmatch(allPrompts[j])[1]), allResponses[j], allAdvantages[j])
+			fmt.Printf("%s %2s; adv: %v\n",
+				strings.TrimSpace(re.FindStringSubmatch(allPrompts[j])[1]),
+				strings.ReplaceAll(allResponses[j], "\n", ";"),
+				allAdvantages[j],
+			)
 		}
 
 		// get batch of ids and mask
