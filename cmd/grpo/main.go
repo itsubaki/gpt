@@ -9,7 +9,7 @@ import (
 	"github.com/itsubaki/autograd/hook"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/autograd/variable"
-	"github.com/itsubaki/gpt/grpo"
+	"github.com/itsubaki/gpt/cmd/grpo/grpo"
 	"github.com/itsubaki/gpt/model"
 	"github.com/itsubaki/gpt/progress"
 	"github.com/itsubaki/gpt/tokenizer"
