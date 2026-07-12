@@ -27,7 +27,7 @@ func main() {
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the pre-trained model gob file")
 	flag.StringVar(&grpoModelPath, "grpo-model-path", "testdata/model_gpt_grpo.gob", "path to the GRPO model gob file")
-	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
+	flag.Float64Var(&maxLR, "max-learning-rate", 7e-6, "maximum learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
