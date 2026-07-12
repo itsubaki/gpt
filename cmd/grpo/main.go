@@ -90,8 +90,7 @@ func main() {
 	bar := progress.NewProgressBar("GRPO", maxIters, os.Stdout)
 	bar.Update(0)
 
-	var accs []float64
-	var curacc float64
+	var acc float64
 	var loss *variable.Variable
 	for i := range maxIters {
 		prompts, gts := dataloader.Batch()
@@ -137,8 +136,8 @@ func main() {
 			o.Update(m)
 		}
 
-		// flush loss
-		if err := write(w, i, loss.At(), curacc); err != nil {
+		// write accuracy and loss to csv
+		if err := write(w, i, acc, loss.At()); err != nil {
 			panic(err)
 		}
 
@@ -176,21 +175,20 @@ func main() {
 				}
 
 				m.Train()
-				curacc = float64(correct) / float64(total) * 100
-				accs = append(accs, curacc)
+				acc = float64(correct) / float64(total) * 100
 			}()
 		}
 
 		// update progress bar
-		bar.Update(i+1, fmt.Sprintf("loss=%v, acc=%.4f", loss.At(), curacc))
+		bar.Update(i+1, fmt.Sprintf("acc=%.4f, loss=%v", acc, loss.At()))
 	}
 }
 
-func write(w *csv.Writer, iter int, loss float64, acc float64) error {
+func write(w *csv.Writer, iter int, acc, loss float64) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
-		fmt.Sprintf("%v", loss),
 		fmt.Sprintf("%v", acc),
+		fmt.Sprintf("%v", loss),
 	}); err != nil {
 		return err
 	}
