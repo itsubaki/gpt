@@ -106,6 +106,7 @@ func (m *GPT) Load(params layer.Parameters) error {
 		return fmt.Errorf("parameter %s not found in model", k)
 	}
 
+	m.ClearCache()
 	return nil
 }
 
