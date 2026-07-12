@@ -9,7 +9,8 @@ import (
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
-	ClearCache()
+	Train()
+	Eval()
 }
 
 func Loss(
@@ -25,7 +26,10 @@ func Loss(
 	var oldProbs *variable.Variable
 	func() {
 		defer variable.Nograd().End()
+
+		oldModel.Train()
 		oldProbs = ComputeProbs(oldModel, ids)
+		oldModel.Eval()
 	}()
 
 	ratio := F.Div(probs, F.AddC(1e-8, oldProbs))              // props / (oldProps + 1e-8)

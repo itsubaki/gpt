@@ -1,6 +1,10 @@
 package grpo
 
-import "github.com/itsubaki/gpt/model"
+import (
+	"fmt"
+
+	"github.com/itsubaki/gpt/model"
+)
 
 func GenerateGroup(
 	m model.Model,
@@ -12,7 +16,6 @@ func GenerateGroup(
 ) ([]string, []string, []float64) {
 	var allPrompts, allResponses []string
 	var allAdvantages []float64
-
 	for i := range prompts {
 		prompt, responses := prompts[i], make([]string, groupSize)
 		for j := range responses {
@@ -44,6 +47,12 @@ func GenerateGroup(
 			allResponses = append(allResponses, responses[j])
 			allAdvantages = append(allAdvantages, advantages[j])
 		}
+
+		fmt.Println("------------------")
+		fmt.Println(prompt)
+		fmt.Println(responses)
+		fmt.Println("rewards:", rewards)
+		fmt.Println("mean:", mean)
 	}
 
 	return allPrompts, allResponses, allAdvantages

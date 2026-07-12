@@ -46,6 +46,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	oldModel.Eval()
 
 	// optimizer
 	o := optimizer.AdamW{
@@ -139,6 +140,7 @@ func main() {
 		if i%10 == 0 {
 			func() {
 				defer variable.Nograd().End()
+				m.Eval()
 
 				var correct, total float64
 				for j := range dataset.Len() {
@@ -160,6 +162,7 @@ func main() {
 					total++
 				}
 
+				m.Train()
 				curacc = float64(correct) / float64(total) * 100
 				accs = append(accs, curacc)
 			}()
