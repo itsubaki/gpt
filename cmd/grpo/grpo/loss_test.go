@@ -18,7 +18,9 @@ func (m *MockModel) Forward(ids *variable.Variable) *variable.Variable {
 	return variable.New(m.logits...).Reshape(m.B, m.C, m.V)
 }
 
-func (m *MockModel) ClearCache() {}
+func (m *MockModel) Train() {}
+
+func (m *MockModel) Eval() {}
 
 func ExampleComputeProbs() {
 	m := &MockModel{
