@@ -167,14 +167,14 @@ func main() {
 		}
 
 		// update progress bar
-		bar.Update(i+1, fmt.Sprintf("loss=%.4f, acc=%.4f", loss.At(), curacc))
+		bar.Update(i+1, fmt.Sprintf("loss=%v, acc=%.4f", loss.At(), curacc))
 	}
 }
 
 func write(w *csv.Writer, iter int, loss float64) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
-		fmt.Sprintf("%.4f", loss),
+		fmt.Sprintf("%v", loss),
 	}); err != nil {
 		return err
 	}
