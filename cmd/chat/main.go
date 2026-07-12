@@ -27,7 +27,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	m.Eval()
 
 	// tokenizer
 	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
