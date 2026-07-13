@@ -164,13 +164,14 @@ GRPO         100%|████████████████████�
 
 
 ```shell
-% make addition
-go run ./cmd/addition/main.go --batch-size 100
+% make eval
+go run ./cmd/eval/main.go --batch-size 100
 6+8=14 true
 5+5=10 true
 8+8=15 false
 ...
 7+2=9  true
+
 accuracy: 99 %
 ```
 

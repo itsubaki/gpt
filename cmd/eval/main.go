@@ -79,5 +79,6 @@ func main() {
 		}
 	}
 
+	fmt.Println()
 	fmt.Println("accuracy:", float64(correct)/float64(batchSize)*100, "%")
 }
