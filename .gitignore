@@ -41,14 +41,14 @@ testdata/model_gpt.gob
 testdata/model_gpt.gob.min
 testdata/model_gpt_sft.gob
 testdata/model_gpt_sft.gob.min
-# testdata/model_gpt_grpo.gob
-# testdata/model_gpt_grpo.gob.min
+testdata/model_gpt_grpo.gob
+testdata/model_gpt_grpo.gob.min
 loss.csv
 loss.png
 loss_sft.csv
 loss_sft.png
-# loss_grpo.csv
-# loss_grpo.png
+loss_grpo.csv
+loss_grpo.png
 cpu.prof
 cpu_sft.prof
 cpu_grpo.prof
