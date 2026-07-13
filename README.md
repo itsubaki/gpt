@@ -40,10 +40,11 @@ Logits
 ```
 
 ```shell
-curl -fs -o testdata/merge_rules.gob   https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
-curl -fs -o testdata/tiny_codes.bin    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
-curl -fs -o testdata/model_gpt.gob     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
-curl -fs -o testdata/model_gpt_sft.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
+curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
+curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_grpo.gob
 ```
 
 ```python
@@ -103,13 +104,6 @@ go run ./cmd/generate/main.go --prompt 'def add(a, b):'
 ```
 
 ```
-model parameters:
- VocabSize    : 1000
- MaxContextLen: 256
- EmbedDim     : 192
- NumOfHeads   : 6
- NumOfBlocks  : 6
-------------------------------
 def add(a, b):
     if b == 0:
         return (a)
@@ -134,13 +128,6 @@ go run ./cmd/chat/main.go --prompt 'Write loop'
 ```
 
 ```
-model parameters:
- VocabSize    : 1000
- MaxContextLen: 256
- EmbedDim     : 192
- NumOfHeads   : 6
- NumOfBlocks  : 6
-------------------------------
 ### Instruction:
 Write loop
 
@@ -179,17 +166,6 @@ GRPO         100%|████████████████████�
 ```shell
 % make addition
 go run ./cmd/addition/main.go --batch-size 100
-model parameters:
- VocabSize    : 1000
- MaxContextLen: 256
- EmbedDim     : 192
- NumOfHeads   : 6
- NumOfBlocks  : 6
-------------------------------
- temperature   : 1
- max new tokens: 256
- batch size    : 100
-------------------------------
 6+8=14 true
 5+5=10 true
 8+8=15 false
