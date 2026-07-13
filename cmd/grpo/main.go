@@ -22,21 +22,23 @@ var re = regexp.MustCompile(`(?s)### Instruction:\s*(.*?)\s*### Response:`)
 func main() {
 	var mergeRulesPath, sftModelPath, grpoModelPath string
 	var maxIters, batchSize, groupSize, updatePerGeneration int
-	var maxLR, beta1, beta2, weightDecay, clip float64
+	var learningRate, beta1, beta2, weightDecay, clip float64
 	var epsilon float64
+	var verbose bool
 	flag.StringVar(&mergeRulesPath, "merge-rules-path", "testdata/merge_rules.gob", "path to the merge rules file")
-	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the pre-trained model gob file")
+	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.StringVar(&grpoModelPath, "grpo-model-path", "testdata/model_gpt_grpo.gob", "path to the GRPO model gob file")
-	flag.Float64Var(&maxLR, "max-learning-rate", 7e-6, "maximum learning rate")
+	flag.Float64Var(&learningRate, "learning-rate", 7e-6, "learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
 	flag.Float64Var(&clip, "clip", 1.0, "gradient clipping value")
 	flag.Float64Var(&epsilon, "epsilon", 0.2, "clipping range")
-	flag.IntVar(&maxIters, "max-iters", 500, "number of maximum iterations")
+	flag.IntVar(&maxIters, "max-iters", 100, "number of maximum iterations")
 	flag.IntVar(&batchSize, "batch-size", 32, "size of each batch")
 	flag.IntVar(&groupSize, "group-size", 8, "size of each group")
 	flag.IntVar(&updatePerGeneration, "update-per-generation", 2, "number of updates per generation")
+	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
 	flag.Parse()
 
 	// model from gob file
@@ -54,7 +56,7 @@ func main() {
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       maxLR,
+		Alpha:       learningRate,
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
@@ -110,13 +112,15 @@ func main() {
 			groupSize,
 		)
 
-		fmt.Println()
-		for j := range allPrompts {
-			fmt.Printf("%s %2s; adv: %v\n",
-				strings.TrimSpace(re.FindStringSubmatch(allPrompts[j])[1]),
-				strings.ReplaceAll(allResponses[j], "\n", ";"),
-				allAdvantages[j],
-			)
+		if verbose {
+			fmt.Println()
+			for j := range allPrompts {
+				fmt.Printf("%s %2s; adv: %v\n",
+					strings.TrimSpace(re.FindStringSubmatch(allPrompts[j])[1]),
+					strings.ReplaceAll(allResponses[j], "\n", ";"),
+					allAdvantages[j],
+				)
+			}
 		}
 
 		// get batch of ids and mask
@@ -182,6 +186,13 @@ func main() {
 		// update progress bar
 		bar.Update(i+1, fmt.Sprintf("acc=%.4f, loss=%v", acc, loss.At()))
 	}
+
+	// save final model
+	if err := m.Save(grpoModelPath); err != nil {
+		panic(err)
+	}
+
+	fmt.Println()
 }
 
 func write(w *csv.Writer, iter int, acc, loss float64) error {

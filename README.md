@@ -3,7 +3,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/gpt)](https://pkg.go.dev/github.com/itsubaki/gpt)
 [![tests](https://github.com/itsubaki/gpt/workflows/tests/badge.svg)](https://github.com/itsubaki/gpt/actions)
 
-GPT implementation in Go from scratch.
+An implementation of GPT in Go from scratch.
 
 ```
 Token IDs
@@ -33,7 +33,7 @@ Linear
 Logits
 ```
 
-## How to run
+## Quick Start
 
 ```shell
 % make testdata example
@@ -60,7 +60,7 @@ def is_prime(n):
     return True
 ```
 
-## Train BPE Tokenizer
+## BPE Tokenizer Training
 
 ```shell
 % make dl
@@ -87,7 +87,7 @@ encoding time: 1.459157917s
 saved tokens to testdata/tiny_codes.bin
 ```
 
-## Pre-Train GPT
+## Pre-Training
 
 ```shell
 % make pretrain
@@ -96,8 +96,6 @@ Pre-Training 100%|████████████████████�
 ```
 
 <img src="https://github.com/itsubaki/gpt/blob/gob/loss.png">
-
-## Generate Text
 
 ```shell
 make generate
@@ -112,8 +110,6 @@ model parameters:
  NumOfHeads   : 6
  NumOfBlocks  : 6
 ------------------------------
-300,890,40,97,44,358,281,259,312,358,390,365,58,272,301,428,97,41,259,301,273,347,358,271,307,40,97,44,358,41,10,999,
-------------------------------
 def add(a, b):
     if b == 0:
         return (a)
@@ -122,21 +118,19 @@ def add(a, b):
 print(a, b)
 ```
 
-## Supervised Fine-Tuning
+## Supervised Fine-Tuning (SFT)
 
 ```shell
 %  make sft
 go run ./cmd/sft/main.go
-SFT 100%|██████████████████████████████| 500/500
+SFT          100%|██████████████████████████████| 500/500
 ```
 
 <img src="https://github.com/itsubaki/gpt/blob/gob/loss_sft.png">
 
-## Chat
-
 ```shell
 % make chat
-go run ./cmd/chat/main.go --prompt 'Write add function'
+go run ./cmd/chat/main.go --prompt 'Write loop'
 ```
 
 ```
@@ -147,14 +141,12 @@ model parameters:
  NumOfHeads   : 6
  NumOfBlocks  : 6
 ------------------------------
-35,35,35,955,435,117,387,58,10,87,903,890,618,271,35,35,35,608,101,966,58,10,300,890,40,97,44,358,281,259,301,273,347,358,999,
-------------------------------
 ### Instruction:
-Write add function
+Write loop
 
 ### Response:
-def add(a, b):
-    return a + b
+for i in range(10):
+    print(i)
 ```
 
 ```
@@ -167,18 +159,40 @@ I'm an AI assistant. What do you need help with?
 
 ```
 ### Instruction:
-3+9
+3+9=
 
 ### Response:
 12
 ```
 
-## GRPO
+## Group Relative Policy Optimization (GRPO)
 
 ```shell
 %  make grpo
 go run ./cmd/grpo/main.go
-GRPO 100%|██████████████████████████████| 500/500
+GRPO         100%|██████████████████████████████| 100/100
+```
+
+```shell
+% make addition
+go run ./cmd/addition/main.go --batch-size 100
+model parameters:
+ VocabSize    : 1000
+ MaxContextLen: 256
+ EmbedDim     : 192
+ NumOfHeads   : 6
+ NumOfBlocks  : 6
+------------------------------
+ temperature   : 1
+ max new tokens: 256
+ batch size    : 100
+------------------------------
+6+8=14 true
+5+5=10 true
+8+8=15 false
+...
+7+2=9  true
+accuracy: 99 %
 ```
 
 ## References
