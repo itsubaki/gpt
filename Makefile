@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 test:
-	go test -cover $(shell go list ./... | grep -v /cmd/ ) -v -coverprofile=coverage.txt -covermode=atomic
+	go test -cover $(shell { go list ./... | grep -v '/cmd/'; go list ./cmd/grpo/grpo; }) -v -coverprofile=coverage.txt -covermode=atomic
 	go tool cover -html=coverage.txt -o coverage.html
 
 lint:
@@ -49,12 +49,20 @@ sft:
 chat:
 	go run ./cmd/chat/main.go
 
+.PHONY: grpo
+grpo:
+	caffeinate -i go run ./cmd/grpo/main.go
+	plot loss_grpo.csv
+
 example:
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def add(a, b):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def factorial(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def fibonacci(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --temperature 0.3 --prompt 'def is_prime(n):'
-	go run ./cmd/generate/main.go --model-path testdata/model_gpt.gob --prompt 'def'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def factorial(n):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
+	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
+	go run ./cmd/generate/main.go --prompt 'def'
 	go run ./cmd/chat/main.go --prompt 'Write is_prime function'
 	go run ./cmd/chat/main.go --prompt 'Hi, who are you?'
-	go run ./cmd/chat/main.go --prompt '3+7'
+	go run ./cmd/chat/main.go --prompt '3+9='
+
+eval:
+	go run ./cmd/eval/main.go --batch-size 100

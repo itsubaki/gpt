@@ -22,7 +22,7 @@ type Tokenizer interface {
 
 type Model interface {
 	Forward(x *variable.Variable) *variable.Variable
-	Eval()
+	ClearCache()
 }
 
 func GenerateText(
@@ -68,8 +68,8 @@ func GenerateChan(
 			// disable gradient tracking for generation
 			defer variable.Nograd().End()
 
-			// set model to evaluation mode (and clear KV cache)
-			model.Eval()
+			// clear KV cache
+			model.ClearCache()
 
 			// encode prompt
 			ids := tokenizer.Encode(prompt)
@@ -88,13 +88,13 @@ func GenerateChan(
 				logits := F.Reshape(-1)(x) // (1, 1, V) -> (V)
 				nextID := sample(logits, temperature)
 
-				// send next token to channel
-				ch <- nextID
-
 				// stop if end token is generated
 				if nextID == tokenizer.EndTokenID() {
 					break
 				}
+
+				// send next token to channel
+				ch <- nextID
 
 				// next token only
 				x = newVariable([]int{nextID}).Reshape(1, 1) // (1, 1)
