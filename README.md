@@ -71,7 +71,7 @@ curl -fs -o testdata/tiny_codes_sft.json https://raw.githubusercontent.com/oreil
 
 ```shell
 % make tokenize
-go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
+go run ./cmd/tokenize -vocab-size 1000
 Training BPE 100%|██████████████████████████████| 743/743
 saved merge rules to testdata/merge_rules.gob
 ...
