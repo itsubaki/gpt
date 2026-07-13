@@ -173,6 +173,9 @@ go run ./cmd/grpo/main.go
 GRPO         100%|██████████████████████████████| 100/100
 ```
 
+<img src="https://github.com/itsubaki/gpt/blob/gob/loss_grpo.png">
+
+
 ```shell
 % make addition
 go run ./cmd/addition/main.go --batch-size 100
