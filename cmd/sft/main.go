@@ -20,12 +20,12 @@ import (
 func main() {
 	var contextLen int
 	var mergeRulesPath, modelPath, alpacaPath, sftModelPath string
-	var maxLR, beta1, beta2, weightDecay, clip float64
+	var learningRate, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var usePProf bool
 	var minLoss float64
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
-	flag.Float64Var(&maxLR, "max-learning-rate", 3e-4, "maximum learning rate")
+	flag.Float64Var(&learningRate, "learning-rate", 3e-4, "learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
 	flag.Float64Var(&beta2, "beta2", 0.999, "beta2 for AdamW optimizer")
 	flag.Float64Var(&weightDecay, "weight-decay", 0.01, "weight decay for AdamW optimizer")
@@ -65,7 +65,7 @@ func main() {
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       maxLR,
+		Alpha:       learningRate,
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
