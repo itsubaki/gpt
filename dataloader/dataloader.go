@@ -46,8 +46,10 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		l.Reset()
 	}
 
-	xs := make([]int, 0, l.BatchSize*l.Dataset.ContextLen())
-	ys := make([]int, 0, l.BatchSize*l.Dataset.ContextLen())
+	size := l.BatchSize * l.Dataset.ContextLen()
+	xs := make([]int, 0, size)
+	ys := make([]int, 0, size)
+
 	for range l.BatchSize {
 		if l.idx >= l.Dataset.Len() {
 			l.Reset()
