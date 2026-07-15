@@ -82,6 +82,10 @@ func (s *AlpacaDataset) Len() int {
 	return len(s.samples)
 }
 
+func (s *AlpacaDataset) ContextLen() int {
+	return s.contextLen
+}
+
 func (s *AlpacaDataset) GetItem(i int) ([]int, []int) {
 	sample := s.samples[i]
 	return sample.IDs, sample.Labels

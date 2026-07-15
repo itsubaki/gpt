@@ -85,10 +85,10 @@ func main() {
 	loader := dataloader.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
-		Dataset: &dataloader.TokenDataset{
-			Tokens:     dataloader.MustLoadTokens(tokensPath),
-			ContextLen: contextLen,
-		},
+		Dataset: dataloader.NewTokenDataset(
+			dataloader.MustLoadTokens(tokensPath),
+			contextLen,
+		),
 	}
 
 	// progress bar

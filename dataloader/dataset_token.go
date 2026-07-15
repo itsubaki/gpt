@@ -6,17 +6,28 @@ import (
 )
 
 type TokenDataset struct {
-	Tokens     []int
-	ContextLen int
+	tokens     []int
+	contextLen int
+}
+
+func NewTokenDataset(tokens []int, contextLen int) *TokenDataset {
+	return &TokenDataset{
+		tokens:     tokens,
+		contextLen: contextLen,
+	}
 }
 
 func (s *TokenDataset) Len() int {
-	return len(s.Tokens) - s.ContextLen
+	return len(s.tokens) - s.contextLen
+}
+
+func (s *TokenDataset) ContextLen() int {
+	return s.contextLen
 }
 
 func (s *TokenDataset) GetItem(i int) ([]int, []int) {
-	x := s.Tokens[i : i+s.ContextLen]
-	y := s.Tokens[i+1 : i+s.ContextLen+1]
+	x := s.tokens[i : i+s.contextLen]
+	y := s.tokens[i+1 : i+s.contextLen+1]
 	return x, y
 }
 
