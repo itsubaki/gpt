@@ -7,11 +7,7 @@ import (
 )
 
 func ExampleTokenDataset() {
-	dataset := dataloader.TokenDataset{
-		Tokens:     []int{0, 1, 2, 3, 4, 5},
-		ContextLen: 3,
-	}
-
+	dataset := dataloader.NewTokenDataset([]int{0, 1, 2, 3, 4, 5}, 3)
 	for i := range dataset.Len() {
 		x, y := dataset.GetItem(i)
 		fmt.Println(x, y)

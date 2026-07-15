@@ -14,6 +14,7 @@ var (
 
 type Dataset interface {
 	Len() int
+	ContextLen() int
 	GetItem(i int) ([]int, []int)
 }
 
@@ -45,8 +46,7 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		l.Reset()
 	}
 
-	xs := make([]*tensor.Tensor[float64], 0, l.BatchSize)
-	ys := make([]*tensor.Tensor[float64], 0, l.BatchSize)
+	var xs, ys []int
 	for range l.BatchSize {
 		if l.idx >= l.Dataset.Len() {
 			l.Reset()
@@ -56,9 +56,11 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		x, y := l.Dataset.GetItem(i)
 		l.idx++
 
-		xs = append(xs, tensor.Float64(tensor.New([]int{len(x)}, x)))
-		ys = append(ys, tensor.Float64(tensor.New([]int{len(y)}, y)))
+		xs, ys = append(xs, x...), append(ys, y...)
 	}
 
-	return variable.From(tensor.Stack(xs, 0)), variable.From(tensor.Stack(ys, 0))
+	shape := []int{l.BatchSize, l.Dataset.ContextLen()} // (B, C)
+	tx := tensor.Float64(tensor.New(shape, xs))
+	ty := tensor.Float64(tensor.New(shape, ys))
+	return variable.From(tx), variable.From(ty)
 }

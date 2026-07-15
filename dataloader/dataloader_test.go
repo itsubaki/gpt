@@ -10,10 +10,7 @@ func ExampleDataLoader() {
 	loader := dataloader.DataLoader{
 		BatchSize: 1,
 		Shuffle:   false,
-		Dataset: &dataloader.TokenDataset{
-			Tokens:     []int{0, 1, 2, 3, 4, 5},
-			ContextLen: 2,
-		},
+		Dataset:   dataloader.NewTokenDataset([]int{0, 1, 2, 3, 4, 5}, 2),
 	}
 
 	for range 10 {
@@ -38,10 +35,7 @@ func ExampleDataLoader_batch2() {
 	loader := dataloader.DataLoader{
 		BatchSize: 2,
 		Shuffle:   false,
-		Dataset: &dataloader.TokenDataset{
-			Tokens:     []int{0, 1, 2, 3, 4, 5},
-			ContextLen: 2,
-		},
+		Dataset:   dataloader.NewTokenDataset([]int{0, 1, 2, 3, 4, 5}, 2),
 	}
 
 	for range 10 {
