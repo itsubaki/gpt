@@ -46,7 +46,8 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		l.Reset()
 	}
 
-	var xs, ys []int
+	xs := make([]int, 0, l.BatchSize*l.Dataset.ContextLen())
+	ys := make([]int, 0, l.BatchSize*l.Dataset.ContextLen())
 	for range l.BatchSize {
 		if l.idx >= l.Dataset.Len() {
 			l.Reset()
@@ -56,7 +57,8 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 		x, y := l.Dataset.GetItem(i)
 		l.idx++
 
-		xs, ys = append(xs, x...), append(ys, y...)
+		xs = append(xs, x...)
+		ys = append(ys, y...)
 	}
 
 	shape := []int{l.BatchSize, l.Dataset.ContextLen()} // (B, C)
