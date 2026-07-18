@@ -49,7 +49,7 @@ curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsuba
 
 ```python
 ### Instruction:
-Write is_prime function
+Write a is_prime function
 
 ### Response:
 def is_prime(n):
