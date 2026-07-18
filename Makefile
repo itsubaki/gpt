@@ -38,7 +38,7 @@ tokenize:
 
 pretrain:
 	caffeinate -i go run ./cmd/pretrain/main.go
-	plot loss.csv
+	plot -x-max 21000 -y-max 8 loss.csv
 
 generate:
 	go run ./cmd/generate/main.go
