@@ -66,5 +66,5 @@ example:
 	go run ./cmd/chat/main.go --prompt '3+9='
 
 eval:
-	go run ./cmd/eval/main.go --model-path testdata/model_gpt_sft.gob  --batch-size 10
-	go run ./cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 10
+	go run ./cmd/eval/main.go --model-path testdata/model_gpt_sft.gob  --batch-size 20
+	go run ./cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 20
