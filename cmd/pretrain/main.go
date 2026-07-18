@@ -26,7 +26,7 @@ func main() {
 	var minLoss float64
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
-	flag.IntVar(&embedDim, "embed-dim", 192, "embedding dimension")
+	flag.IntVar(&embedDim, "embed-dim", 256, "embedding dimension")
 	flag.IntVar(&numOfHeads, "num-of-heads", 6, "number of heads")
 	flag.IntVar(&numOfBlocks, "num-of-blocks", 6, "number of blocks")
 	flag.Float64Var(&theta, "theta", 10000, "theta for RoPE")
