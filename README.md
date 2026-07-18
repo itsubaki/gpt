@@ -40,11 +40,11 @@ Logits
 ```
 
 ```shell
-curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/merge_rules.gob
-curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/tiny_codes.bin
-curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt.gob
-curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_sft.gob
-curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/gob/testdata/model_gpt_grpo.gob
+curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_sft.gob
+curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_grpo.gob
 ```
 
 ```python
@@ -96,7 +96,7 @@ go run ./cmd/pretrain/main.go
 Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
-<img src="https://github.com/itsubaki/gpt/blob/gob/loss.png">
+<img src="https://github.com/itsubaki/gpt/blob/embed-dim-256/loss.png">
 
 ```shell
 make generate
@@ -120,28 +120,30 @@ go run ./cmd/sft/main.go
 SFT          100%|██████████████████████████████| 500/500
 ```
 
-<img src="https://github.com/itsubaki/gpt/blob/gob/loss_sft.png">
+<img src="https://github.com/itsubaki/gpt/blob/embed-dim-256/loss_sft.png">
 
 ```shell
 % make chat
-go run ./cmd/chat/main.go --prompt 'Write loop'
+go run ./cmd/chat/main.go --prompt 'Write a loop'
 ```
 
 ```
 ### Instruction:
-Write loop
+Write a loop
 
 ### Response:
-for i in range(10):
+for i in range(5):
     print(i)
+else:
+    print('done')
 ```
 
 ```
 ### Instruction:
-Hi, who are you?
+Who are you?
 
 ### Response:
-I'm an AI assistant. What do you need help with?
+I'm CodeBot. How can I assist you today?
 ```
 
 ```
@@ -160,7 +162,7 @@ go run ./cmd/grpo/main.go
 GRPO         100%|██████████████████████████████| 100/100
 ```
 
-<img src="https://github.com/itsubaki/gpt/blob/gob/loss_grpo.png">
+<img src="https://github.com/itsubaki/gpt/blob/embed-dim-256/loss_grpo.png">
 
 
 ```shell
