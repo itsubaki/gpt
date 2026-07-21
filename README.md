@@ -3,8 +3,6 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/gpt)](https://pkg.go.dev/github.com/itsubaki/gpt)
 [![tests](https://github.com/itsubaki/gpt/workflows/tests/badge.svg)](https://github.com/itsubaki/gpt/actions)
 
-An implementation of GPT in Go from scratch.
-
 ```
 Token IDs
     ↓
