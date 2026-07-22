@@ -61,7 +61,7 @@ example:
 	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
 	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
 	go run ./cmd/generate/main.go --prompt 'def'
-	go run ./cmd/chat/main.go --prompt 'Write an is_prime function'
+	go run ./cmd/chat/main.go --prompt 'Write a is_prime function'
 	go run ./cmd/chat/main.go --prompt 'Who are you?'
 	go run ./cmd/chat/main.go --prompt '3+9='
 
