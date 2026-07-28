@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/gob"
 	"fmt"
+	"iter"
 	"os"
 
 	"github.com/itsubaki/autograd/layer"
@@ -70,45 +71,42 @@ func NewGPT(
 
 func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x := m.L["embed"].First(ids)
-	for i := range m.NumOfBlocks {
-		x = m.L[fmt.Sprintf("block[%d]", i)].First(x)
+	for b := range m.Blocks() {
+		x = b.First(x)
 	}
 
 	x = m.L["norm"].First(x)
-	logits := m.L["unembed"].First(x) // (B, C, VocabSize)
+	logits := m.L["unembed"].First(x) // (B, C, V)
 	return logits
 }
 
 func (m *GPT) ClearCache() {
-	for i := range m.NumOfBlocks {
-		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).ClearCache()
+	for b := range m.Blocks() {
+		b.ClearCache()
 	}
 }
 
 func (m *GPT) Eval() {
-	for i := range m.NumOfBlocks {
-		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).Eval()
+	for b := range m.Blocks() {
+		b.Eval()
 	}
 }
 
 func (m *GPT) Train() {
-	for i := range m.NumOfBlocks {
-		m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT).Train()
+	for b := range m.Blocks() {
+		b.Train()
 	}
 }
 
-func (m *GPT) Load(params layer.Parameters) error {
-	for k, v := range params {
-		if p, ok := m.Params()[k]; ok {
-			p.Data = tensor.Clone(v.Data)
-			continue
+func (m *GPT) Blocks() iter.Seq[*L.BlockT] {
+	return func(yield func(*L.BlockT) bool) {
+		for i := range m.NumOfBlocks {
+			block := m.L[fmt.Sprintf("block[%d]", i)].(*L.BlockT)
+			if !yield(block) {
+				return
+			}
 		}
-
-		return fmt.Errorf("parameter %s not found in model", k)
 	}
-
-	m.ClearCache()
-	return nil
 }
 
 func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, *L.BlockT) {
@@ -166,5 +164,19 @@ func (m *GPT) Save(path string) error {
 		return fmt.Errorf("encode: %v", err)
 	}
 
+	return nil
+}
+
+func (m *GPT) Load(params layer.Parameters) error {
+	for k, v := range params {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = tensor.Clone(v.Data)
+			continue
+		}
+
+		return fmt.Errorf("parameter %s not found in model", k)
+	}
+
+	m.ClearCache()
 	return nil
 }
