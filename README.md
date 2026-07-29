@@ -3,6 +3,36 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/gpt)](https://pkg.go.dev/github.com/itsubaki/gpt)
 [![tests](https://github.com/itsubaki/gpt/workflows/tests/badge.svg)](https://github.com/itsubaki/gpt/actions)
 
+## Quick Start
+
+``` shell
+% make testdata example
+```
+
+```shell
+curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_sft.gob
+curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_grpo.gob
+```
+
+```python
+### Instruction:
+Write a is_prime function
+
+### Response:
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+```
+
+## Architecture
+
 ```
 Token IDs
     ↓
@@ -29,34 +59,6 @@ RMSNorm
 Linear
     ↓
 Logits
-```
-
-## Quick Start
-
-```shell
-% make testdata example
-```
-
-```shell
-curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/merge_rules.gob
-curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/tiny_codes.bin
-curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt.gob
-curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_sft.gob
-curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_grpo.gob
-```
-
-```python
-### Instruction:
-Write a is_prime function
-
-### Response:
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
 ```
 
 ## BPE Tokenizer Training
@@ -97,7 +99,7 @@ Pre-Training 100%|████████████████████�
 <img src="https://github.com/itsubaki/gpt/blob/embed-dim-256/loss.png">
 
 ```shell
-make generate
+% make generate
 go run ./cmd/generate/main.go --prompt 'def add(a, b):'
 ```
 
