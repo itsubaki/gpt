@@ -70,8 +70,8 @@ curl -fs -o testdata/tiny_codes_sft.json https://raw.githubusercontent.com/oreil
 ```
 
 ```shell
-% make tokenize
-go run ./cmd/tokenize -vocab-size 1000
+% make bpetrain
+go run cmd/bpetrain/main.go -vocab-size 1000
 Training BPE 100%|██████████████████████████████| 743/743
 saved merge rules to testdata/merge_rules.gob
 ...
@@ -89,8 +89,8 @@ saved tokens to testdata/tiny_codes.bin
 ```
 
 ```shell
-% make encode
-go run cmd/encode/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
+% make tokenize
+go run cmd/tokenize/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
 "def"(300) " is"(382) "_"( 95) "prime"(830) "("( 40) "n"(110) ":"( 58) " int"(888) ")"( 41) " -"(440) ">"( 62) " b"(358) "o"(111) "ol"(412) ":"( 58) " "( 32) "return"(301) " n"(289) " >"(523) "="( 61) " 2"(373) " and"(409) " all"(905) "("( 40) "n"(110) " %"(590) " i"(284) " for"(406) " i"(284) " in"(286) " range"(391) "("( 40) "2"( 50) ","( 44) " int"(888) "("( 40) "n"(110) "**"(910) "0"( 48)"."( 46) "5"( 53) ")"( 41) " +"(347) " 1"(313) "))"(376)
 ```
 
@@ -98,7 +98,7 @@ go run cmd/encode/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 an
 
 ```shell
 % make pretrain
-go run ./cmd/pretrain/main.go
+go run cmd/pretrain/main.go
 Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
@@ -106,7 +106,7 @@ Pre-Training 100%|████████████████████�
 
 ```shell
 % make generate
-go run ./cmd/generate/main.go --prompt 'def add(a, b):'
+go run cmd/generate/main.go --prompt 'def add(a, b):'
 ```
 
 ```
@@ -122,7 +122,7 @@ print(a, b)
 
 ```shell
 %  make sft
-go run ./cmd/sft/main.go
+go run cmd/sft/main.go
 SFT          100%|██████████████████████████████| 500/500
 ```
 
@@ -130,7 +130,7 @@ SFT          100%|████████████████████�
 
 ```shell
 % make chat
-go run ./cmd/chat/main.go --prompt 'Write a loop'
+go run cmd/chat/main.go --prompt 'Write a loop'
 ```
 
 ```
@@ -164,7 +164,7 @@ I'm CodeBot. How can I assist you today?
 
 ```shell
 %  make grpo
-go run ./cmd/grpo/main.go
+go run cmd/grpo/main.go
 GRPO         100%|██████████████████████████████| 100/100
 ```
 
@@ -173,7 +173,7 @@ GRPO         100%|████████████████████�
 
 ```shell
 % make eval
-go run ./cmd/eval/main.go --batch-size 100
+go run cmd/eval/main.go --batch-size 100
 6+8=14 true
 5+5=10 true
 8+8=15 false

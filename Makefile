@@ -31,43 +31,43 @@ dl:
 	curl -fs -o testdata/tiny_codes.txt      https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
 	curl -fs -o testdata/tiny_codes_sft.json https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes_sft.json
 
-tokenize:
+bpetrain:
 	rm -f testdata/merge_rules.gob
 	rm -f testdata/tiny_codes.bin
-	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
+	go run cmd/bpetrain/main.go -f testdata/tiny_codes.txt -vocab-size 1000
 
-encode:
-	go run cmd/encode/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
+tokenize:
+	go run cmd/tokenize/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
 
 pretrain:
-	caffeinate -i go run ./cmd/pretrain/main.go
+	caffeinate -i go run cmd/pretrain/main.go
 	plot loss.csv
 
 generate:
-	go run ./cmd/generate/main.go
+	go run cmd/generate/main.go
 
 sft:
-	caffeinate -i go run ./cmd/sft/main.go
+	caffeinate -i go run cmd/sft/main.go
 	plot loss_sft.csv
 
 chat:
-	go run ./cmd/chat/main.go
+	go run cmd/chat/main.go
 
 .PHONY: grpo
 grpo:
-	caffeinate -i go run ./cmd/grpo/main.go
+	caffeinate -i go run cmd/grpo/main.go
 	plot loss_grpo.csv
 
 example:
-	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
-	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def factorial(n):'
-	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
-	go run ./cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
-	go run ./cmd/generate/main.go --prompt 'def'
-	go run ./cmd/chat/main.go --prompt 'Write a is_prime function'
-	go run ./cmd/chat/main.go --prompt 'Who are you?'
-	go run ./cmd/chat/main.go --prompt '3+9='
+	go run cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
+	go run cmd/generate/main.go --temperature 0.3 --prompt 'def factorial(n):'
+	go run cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
+	go run cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
+	go run cmd/generate/main.go --prompt 'def'
+	go run cmd/chat/main.go --prompt 'Write a is_prime function'
+	go run cmd/chat/main.go --prompt 'Who are you?'
+	go run cmd/chat/main.go --prompt '3+9='
 
 eval:
-	go run ./cmd/eval/main.go --model-path testdata/model_gpt_sft.gob  --batch-size 20
-	go run ./cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 20
+	go run cmd/eval/main.go --model-path testdata/model_gpt_sft.gob  --batch-size 20
+	go run cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 20
