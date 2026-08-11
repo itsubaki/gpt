@@ -36,6 +36,9 @@ tokenize:
 	rm -f testdata/tiny_codes.bin
 	go run ./cmd/tokenize -f testdata/tiny_codes.txt -vocab-size 1000
 
+encode:
+	go run cmd/encode/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
+
 pretrain:
 	caffeinate -i go run ./cmd/pretrain/main.go
 	plot loss.csv

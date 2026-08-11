@@ -88,6 +88,12 @@ encoding time: 1.459157917s
 saved tokens to testdata/tiny_codes.bin
 ```
 
+```shell
+% make encode
+go run cmd/encode/main.go --text 'def is_prime(n: int) -> bool: return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))'
+"def"(300) " is"(382) "_"( 95) "prime"(830) "("( 40) "n"(110) ":"( 58) " int"(888) ")"( 41) " -"(440) ">"( 62) " b"(358) "o"(111) "ol"(412) ":"( 58) " "( 32) "return"(301) " n"(289) " >"(523) "="( 61) " 2"(373) " and"(409) " all"(905) "("( 40) "n"(110) " %"(590) " i"(284) " for"(406) " i"(284) " in"(286) " range"(391) "("( 40) "2"( 50) ","( 44) " int"(888) "("( 40) "n"(110) "**"(910) "0"( 48)"."( 46) "5"( 53) ")"( 41) " +"(347) " 1"(313) "))"(376)
+```
+
 ## Pre-Training
 
 ```shell
