@@ -50,7 +50,7 @@ func main() {
 	for range count {
 		// generate text
 		now := time.Now()
-		ch := model.GenerateChan(
+		tokens := model.GenerateTokens(
 			m,
 			m.MaxContextLen,
 			tknizer,
@@ -60,7 +60,7 @@ func main() {
 		)
 
 		var ids []int
-		for id := range ch {
+		for id := range tokens {
 			ids = append(ids, id)
 			fmt.Printf("%v,", id)
 		}

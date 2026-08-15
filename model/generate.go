@@ -33,7 +33,7 @@ func GenerateText(
 	maxNewTokens int,
 	temperature float64,
 ) string {
-	ch := GenerateChan(
+	ch := GenerateTokens(
 		model,
 		maxContextLen,
 		tokenizer,
@@ -50,7 +50,7 @@ func GenerateText(
 	return tokenizer.Decode(ids)
 }
 
-func GenerateChan(
+func GenerateTokens(
 	model Model,
 	maxContextLen int,
 	tokenizer Tokenizer,
@@ -112,19 +112,19 @@ func sample(logits *variable.Variable, temperature float64) int {
 	}
 
 	probs := F.Softmax(-1)(F.MulC(1.0/temperature, logits))
-	return multinominal(probs)
+	return multinomial(probs)
 }
 
-func newVariable(x []int) *variable.Variable {
-	f := make([]float64, len(x))
-	for i, v := range x {
-		f[i] = float64(v)
+func newVariable(ids []int) *variable.Variable {
+	f := make([]float64, len(ids))
+	for i, id := range ids {
+		f[i] = float64(id)
 	}
 
 	return variable.New(f...)
 }
 
-func multinominal(probs *variable.Variable) int {
+func multinomial(probs *variable.Variable) int {
 	r := rand.Float64()
 
 	var cum float64
