@@ -33,7 +33,7 @@ func GenerateText(
 	maxNewTokens int,
 	temperature float64,
 ) string {
-	ch := GenerateTokens(
+	tokens := GenerateTokens(
 		model,
 		maxContextLen,
 		tokenizer,
@@ -43,7 +43,7 @@ func GenerateText(
 	)
 
 	var ids []int
-	for id := range ch {
+	for id := range tokens {
 		ids = append(ids, id)
 	}
 
