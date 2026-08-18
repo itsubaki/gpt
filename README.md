@@ -170,17 +170,23 @@ GRPO         100%|████████████████████�
 
 <img src="https://github.com/itsubaki/gpt/blob/embed-dim-256/loss_grpo.png">
 
-
 ```shell
 % make eval
-go run cmd/eval/main.go --batch-size 100
-6+8=14 true
-5+5=10 true
-8+8=15 false
+go run cmd/eval/main.go --model-path testdata/model_gpt_sft.gob  --batch-size 20
+4+6=10 true
+9+5=15 false
+5+3=6  false
+9+4=13 true
 ...
-7+2=9  true
+accuracy: 60 %
 
-accuracy: 99 %
+go run cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 20
+7+3=10 true
+3+5=8  true
+6+4=10 true
+9+4=13 true
+...
+accuracy: 100 %
 ```
 
 ## References
