@@ -179,3 +179,15 @@ func (m *GPT) Load(params layer.Parameters) error {
 	m.ClearCache()
 	return nil
 }
+
+func (m *GPT) State() *GPTState {
+	return &GPTState{
+		VocabSize:     m.VocabSize,
+		MaxContextLen: m.MaxContextLen,
+		EmbedDim:      m.EmbedDim,
+		NumOfHeads:    m.NumOfHeads,
+		NumOfBlocks:   m.NumOfBlocks,
+		Theta:         m.Theta,
+		Params:        m.Params(),
+	}
+}
