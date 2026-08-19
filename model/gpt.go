@@ -113,17 +113,6 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
 }
 
-func init() {
-	gob.Register(&L.MultiHeadAttentionT{})
-	gob.Register(&L.BlockT{})
-	gob.Register(&L.EmbeddingsT{})
-	gob.Register(&L.FFNT{})
-	gob.Register(&L.LayerNormT{})
-	gob.Register(&L.LinearT{})
-	gob.Register(&L.RMSNormT{})
-	gob.Register(&L.SwiGLUT{})
-}
-
 func NewGPTFrom(path string) (*GPT, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -131,22 +120,22 @@ func NewGPTFrom(path string) (*GPT, error) {
 	}
 	defer func() { _ = f.Close() }()
 
-	var saved *GPT
-	if err := gob.NewDecoder(f).Decode(&saved); err != nil {
+	var s *GPTState
+	if err := gob.NewDecoder(f).Decode(&s); err != nil {
 		return nil, fmt.Errorf("decode: %v", err)
 	}
 
 	// restore model
 	m := NewGPT(
-		saved.VocabSize,
-		saved.MaxContextLen,
-		saved.EmbedDim,
-		saved.NumOfHeads,
-		saved.NumOfBlocks,
-		saved.Theta,
+		s.VocabSize,
+		s.MaxContextLen,
+		s.EmbedDim,
+		s.NumOfHeads,
+		s.NumOfBlocks,
+		s.Theta,
 	)
 
-	if err := m.Load(saved.Params()); err != nil {
+	if err := m.Load(s.Params); err != nil {
 		return nil, fmt.Errorf("load: %v", err)
 	}
 
@@ -160,7 +149,17 @@ func (m *GPT) Save(path string) error {
 	}
 	defer func() { _ = f.Close() }()
 
-	if err := gob.NewEncoder(f).Encode(m); err != nil {
+	s := &GPTState{
+		VocabSize:     m.VocabSize,
+		MaxContextLen: m.MaxContextLen,
+		EmbedDim:      m.EmbedDim,
+		NumOfHeads:    m.NumOfHeads,
+		NumOfBlocks:   m.NumOfBlocks,
+		Theta:         m.Theta,
+		Params:        m.Params(),
+	}
+
+	if err := gob.NewEncoder(f).Encode(s); err != nil {
 		return fmt.Errorf("encode: %v", err)
 	}
 

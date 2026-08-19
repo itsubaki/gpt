@@ -83,7 +83,7 @@ func ExampleGPT_Params() {
 	// unembed.w
 }
 
-func ExampleGPT_save() {
+func ExampleGPT_Save() {
 	dir, err := os.MkdirTemp("", "ExampleGPT_save")
 	if err != nil {
 		panic(err)
