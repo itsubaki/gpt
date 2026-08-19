@@ -135,17 +135,7 @@ func NewGPTFrom(path string) (*GPT, error) {
 }
 
 func (m *GPT) Save(path string) error {
-	s := &GPTState{
-		VocabSize:     m.VocabSize,
-		MaxContextLen: m.MaxContextLen,
-		EmbedDim:      m.EmbedDim,
-		NumOfHeads:    m.NumOfHeads,
-		NumOfBlocks:   m.NumOfBlocks,
-		Theta:         m.Theta,
-		Params:        m.Params(),
-	}
-
-	if err := s.Save(path); err != nil {
+	if err := m.State().Save(path); err != nil {
 		return fmt.Errorf("save state: %v", err)
 	}
 
