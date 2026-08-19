@@ -1,10 +1,8 @@
 package model
 
 import (
-	"encoding/gob"
 	"fmt"
 	"iter"
-	"os"
 
 	"github.com/itsubaki/autograd/layer"
 	M "github.com/itsubaki/autograd/model"
@@ -137,12 +135,6 @@ func NewGPTFrom(path string) (*GPT, error) {
 }
 
 func (m *GPT) Save(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("create file: %v", err)
-	}
-	defer func() { _ = f.Close() }()
-
 	s := &GPTState{
 		VocabSize:     m.VocabSize,
 		MaxContextLen: m.MaxContextLen,
@@ -153,8 +145,8 @@ func (m *GPT) Save(path string) error {
 		Params:        m.Params(),
 	}
 
-	if err := gob.NewEncoder(f).Encode(s); err != nil {
-		return fmt.Errorf("encode: %v", err)
+	if err := s.Save(path); err != nil {
+		return fmt.Errorf("save state: %v", err)
 	}
 
 	return nil
