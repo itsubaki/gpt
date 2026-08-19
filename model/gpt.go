@@ -111,13 +111,7 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
-	s, err := LoadGPTState(path)
-	if err != nil {
-		return nil, fmt.Errorf("load state: %v", err)
-	}
-
-	// restore model
+func NewGPTFromState(s *GPTState) (*GPT, error) {
 	m := NewGPT(
 		s.VocabSize,
 		s.MaxContextLen,
@@ -132,6 +126,27 @@ func NewGPTFrom(path string) (*GPT, error) {
 	}
 
 	return m, nil
+}
+
+func (m *GPT) State() *GPTState {
+	return &GPTState{
+		VocabSize:     m.VocabSize,
+		MaxContextLen: m.MaxContextLen,
+		EmbedDim:      m.EmbedDim,
+		NumOfHeads:    m.NumOfHeads,
+		NumOfBlocks:   m.NumOfBlocks,
+		Theta:         m.Theta,
+		Params:        m.Params(),
+	}
+}
+
+func NewGPTFrom(path string) (*GPT, error) {
+	s, err := LoadGPTState(path)
+	if err != nil {
+		return nil, fmt.Errorf("load state: %v", err)
+	}
+
+	return NewGPTFromState(s)
 }
 
 func (m *GPT) Save(path string) error {
@@ -154,16 +169,4 @@ func (m *GPT) Load(params layer.Parameters) error {
 
 	m.ClearCache()
 	return nil
-}
-
-func (m *GPT) State() *GPTState {
-	return &GPTState{
-		VocabSize:     m.VocabSize,
-		MaxContextLen: m.MaxContextLen,
-		EmbedDim:      m.EmbedDim,
-		NumOfHeads:    m.NumOfHeads,
-		NumOfBlocks:   m.NumOfBlocks,
-		Theta:         m.Theta,
-		Params:        m.Params(),
-	}
 }
