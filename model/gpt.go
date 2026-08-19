@@ -114,15 +114,9 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 }
 
 func NewGPTFrom(path string) (*GPT, error) {
-	f, err := os.Open(path)
+	s, err := LoadGPTState(path)
 	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
-	var s *GPTState
-	if err := gob.NewDecoder(f).Decode(&s); err != nil {
-		return nil, fmt.Errorf("decode: %v", err)
+		return nil, fmt.Errorf("load state: %v", err)
 	}
 
 	// restore model
