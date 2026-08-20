@@ -1,10 +1,8 @@
 package model
 
 import (
-	"encoding/gob"
 	"fmt"
 	"iter"
-	"os"
 
 	"github.com/itsubaki/autograd/layer"
 	M "github.com/itsubaki/autograd/model"
@@ -113,58 +111,30 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
 }
 
-func init() {
-	gob.Register(&L.MultiHeadAttentionT{})
-	gob.Register(&L.BlockT{})
-	gob.Register(&L.EmbeddingsT{})
-	gob.Register(&L.FFNT{})
-	gob.Register(&L.LayerNormT{})
-	gob.Register(&L.LinearT{})
-	gob.Register(&L.RMSNormT{})
-	gob.Register(&L.SwiGLUT{})
+func NewGPTFrom(path string) (*GPT, error) {
+	s, err := NewGPTStateFrom(path)
+	if err != nil {
+		return nil, fmt.Errorf("load state: %v", err)
+	}
+
+	return NewGPTFromState(s)
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
-	var saved *GPT
-	if err := gob.NewDecoder(f).Decode(&saved); err != nil {
-		return nil, fmt.Errorf("decode: %v", err)
-	}
-
-	// restore model
+func NewGPTFromState(s *GPTState) (*GPT, error) {
 	m := NewGPT(
-		saved.VocabSize,
-		saved.MaxContextLen,
-		saved.EmbedDim,
-		saved.NumOfHeads,
-		saved.NumOfBlocks,
-		saved.Theta,
+		s.VocabSize,
+		s.MaxContextLen,
+		s.EmbedDim,
+		s.NumOfHeads,
+		s.NumOfBlocks,
+		s.Theta,
 	)
 
-	if err := m.Load(saved.Params()); err != nil {
+	if err := m.Load(s.Params); err != nil {
 		return nil, fmt.Errorf("load: %v", err)
 	}
 
 	return m, nil
-}
-
-func (m *GPT) Save(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("create file: %v", err)
-	}
-	defer func() { _ = f.Close() }()
-
-	if err := gob.NewEncoder(f).Encode(m); err != nil {
-		return fmt.Errorf("encode: %v", err)
-	}
-
-	return nil
 }
 
 func (m *GPT) Load(params layer.Parameters) error {
@@ -179,4 +149,24 @@ func (m *GPT) Load(params layer.Parameters) error {
 
 	m.ClearCache()
 	return nil
+}
+
+func (m *GPT) Save(path string) error {
+	if err := m.State().Save(path); err != nil {
+		return fmt.Errorf("save state: %v", err)
+	}
+
+	return nil
+}
+
+func (m *GPT) State() *GPTState {
+	return &GPTState{
+		VocabSize:     m.VocabSize,
+		MaxContextLen: m.MaxContextLen,
+		EmbedDim:      m.EmbedDim,
+		NumOfHeads:    m.NumOfHeads,
+		NumOfBlocks:   m.NumOfBlocks,
+		Theta:         m.Theta,
+		Params:        m.Params(),
+	}
 }
