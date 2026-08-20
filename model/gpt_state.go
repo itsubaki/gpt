@@ -18,7 +18,7 @@ type GPTState struct {
 	Params        layer.Parameters
 }
 
-func LoadGPTState(path string) (*GPTState, error) {
+func NewGPTStateFrom(path string) (*GPTState, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
