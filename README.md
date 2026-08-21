@@ -10,11 +10,11 @@
 ```
 
 ```shell
-curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/merge_rules.gob
-curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/tiny_codes.bin
-curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt.gob
-curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_sft.gob
-curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256/testdata/model_gpt_grpo.gob
+curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256s/testdata/merge_rules.gob
+curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256s/testdata/tiny_codes.bin
+curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256s/testdata/model_gpt.gob
+curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256s/testdata/model_gpt_sft.gob
+curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/embed-dim-256s/testdata/model_gpt_grpo.gob
 ```
 
 ```python
