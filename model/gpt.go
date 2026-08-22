@@ -1,10 +1,8 @@
 package model
 
 import (
-	"encoding/gob"
 	"fmt"
 	"iter"
-	"os"
 
 	"github.com/itsubaki/autograd/layer"
 	M "github.com/itsubaki/autograd/model"
@@ -114,18 +112,15 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 }
 
 func NewGPTFrom(path string) (*GPT, error) {
-	f, err := os.Open(path)
+	s, err := NewGPTStateFrom(path)
 	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
-	var s *GPTState
-	if err := gob.NewDecoder(f).Decode(&s); err != nil {
-		return nil, fmt.Errorf("decode: %v", err)
+		return nil, fmt.Errorf("load state: %v", err)
 	}
 
-	// restore model
+	return NewGPTFromState(s)
+}
+
+func NewGPTFromState(s *GPTState) (*GPT, error) {
 	m := NewGPT(
 		s.VocabSize,
 		s.MaxContextLen,
@@ -142,30 +137,6 @@ func NewGPTFrom(path string) (*GPT, error) {
 	return m, nil
 }
 
-func (m *GPT) Save(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("create file: %v", err)
-	}
-	defer func() { _ = f.Close() }()
-
-	s := &GPTState{
-		VocabSize:     m.VocabSize,
-		MaxContextLen: m.MaxContextLen,
-		EmbedDim:      m.EmbedDim,
-		NumOfHeads:    m.NumOfHeads,
-		NumOfBlocks:   m.NumOfBlocks,
-		Theta:         m.Theta,
-		Params:        m.Params(),
-	}
-
-	if err := gob.NewEncoder(f).Encode(s); err != nil {
-		return fmt.Errorf("encode: %v", err)
-	}
-
-	return nil
-}
-
 func (m *GPT) Load(params layer.Parameters) error {
 	for k, v := range params {
 		if p, ok := m.Params()[k]; ok {
@@ -178,4 +149,24 @@ func (m *GPT) Load(params layer.Parameters) error {
 
 	m.ClearCache()
 	return nil
+}
+
+func (m *GPT) Save(path string) error {
+	if err := m.State().Save(path); err != nil {
+		return fmt.Errorf("save state: %v", err)
+	}
+
+	return nil
+}
+
+func (m *GPT) State() *GPTState {
+	return &GPTState{
+		VocabSize:     m.VocabSize,
+		MaxContextLen: m.MaxContextLen,
+		EmbedDim:      m.EmbedDim,
+		NumOfHeads:    m.NumOfHeads,
+		NumOfBlocks:   m.NumOfBlocks,
+		Theta:         m.Theta,
+		Params:        m.Params(),
+	}
 }

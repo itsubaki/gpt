@@ -146,7 +146,7 @@ func main() {
 		}
 
 		// checkpoint
-		if i%100 == 0 {
+		if i%10 == 0 {
 			if err := m.Save(grpoModelPath); err != nil {
 				panic(err)
 			}
