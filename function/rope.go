@@ -60,7 +60,7 @@ func (f *RoPET) Forward(x ...*variable.Variable) []*variable.Variable {
 	// clamp
 	offset := f.clamp(C)
 
-	y := tensor.ZeroLike(x[0].Data)
+	y := tensor.ZerosLike(x[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
@@ -94,7 +94,7 @@ func (f *RoPET) Backward(gy ...*variable.Variable) []*variable.Variable {
 	// clamp
 	offset := f.clamp(C)
 
-	gx := tensor.ZeroLike(gy[0].Data)
+	gx := tensor.ZerosLike(gy[0].Data)
 	for b := range B {
 		for h := range H {
 			for pos := range C {
