@@ -60,9 +60,6 @@ func main() {
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
-		Hook: []optimizer.Hook{
-			hook.ClipGrad(clip),
-		},
 	}
 
 	// tokenizer
@@ -137,7 +134,8 @@ func main() {
 			)
 
 			loss.Backward()
-			o.Update(m)
+			hook.ClipGrad(clip)(m.Params())
+			o.Update(m.Params())
 		}
 
 		// write accuracy and loss to csv

@@ -69,9 +69,6 @@ func main() {
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
-		Hook: []optimizer.Hook{
-			hook.ClipGrad(clip),
-		},
 	}
 
 	// tokenizer
@@ -120,7 +117,8 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		o.Update(m)
+		hook.ClipGrad(clip)(m.Params())
+		o.Update(m.Params())
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {
