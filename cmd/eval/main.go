@@ -31,13 +31,13 @@ func main() {
 	m.Eval()
 
 	// tokenizer
-	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 
 	// dataset and dataloader
-	dataset := grpo.NewDataset(tknizer)
+	dataset := grpo.NewDataset(bpeTokenizer)
 	dataloader := &grpo.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
@@ -62,7 +62,7 @@ func main() {
 		response := model.GenerateText(
 			m,
 			m.MaxContextLen,
-			tknizer,
+			bpeTokenizer,
 			prompt,
 			maxNewTokens,
 			temperature,

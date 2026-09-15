@@ -37,16 +37,16 @@ func main() {
 		fmt.Println("saved merge rules to", mergeRulesPath)
 	}
 
-	tknizer := tokenizer.NewBPETokenizer(mergeRules)
-	for key := range keys(tknizer.ID2Bytes) {
-		fmt.Printf("%3d -> %q\n", key, tknizer.Decode([]int{key}))
+	bpeTokenizer := tokenizer.NewBPETokenizer(mergeRules)
+	for key := range keys(bpeTokenizer.ID2Bytes) {
+		fmt.Printf("%3d -> %q\n", key, bpeTokenizer.Decode([]int{key}))
 	}
 
 	sample := string([]rune(string(data)))
 	byteCount := len([]byte(sample))
 
 	now := time.Now()
-	ids := tknizer.Encode(sample)
+	ids := bpeTokenizer.Encode(sample)
 
 	fmt.Println()
 	fmt.Println("byte count:", byteCount)

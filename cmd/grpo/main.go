@@ -66,12 +66,12 @@ func main() {
 	}
 
 	// tokenizer
-	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 
-	dataset := grpo.NewDataset(tknizer)
+	dataset := grpo.NewDataset(bpeTokenizer)
 	dataloader := &grpo.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
@@ -106,7 +106,7 @@ func main() {
 		allPrompts, allResponses, allAdvantages := grpo.GenerateGroup(
 			oldModel,
 			oldModel.MaxContextLen,
-			tknizer,
+			bpeTokenizer,
 			prompts,
 			gts,
 			groupSize,
@@ -164,7 +164,7 @@ func main() {
 					response := model.GenerateText(
 						m,
 						m.MaxContextLen,
-						tknizer,
+						bpeTokenizer,
 						prompt,
 						1000, // max new tokens
 						0.0,  // temperature

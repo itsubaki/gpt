@@ -29,7 +29,7 @@ func main() {
 	m.Eval()
 
 	// tokenizer
-	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func main() {
 		tokens := model.GenerateTokens(
 			m,
 			m.MaxContextLen,
-			tknizer,
+			bpeTokenizer,
 			prompt,
 			maxNewTokens,
 			temperature,
@@ -68,7 +68,7 @@ func main() {
 		fmt.Println("------------------------------")
 		fmt.Println("generation time:", time.Since(now))
 		fmt.Println("------------------------------")
-		fmt.Println(tknizer.Decode(ids))
+		fmt.Println(bpeTokenizer.Decode(ids))
 		fmt.Println("------------------------------")
 	}
 }

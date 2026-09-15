@@ -37,11 +37,11 @@ func Loss(
 	unclipped := F.Mul(ratio, adv)                             // ratio * adv
 	clipped := F.Mul(F.Clip(1-epsilon, 1+epsilon)(ratio), adv) // clip(ratio, 1-epsilon, 1+epsilon) * adv
 
-	masks := slice(mask, 1, 1, mask.Shape()[1])                      // (B, C-1)
-	tokenObjective := F.Mul(masks, function.Min(unclipped, clipped)) // masks * min(unclipped, clipped)
+	masks := slice(mask, 1, 1, mask.Shape()[1])                   // (B, C-1)
+	tokenObjective := F.Mul(masks, F.Minimum(unclipped, clipped)) // masks * minimum(unclipped, clipped)
 	sum := F.Sum()(tokenObjective)
 
-	samples := float64(ids.Shape()[0])              //
+	samples := float64(ids.Shape()[0])
 	return F.Neg(F.Div(sum, variable.New(samples))) // -1 * sum / samples
 }
 

@@ -13,14 +13,14 @@ func main() {
 	flag.StringVar(&text, "text", "Hello world!!", "text to encode")
 	flag.Parse()
 
-	tknizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 
-	ids := tknizer.Encode(text)
+	ids := bpeTokenizer.Encode(text)
 	for _, id := range ids {
-		decodeed := tknizer.Decode([]int{id})
+		decodeed := bpeTokenizer.Decode([]int{id})
 		fmt.Printf("%q(%3d) ", decodeed, id)
 	}
 
