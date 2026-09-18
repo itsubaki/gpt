@@ -1,6 +1,7 @@
 package tokenizer
 
 import (
+	"io"
 	"math"
 	"regexp"
 )
@@ -43,8 +44,8 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 	}
 }
 
-func NewBPETokenizerFrom(mergeRulesPath string, endToken ...string) (*BPETokenizer, error) {
-	mergeRules, err := Load(mergeRulesPath)
+func NewBPETokenizerFrom(r io.Reader, endToken ...string) (*BPETokenizer, error) {
+	mergeRules, err := LoadDefaultDict(r)
 	if err != nil {
 		return nil, err
 	}

@@ -72,7 +72,13 @@ func main() {
 	}
 
 	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	rulesf, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesf.Close() }()
+
+	mergeRules, err := tokenizer.LoadDefaultDict(rulesf)
 	if err != nil {
 		panic(err)
 	}

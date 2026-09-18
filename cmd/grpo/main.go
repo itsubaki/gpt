@@ -63,7 +63,13 @@ func main() {
 	}
 
 	// tokenizer
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	rulesf, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesf.Close() }()
+
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesf)
 	if err != nil {
 		panic(err)
 	}

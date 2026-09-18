@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/itsubaki/gpt/model"
@@ -21,18 +22,24 @@ func main() {
 	flag.IntVar(&count, "count", 1, "number of times to generate text")
 	flag.Parse()
 
+	// tokenizer
+	f, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = f.Close() }()
+
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(f)
+	if err != nil {
+		panic(err)
+	}
+
 	// model from gob file
 	m, err := model.NewGPTFrom(modelPath)
 	if err != nil {
 		panic(err)
 	}
 	m.Eval()
-
-	// tokenizer
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
 
 	fmt.Println("model parameters:")
 	fmt.Println(" VocabSize    :", m.VocabSize)
