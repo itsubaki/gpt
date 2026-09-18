@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/itsubaki/gpt/cmd/grpo/grpo"
@@ -23,18 +24,31 @@ func main() {
 	flag.IntVar(&batchSize, "batch-size", 32, "size of each batch")
 	flag.Parse()
 
+	// open files
+	rulesFile, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesFile.Close() }()
+
+	modelFile, err := os.Open(modelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = modelFile.Close() }()
+
+	// tokenizer
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
+	if err != nil {
+		panic(err)
+	}
+
 	// model from gob file
-	m, err := model.NewGPTFrom(modelPath)
+	m, err := model.NewGPTFrom(modelFile)
 	if err != nil {
 		panic(err)
 	}
 	m.Eval()
-
-	// tokenizer
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
 
 	// dataset and dataloader
 	dataset := grpo.NewDataset(bpeTokenizer)

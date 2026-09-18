@@ -1,9 +1,8 @@
 package model_test
 
 import (
+	"bytes"
 	"fmt"
-	"os"
-	"path/filepath"
 	"reflect"
 	"slices"
 
@@ -84,19 +83,13 @@ func ExampleGPT_Params() {
 }
 
 func ExampleGPT_Save() {
-	dir, err := os.MkdirTemp("", "ExampleGPT_save")
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = os.RemoveAll(dir) }()
-	path := filepath.Join(dir, "model_gpt.gob")
-
+	var buf bytes.Buffer
 	m0 := model.NewGPT(1000, 256, 394, 6, 6, 10000)
-	if err := m0.Save(path); err != nil {
+	if err := m0.Save(&buf); err != nil {
 		panic(err)
 	}
 
-	m1, err := model.NewGPTFrom(path)
+	m1, err := model.NewGPTFrom(&buf)
 	if err != nil {
 		panic(err)
 	}
