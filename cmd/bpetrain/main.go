@@ -27,15 +27,15 @@ func main() {
 	}
 
 	// train BPE tokenizer
-	f, err := os.Create(mergeRulesPath)
+	rulesFile, err := os.Create(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = f.Close() }()
+	defer func() { _ = rulesFile.Close() }()
 
 	tokenizer.Writer = os.Stdout // debug print
 	rules := tokenizer.TrainBPE(string(data), vocabSize)
-	if err := rules.Save(f); err != nil {
+	if err := rules.Save(rulesFile); err != nil {
 		panic(err)
 	}
 	fmt.Println("saved merge rules to", mergeRulesPath)
