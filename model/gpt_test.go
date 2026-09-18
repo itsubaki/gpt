@@ -91,12 +91,24 @@ func ExampleGPT_Save() {
 	defer func() { _ = os.RemoveAll(dir) }()
 	path := filepath.Join(dir, "model_gpt.gob")
 
-	m0 := model.NewGPT(1000, 256, 394, 6, 6, 10000)
-	if err := m0.Save(path); err != nil {
+	created, err := os.Create(path)
+	if err != nil {
 		panic(err)
 	}
 
-	m1, err := model.NewGPTFrom(path)
+	m0 := model.NewGPT(1000, 256, 394, 6, 6, 10000)
+	if err := m0.Save(created); err != nil {
+		panic(err)
+	}
+	_ = created.Close()
+
+	opened, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = opened.Close() }()
+
+	m1, err := model.NewGPTFrom(opened)
 	if err != nil {
 		panic(err)
 	}

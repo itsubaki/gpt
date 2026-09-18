@@ -22,20 +22,27 @@ func main() {
 	flag.IntVar(&count, "count", 1, "number of times to generate text")
 	flag.Parse()
 
-	// tokenizer
-	f, err := os.Open(mergeRulesPath)
+	// open files
+	rulesFile, err := os.Open(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = f.Close() }()
+	defer func() { _ = rulesFile.Close() }()
 
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(f)
+	modelFile, err := os.Open(modelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = modelFile.Close() }()
+
+	// tokenizer
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// model from gob file
-	m, err := model.NewGPTFrom(modelPath)
+	m, err := model.NewGPTFrom(modelFile)
 	if err != nil {
 		panic(err)
 	}

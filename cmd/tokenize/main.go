@@ -14,12 +14,14 @@ func main() {
 	flag.StringVar(&text, "text", "Hello world!!", "text to encode")
 	flag.Parse()
 
+	// open file
 	f, err := os.Open(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = f.Close() }()
 
+	// create BPE tokenizer from merge rules file
 	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(f)
 	if err != nil {
 		panic(err)

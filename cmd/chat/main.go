@@ -23,24 +23,31 @@ func main() {
 	flag.IntVar(&count, "count", 1, "number of times to generate text")
 	flag.Parse()
 
+	// open files
+	rulesFile, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesFile.Close() }()
+
+	modelFile, err := os.Open(modelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = modelFile.Close() }()
+
+	// tokenizer
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
+	if err != nil {
+		panic(err)
+	}
+
 	// model from gob file
-	m, err := model.NewGPTFrom(modelPath)
+	m, err := model.NewGPTFrom(modelFile)
 	if err != nil {
 		panic(err)
 	}
 	m.Eval()
-
-	// tokenizer
-	f, err := os.Open(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = f.Close() }()
-
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(f)
-	if err != nil {
-		panic(err)
-	}
 
 	fmt.Println("model parameters:")
 	fmt.Println(" VocabSize    :", m.VocabSize)
