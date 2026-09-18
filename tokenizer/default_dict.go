@@ -77,7 +77,7 @@ func (d *DefaultDict[T]) Save(w io.Writer) error {
 	return nil
 }
 
-func LoadDefaultDict(r io.Reader) (*DefaultDict[Pair], error) {
+func NewDefaultDictFrom(r io.Reader) (*DefaultDict[Pair], error) {
 	var dict DefaultDict[Pair]
 	if err := gob.NewDecoder(r).Decode(&dict); err != nil {
 		return nil, fmt.Errorf("decode: %v", err)

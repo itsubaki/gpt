@@ -45,7 +45,7 @@ func NewBPETokenizer(mergeRules *DefaultDict[Pair], endToken ...string) *BPEToke
 }
 
 func NewBPETokenizerFrom(r io.Reader, endToken ...string) (*BPETokenizer, error) {
-	mergeRules, err := LoadDefaultDict(r)
+	mergeRules, err := NewDefaultDictFrom(r)
 	if err != nil {
 		return nil, err
 	}

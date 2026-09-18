@@ -71,7 +71,7 @@ func main() {
 	defer func() { _ = modelFile.Close() }()
 
 	// tokenizer
-	mergeRules, err := tokenizer.LoadDefaultDict(rulesFile)
+	mergeRules, err := tokenizer.NewDefaultDictFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}
