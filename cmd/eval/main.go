@@ -24,26 +24,25 @@ func main() {
 	flag.IntVar(&batchSize, "batch-size", 32, "size of each batch")
 	flag.Parse()
 
-	// open files
+	// tokenizer
 	rulesFile, err := os.Open(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = rulesFile.Close() }()
 
-	modelFile, err := os.Open(modelPath)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = modelFile.Close() }()
-
-	// tokenizer
 	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// model from gob file
+	modelFile, err := os.Open(modelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = modelFile.Close() }()
+
 	m, err := model.NewGPTFrom(modelFile)
 	if err != nil {
 		panic(err)

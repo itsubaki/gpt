@@ -41,38 +41,37 @@ func main() {
 	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
 	flag.Parse()
 
-	// open files
+	// tokenizer
 	rulesFile, err := os.Open(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
 	defer func() { _ = rulesFile.Close() }()
 
-	current, err := os.Open(sftModelPath)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = current.Close() }()
-
-	old, err := os.Open(sftModelPath)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = old.Close() }()
-
-	// tokenizer
 	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// model from gob file
+	current, err := os.Open(sftModelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = current.Close() }()
+
 	m, err := model.NewGPTFrom(current)
 	if err != nil {
 		panic(err)
 	}
 
 	// old model from gob file
+	old, err := os.Open(sftModelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = old.Close() }()
+
 	oldModel, err := model.NewGPTFrom(old)
 	if err != nil {
 		panic(err)

@@ -15,14 +15,14 @@ func main() {
 	flag.Parse()
 
 	// open file
-	f, err := os.Open(mergeRulesPath)
+	rulesFile, err := os.Open(mergeRulesPath)
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = f.Close() }()
+	defer func() { _ = rulesFile.Close() }()
 
 	// create BPE tokenizer from merge rules file
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(f)
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}
