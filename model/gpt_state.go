@@ -14,7 +14,7 @@ type GPTState struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
+	Theta         float32
 	Params        layer.Parameters
 }
 

@@ -33,7 +33,7 @@ type GPT struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
+	Theta         float32
 	M.Model
 }
 
@@ -43,7 +43,7 @@ func NewGPT(
 	embedDim int,
 	numOfHeads int,
 	numOfBlocks int,
-	theta float64,
+	theta float32,
 ) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,

@@ -64,7 +64,7 @@ func (l *DataLoader) Batch() (*variable.Variable, *variable.Variable) {
 	}
 
 	shape := []int{l.BatchSize, l.Dataset.ContextLen()} // (B, C)
-	tx := tensor.Float64(tensor.New(shape, xs))
-	ty := tensor.Float64(tensor.New(shape, ys))
+	tx := tensor.Float32(tensor.New(shape, xs))
+	ty := tensor.Float32(tensor.New(shape, ys))
 	return variable.From(tx), variable.From(ty)
 }

@@ -4,12 +4,12 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"runtime/pprof"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/hook"
+	"github.com/itsubaki/autograd/math"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
@@ -67,15 +67,15 @@ func main() {
 		embedDim,
 		numOfHeads,
 		numOfBlocks,
-		theta,
+		float32(theta),
 	)
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       learningRate,
-		Beta1:       beta1,
-		Beta2:       beta2,
-		WeightDecay: weightDecay,
+		Alpha:       float32(learningRate),
+		Beta1:       float32(beta1),
+		Beta2:       float32(beta2),
+		WeightDecay: float32(weightDecay),
 	}
 
 	// dataloader
@@ -103,6 +103,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
+	var min float32 = float32(minLoss)
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -117,7 +118,7 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		hook.ClipGrad(clip)(m.Params())
+		hook.ClipGrad(float32(clip))(m.Params())
 		o.Update(m.Params())
 
 		// flush loss
@@ -132,12 +133,12 @@ func main() {
 			}
 		}
 
-		if loss.At() < minLoss {
+		if loss.At() < min {
 			if err := save(modelPath+".min", m); err != nil {
 				panic(err)
 			}
 
-			minLoss = loss.At()
+			min = loss.At()
 		}
 
 		// update progress bar
@@ -152,7 +153,7 @@ func main() {
 	fmt.Println()
 }
 
-func write(w *csv.Writer, iter int, loss float64) error {
+func write(w *csv.Writer, iter int, loss float32) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
 		fmt.Sprintf("%.4f", loss),

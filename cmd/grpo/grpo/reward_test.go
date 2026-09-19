@@ -10,7 +10,7 @@ func TestReward(t *testing.T) {
 	cases := []struct {
 		groundTruth string
 		response    string
-		want        float64
+		want        float32
 	}{
 		{
 			groundTruth: "12",
