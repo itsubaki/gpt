@@ -153,6 +153,7 @@ func (m *GPT) Load(params layer.Parameters) error {
 }
 
 func (m *GPT) Save(w io.Writer) error {
+	m.Cleargrads()
 	if err := m.State().Save(w); err != nil {
 		return fmt.Errorf("save state: %v", err)
 	}
