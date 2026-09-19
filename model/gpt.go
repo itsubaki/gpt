@@ -33,7 +33,7 @@ type GPT struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
+	Theta         float32
 	M.Model
 }
 
@@ -43,7 +43,7 @@ func NewGPT(
 	embedDim int,
 	numOfHeads int,
 	numOfBlocks int,
-	theta float64,
+	theta float32,
 ) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
@@ -153,6 +153,7 @@ func (m *GPT) Load(params layer.Parameters) error {
 }
 
 func (m *GPT) Save(w io.Writer) error {
+	m.Cleargrads()
 	if err := m.State().Save(w); err != nil {
 		return fmt.Errorf("save state: %v", err)
 	}

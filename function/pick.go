@@ -25,7 +25,7 @@ func (f *PickT) Forward(x ...*variable.Variable) []*variable.Variable {
 	f.shape = x[0].Data.Shape
 
 	B, C := f.shape[0], f.shape[1]
-	y := tensor.Zeros[float64](B, C)
+	y := tensor.Zeros[float32](B, C)
 
 	for b := range B {
 		for c := range C {
@@ -40,7 +40,7 @@ func (f *PickT) Forward(x ...*variable.Variable) []*variable.Variable {
 }
 
 func (f *PickT) Backward(gy ...*variable.Variable) []*variable.Variable {
-	gx := tensor.Zeros[float64](f.shape...)
+	gx := tensor.Zeros[float32](f.shape...)
 	B, C := f.labels.Shape[0], f.labels.Shape[1]
 	for b := range B {
 		for c := range C {

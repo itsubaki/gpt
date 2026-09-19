@@ -68,7 +68,7 @@ func main() {
 			bpeTokenizer,
 			prompt,
 			maxNewTokens,
-			temperature,
+			float32(temperature),
 		)
 
 		var ids []int
