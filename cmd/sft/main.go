@@ -23,7 +23,6 @@ func main() {
 	var learningRate, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var usePProf bool
-	var minLoss float64
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.Float64Var(&learningRate, "learning-rate", 3e-4, "learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
@@ -37,7 +36,6 @@ func main() {
 	flag.StringVar(&alpacaPath, "alpaca-path", "testdata/tiny_codes_sft.json", "path to the Alpaca data JSON file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
-	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
 	flag.Parse()
 
 	if usePProf {
@@ -114,7 +112,7 @@ func main() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
-	var min float32 = float32(minLoss)
+	var minLoss float32 = 1.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -145,12 +143,12 @@ func main() {
 			}
 		}
 
-		if loss.At() < min {
+		if loss.At() < minLoss {
 			if err := save(sftModelPath+".min", m); err != nil {
 				panic(err)
 			}
 
-			min = loss.At()
+			minLoss = loss.At()
 		}
 
 		// update progress bar
