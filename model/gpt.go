@@ -132,10 +132,10 @@ func NewGPTFrom(r io.Reader) (*GPT, error) {
 		return nil, fmt.Errorf("load state: %v", err)
 	}
 
-	return NewGPTWith(s)
+	return NewGPTFromState(s)
 }
 
-func NewGPTWith(s *GPTState) (*GPT, error) {
+func NewGPTFromState(s *GPTState) (*GPT, error) {
 	m := NewGPT(
 		s.VocabSize,
 		s.MaxContextLen,
