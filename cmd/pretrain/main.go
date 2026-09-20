@@ -68,6 +68,14 @@ func main() {
 		float32(theta),
 	)
 
+	fmt.Println("model parameters:")
+	fmt.Println(" VocabSize    :", m.VocabSize)
+	fmt.Println(" MaxContextLen:", m.MaxContextLen)
+	fmt.Println(" EmbedDim     :", m.EmbedDim)
+	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
+	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
+	fmt.Println(" Params.Size  :", m.Params().Size())
+
 	// optimizer
 	o := optimizer.AdamW{
 		Alpha:       float32(learningRate),
