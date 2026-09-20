@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/itsubaki/autograd/layer"
+	"github.com/itsubaki/autograd/tensor"
 )
 
 type GPTState struct {
@@ -15,7 +15,7 @@ type GPTState struct {
 	NumOfHeads    int
 	NumOfBlocks   int
 	Theta         float32
-	Params        layer.Parameters
+	Params        map[string]*tensor.Tensor[float32]
 }
 
 func NewGPTStateFrom(r io.Reader) (*GPTState, error) {

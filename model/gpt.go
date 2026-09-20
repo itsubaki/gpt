@@ -79,6 +79,20 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	return logits
 }
 
+func (m *GPT) Load(params layer.Parameters) error {
+	for k, v := range params {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = tensor.Clone(v.Data)
+			continue
+		}
+
+		return fmt.Errorf("parameter %s not found", k)
+	}
+
+	m.ClearCache()
+	return nil
+}
+
 func (m *GPT) ClearCache() {
 	for b := range m.Blocks() {
 		b.ClearCache()
@@ -118,10 +132,10 @@ func NewGPTFrom(r io.Reader) (*GPT, error) {
 		return nil, fmt.Errorf("load state: %v", err)
 	}
 
-	return NewGPTFromState(s)
+	return NewGPTWith(s)
 }
 
-func NewGPTFromState(s *GPTState) (*GPT, error) {
+func NewGPTWith(s *GPTState) (*GPT, error) {
 	m := NewGPT(
 		s.VocabSize,
 		s.MaxContextLen,
@@ -131,29 +145,19 @@ func NewGPTFromState(s *GPTState) (*GPT, error) {
 		s.Theta,
 	)
 
-	if err := m.Load(s.Params); err != nil {
-		return nil, fmt.Errorf("load: %v", err)
+	for k, v := range s.Params {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = v
+			continue
+		}
+
+		return nil, fmt.Errorf("parameter %s not found", k)
 	}
 
 	return m, nil
 }
 
-func (m *GPT) Load(params layer.Parameters) error {
-	for k, v := range params {
-		if p, ok := m.Params()[k]; ok {
-			p.Data = tensor.Clone(v.Data)
-			continue
-		}
-
-		return fmt.Errorf("parameter %s not found in model", k)
-	}
-
-	m.ClearCache()
-	return nil
-}
-
 func (m *GPT) Save(w io.Writer) error {
-	m.Cleargrads()
 	if err := m.State().Save(w); err != nil {
 		return fmt.Errorf("save state: %v", err)
 	}
@@ -162,6 +166,11 @@ func (m *GPT) Save(w io.Writer) error {
 }
 
 func (m *GPT) State() *GPTState {
+	params := make(map[string]*tensor.Tensor[float32])
+	for k, v := range m.Params() {
+		params[k] = tensor.Clone(v.Data)
+	}
+
 	return &GPTState{
 		VocabSize:     m.VocabSize,
 		MaxContextLen: m.MaxContextLen,
@@ -169,6 +178,6 @@ func (m *GPT) State() *GPTState {
 		NumOfHeads:    m.NumOfHeads,
 		NumOfBlocks:   m.NumOfBlocks,
 		Theta:         m.Theta,
-		Params:        m.Params(),
+		Params:        params,
 	}
 }
