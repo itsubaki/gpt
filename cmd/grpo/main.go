@@ -41,14 +41,38 @@ func main() {
 	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
 	flag.Parse()
 
+	// tokenizer
+	rulesFile, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesFile.Close() }()
+
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
+	if err != nil {
+		panic(err)
+	}
+
 	// model from gob file
-	m, err := model.NewGPTFrom(sftModelPath)
+	current, err := os.Open(sftModelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = current.Close() }()
+
+	m, err := model.NewGPTFrom(current)
 	if err != nil {
 		panic(err)
 	}
 
 	// old model from gob file
-	oldModel, err := model.NewGPTFrom(sftModelPath)
+	old, err := os.Open(sftModelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = old.Close() }()
+
+	oldModel, err := model.NewGPTFrom(old)
 	if err != nil {
 		panic(err)
 	}
@@ -60,17 +84,9 @@ func main() {
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
-		Hook: []optimizer.Hook{
-			hook.ClipGrad(clip),
-		},
 	}
 
-	// tokenizer
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
-	if err != nil {
-		panic(err)
-	}
-
+	// dataloader
 	dataset := grpo.NewDataset(bpeTokenizer)
 	dataloader := &grpo.DataLoader{
 		BatchSize: batchSize,
@@ -137,7 +153,8 @@ func main() {
 			)
 
 			loss.Backward()
-			o.Update(m)
+			hook.ClipGrad(clip)(m.Params())
+			o.Update(m.Params())
 		}
 
 		// write accuracy and loss to csv
@@ -147,7 +164,7 @@ func main() {
 
 		// checkpoint
 		if i%10 == 0 {
-			if err := m.Save(grpoModelPath); err != nil {
+			if err := save(grpoModelPath, m); err != nil {
 				panic(err)
 			}
 		}
@@ -188,7 +205,7 @@ func main() {
 	}
 
 	// save final model
-	if err := m.Save(grpoModelPath); err != nil {
+	if err := save(grpoModelPath, m); err != nil {
 		panic(err)
 	}
 
@@ -207,6 +224,20 @@ func write(w *csv.Writer, iter int, acc, loss float64) error {
 	w.Flush()
 	if err := w.Error(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func save(path string, m *model.GPT) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("create: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := m.Save(f); err != nil {
+		return fmt.Errorf("save: %w", err)
 	}
 
 	return nil

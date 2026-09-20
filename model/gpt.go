@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"io"
 	"iter"
 
 	"github.com/itsubaki/autograd/layer"
@@ -111,8 +112,8 @@ func newBlock(i int, embedDim, numOfHeads int, rope function.RoPEFunc) (string, 
 	return fmt.Sprintf("block[%d]", i), L.Block(embedDim, numOfHeads, rope)
 }
 
-func NewGPTFrom(path string) (*GPT, error) {
-	s, err := NewGPTStateFrom(path)
+func NewGPTFrom(r io.Reader) (*GPT, error) {
+	s, err := NewGPTStateFrom(r)
 	if err != nil {
 		return nil, fmt.Errorf("load state: %v", err)
 	}
@@ -151,8 +152,8 @@ func (m *GPT) Load(params layer.Parameters) error {
 	return nil
 }
 
-func (m *GPT) Save(path string) error {
-	if err := m.State().Save(path); err != nil {
+func (m *GPT) Save(w io.Writer) error {
+	if err := m.State().Save(w); err != nil {
 		return fmt.Errorf("save state: %v", err)
 	}
 

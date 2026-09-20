@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/itsubaki/gpt/tokenizer"
 )
@@ -13,7 +14,15 @@ func main() {
 	flag.StringVar(&text, "text", "Hello world!!", "text to encode")
 	flag.Parse()
 
-	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(mergeRulesPath)
+	// open file
+	rulesFile, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesFile.Close() }()
+
+	// create BPE tokenizer from merge rules file
+	bpeTokenizer, err := tokenizer.NewBPETokenizerFrom(rulesFile)
 	if err != nil {
 		panic(err)
 	}

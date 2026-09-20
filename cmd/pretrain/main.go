@@ -76,9 +76,6 @@ func main() {
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
-		Hook: []optimizer.Hook{
-			hook.ClipGrad(clip),
-		},
 	}
 
 	// dataloader
@@ -120,7 +117,8 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		o.Update(m)
+		hook.ClipGrad(clip)(m.Params())
+		o.Update(m.Params())
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {
@@ -129,13 +127,13 @@ func main() {
 
 		// model checkpoint
 		if i%100 == 0 {
-			if err := m.Save(modelPath); err != nil {
+			if err := save(modelPath, m); err != nil {
 				panic(err)
 			}
 		}
 
 		if loss.At() < minLoss {
-			if err := m.Save(modelPath + ".min"); err != nil {
+			if err := save(modelPath+".min", m); err != nil {
 				panic(err)
 			}
 
@@ -147,7 +145,7 @@ func main() {
 	}
 
 	// save final model
-	if err := m.Save(modelPath); err != nil {
+	if err := save(modelPath, m); err != nil {
 		panic(err)
 	}
 
@@ -165,6 +163,20 @@ func write(w *csv.Writer, iter int, loss float64) error {
 	w.Flush()
 	if err := w.Error(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func save(path string, m *model.GPT) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("create: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := m.Save(f); err != nil {
+		return fmt.Errorf("save: %w", err)
 	}
 
 	return nil

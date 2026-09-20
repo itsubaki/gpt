@@ -26,18 +26,21 @@ func main() {
 		panic(err)
 	}
 
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
+	// train BPE tokenizer
+	rulesFile, err := os.Create(mergeRulesPath)
 	if err != nil {
-		tokenizer.Writer = os.Stdout
-		mergeRules = tokenizer.TrainBPE(string(data), vocabSize)
-		if err := tokenizer.Save(mergeRulesPath, mergeRules); err != nil {
-			panic(err)
-		}
-
-		fmt.Println("saved merge rules to", mergeRulesPath)
+		panic(err)
 	}
+	defer func() { _ = rulesFile.Close() }()
 
-	bpeTokenizer := tokenizer.NewBPETokenizer(mergeRules)
+	tokenizer.Writer = os.Stdout // debug print
+	rules := tokenizer.TrainBPE(string(data), vocabSize)
+	if err := rules.Save(rulesFile); err != nil {
+		panic(err)
+	}
+	fmt.Println("saved merge rules to", mergeRulesPath)
+
+	bpeTokenizer := tokenizer.NewBPETokenizer(rules)
 	for key := range keys(bpeTokenizer.ID2Bytes) {
 		fmt.Printf("%3d -> %q\n", key, bpeTokenizer.Decode([]int{key}))
 	}

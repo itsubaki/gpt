@@ -3,7 +3,7 @@ package model
 import (
 	"encoding/gob"
 	"fmt"
-	"os"
+	"io"
 
 	"github.com/itsubaki/autograd/layer"
 )
@@ -18,29 +18,17 @@ type GPTState struct {
 	Params        layer.Parameters
 }
 
-func NewGPTStateFrom(path string) (*GPTState, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
+func NewGPTStateFrom(r io.Reader) (*GPTState, error) {
 	var s *GPTState
-	if err := gob.NewDecoder(f).Decode(&s); err != nil {
+	if err := gob.NewDecoder(r).Decode(&s); err != nil {
 		return nil, fmt.Errorf("decode: %v", err)
 	}
 
 	return s, nil
 }
 
-func (s *GPTState) Save(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("create file: %v", err)
-	}
-	defer func() { _ = f.Close() }()
-
-	if err := gob.NewEncoder(f).Encode(s); err != nil {
+func (s *GPTState) Save(w io.Writer) error {
+	if err := gob.NewEncoder(w).Encode(s); err != nil {
 		return fmt.Errorf("encode: %v", err)
 	}
 

@@ -57,8 +57,26 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
+	// tokenizer
+	rulesFile, err := os.Open(mergeRulesPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = rulesFile.Close() }()
+
+	mergeRules, err := tokenizer.NewDefaultDictFrom(rulesFile)
+	if err != nil {
+		panic(err)
+	}
+
 	// model from gob file
-	m, err := model.NewGPTFrom(modelPath)
+	modelFile, err := os.Open(modelPath)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = modelFile.Close() }()
+
+	m, err := model.NewGPTFrom(modelFile)
 	if err != nil {
 		panic(err)
 	}
@@ -69,15 +87,6 @@ func main() {
 		Beta1:       beta1,
 		Beta2:       beta2,
 		WeightDecay: weightDecay,
-		Hook: []optimizer.Hook{
-			hook.ClipGrad(clip),
-		},
-	}
-
-	// tokenizer
-	mergeRules, err := tokenizer.Load(mergeRulesPath)
-	if err != nil {
-		panic(err)
 	}
 
 	// dataloader
@@ -120,7 +129,8 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		o.Update(m)
+		hook.ClipGrad(clip)(m.Params())
+		o.Update(m.Params())
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {
@@ -129,13 +139,13 @@ func main() {
 
 		// model checkpoint
 		if i%100 == 0 {
-			if err := m.Save(sftModelPath); err != nil {
+			if err := save(sftModelPath, m); err != nil {
 				panic(err)
 			}
 		}
 
 		if loss.At() < minLoss {
-			if err := m.Save(sftModelPath + ".min"); err != nil {
+			if err := save(sftModelPath+".min", m); err != nil {
 				panic(err)
 			}
 
@@ -147,7 +157,7 @@ func main() {
 	}
 
 	// save final model
-	if err := m.Save(sftModelPath); err != nil {
+	if err := save(sftModelPath, m); err != nil {
 		panic(err)
 	}
 
@@ -165,6 +175,20 @@ func write(w *csv.Writer, iter int, loss float64) error {
 	w.Flush()
 	if err := w.Error(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func save(path string, m *model.GPT) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("create: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if err := m.Save(f); err != nil {
+		return fmt.Errorf("save: %w", err)
 	}
 
 	return nil
