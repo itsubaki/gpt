@@ -42,6 +42,7 @@ func main() {
 	flag.Parse()
 
 	if usePProf {
+		fmt.Println("Starting CPU profiling...")
 		f, err := os.Create("cpu.prof")
 		if err != nil {
 			panic(err)
