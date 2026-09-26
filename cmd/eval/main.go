@@ -63,6 +63,7 @@ func main() {
 	fmt.Println(" EmbedDim     :", m.EmbedDim)
 	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
 	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
+	fmt.Println(" Params.Size  :", m.Params().Size())
 	fmt.Println("------------------------------")
 	fmt.Println(" temperature   :", temperature)
 	fmt.Println(" max new tokens:", maxNewTokens)
