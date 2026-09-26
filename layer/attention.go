@@ -1,10 +1,9 @@
 package layer
 
 import (
-	"math"
-
 	F "github.com/itsubaki/autograd/function"
 	L "github.com/itsubaki/autograd/layer"
+	"github.com/itsubaki/autograd/math"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 	"github.com/itsubaki/gpt/function"
@@ -83,12 +82,12 @@ func (l *MultiHeadAttentionT) Forward(x ...*variable.Variable) []*variable.Varia
 	// QK^t/sqrt(d)
 	Kt := F.Transpose(0, 1, 3, 2)(K)                   // (B, H, D, C)
 	scores := F.MatMul(Q, Kt)                          // (B, H, C, D) @ (B, H, D, C) -> (B, H, C, C)
-	scores = F.MulC(1.0/math.Sqrt(float64(D)), scores) // (B, H, C, C)
+	scores = F.MulC(1.0/math.Sqrt(float32(D)), scores) // (B, H, C, C)
 
 	// attention mask
 	if !l.useCache || isFirstCall {
-		mask := tensor.Tril(tensor.Ones[float64](C, C))
-		cond := func(m float64) bool { return m == 0 }
+		mask := tensor.Tril(tensor.Ones[float32](C, C))
+		cond := func(m float32) bool { return m == 0 }
 		scores = F.MaskFill(mask, cond, math.Inf(-1))(scores) // (B, H, C, C)
 	}
 

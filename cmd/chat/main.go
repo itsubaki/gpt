@@ -69,7 +69,7 @@ func main() {
 			bpeTokenizer,
 			dataloader.AlpacaFormat(prompt),
 			maxNewTokens,
-			temperature,
+			float32(temperature),
 		)
 
 		var ids []int

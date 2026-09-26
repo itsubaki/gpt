@@ -4,12 +4,12 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"runtime/pprof"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/hook"
+	"github.com/itsubaki/autograd/math"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
@@ -23,7 +23,6 @@ func main() {
 	var learningRate, beta1, beta2, weightDecay, clip float64
 	var maxIters, batchSize int
 	var usePProf bool
-	var minLoss float64
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.Float64Var(&learningRate, "learning-rate", 3e-4, "learning rate")
 	flag.Float64Var(&beta1, "beta1", 0.9, "beta1 for AdamW optimizer")
@@ -37,7 +36,6 @@ func main() {
 	flag.StringVar(&alpacaPath, "alpaca-path", "testdata/tiny_codes_sft.json", "path to the Alpaca data JSON file")
 	flag.StringVar(&sftModelPath, "sft-model-path", "testdata/model_gpt_sft.gob", "path to the SFT model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
-	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
 	flag.Parse()
 
 	if usePProf {
@@ -83,10 +81,10 @@ func main() {
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       learningRate,
-		Beta1:       beta1,
-		Beta2:       beta2,
-		WeightDecay: weightDecay,
+		Alpha:       float32(learningRate),
+		Beta1:       float32(beta1),
+		Beta2:       float32(beta2),
+		WeightDecay: float32(weightDecay),
 	}
 
 	// dataloader
@@ -114,6 +112,7 @@ func main() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
+	var minLoss float32 = 1.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -129,7 +128,7 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		hook.ClipGrad(clip)(m.Params())
+		hook.ClipGrad(float32(clip))(m.Params())
 		o.Update(m.Params())
 
 		// flush loss
@@ -164,7 +163,7 @@ func main() {
 	fmt.Println()
 }
 
-func write(w *csv.Writer, iter int, loss float64) error {
+func write(w *csv.Writer, iter int, loss float32) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
 		fmt.Sprintf("%.4f", loss),

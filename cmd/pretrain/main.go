@@ -4,12 +4,12 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"runtime/pprof"
 
 	F "github.com/itsubaki/autograd/function"
 	"github.com/itsubaki/autograd/hook"
+	"github.com/itsubaki/autograd/math"
 	"github.com/itsubaki/autograd/optimizer"
 	"github.com/itsubaki/gpt/dataloader"
 	"github.com/itsubaki/gpt/model"
@@ -23,7 +23,6 @@ func main() {
 	var maxIters, batchSize int
 	var tokensPath, modelPath string
 	var usePProf bool
-	var minLoss float64
 	flag.IntVar(&vocabSize, "vocab-size", 1000, "vocabulary size")
 	flag.IntVar(&contextLen, "context-len", 256, "maximum context length")
 	flag.IntVar(&embedDim, "embed-dim", 256, "embedding dimension")
@@ -40,10 +39,10 @@ func main() {
 	flag.StringVar(&tokensPath, "tokens-path", "testdata/tiny_codes.bin", "path to the tokens gob file")
 	flag.StringVar(&modelPath, "model-path", "testdata/model_gpt.gob", "path to the model gob file")
 	flag.BoolVar(&usePProf, "pprof", false, "enable pprof")
-	flag.Float64Var(&minLoss, "min-loss", 1.0, "minimum loss for saving the model")
 	flag.Parse()
 
 	if usePProf {
+		fmt.Println("Starting CPU profiling...")
 		f, err := os.Create("cpu.prof")
 		if err != nil {
 			panic(err)
@@ -67,15 +66,23 @@ func main() {
 		embedDim,
 		numOfHeads,
 		numOfBlocks,
-		theta,
+		float32(theta),
 	)
+
+	fmt.Println("model parameters:")
+	fmt.Println(" VocabSize    :", m.VocabSize)
+	fmt.Println(" MaxContextLen:", m.MaxContextLen)
+	fmt.Println(" EmbedDim     :", m.EmbedDim)
+	fmt.Println(" NumOfHeads   :", m.NumOfHeads)
+	fmt.Println(" NumOfBlocks  :", m.NumOfBlocks)
+	fmt.Println(" Params.Size  :", m.Params().Size())
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       learningRate,
-		Beta1:       beta1,
-		Beta2:       beta2,
-		WeightDecay: weightDecay,
+		Alpha:       float32(learningRate),
+		Beta1:       float32(beta1),
+		Beta2:       float32(beta2),
+		WeightDecay: float32(weightDecay),
 	}
 
 	// dataloader
@@ -103,6 +110,7 @@ func main() {
 	defer w.Flush()
 
 	// training loop
+	var minLoss float32 = 1.0
 	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
@@ -117,7 +125,7 @@ func main() {
 		// backward and update
 		m.Cleargrads()
 		loss.Backward()
-		hook.ClipGrad(clip)(m.Params())
+		hook.ClipGrad(float32(clip))(m.Params())
 		o.Update(m.Params())
 
 		// flush loss
@@ -152,7 +160,7 @@ func main() {
 	fmt.Println()
 }
 
-func write(w *csv.Writer, iter int, loss float64) error {
+func write(w *csv.Writer, iter int, loss float32) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
 		fmt.Sprintf("%.4f", loss),

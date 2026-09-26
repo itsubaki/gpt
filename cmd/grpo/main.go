@@ -80,10 +80,10 @@ func main() {
 
 	// optimizer
 	o := optimizer.AdamW{
-		Alpha:       learningRate,
-		Beta1:       beta1,
-		Beta2:       beta2,
-		WeightDecay: weightDecay,
+		Alpha:       float32(learningRate),
+		Beta1:       float32(beta1),
+		Beta2:       float32(beta2),
+		WeightDecay: float32(weightDecay),
 	}
 
 	// dataloader
@@ -108,7 +108,7 @@ func main() {
 	bar := progress.NewProgressBar("GRPO", maxIters, os.Stdout)
 	bar.Update(0)
 
-	var acc float64
+	var acc float32
 	var loss *variable.Variable
 	for i := range maxIters {
 		prompts, gts := dataloader.Batch()
@@ -149,11 +149,11 @@ func main() {
 				ids,
 				mask,
 				allAdvantages,
-				epsilon,
+				float32(epsilon),
 			)
 
 			loss.Backward()
-			hook.ClipGrad(clip)(m.Params())
+			hook.ClipGrad(float32(clip))(m.Params())
 			o.Update(m.Params())
 		}
 
@@ -196,7 +196,7 @@ func main() {
 				}
 
 				m.Train()
-				acc = float64(correct) / float64(total) * 100
+				acc = float32(correct) / float32(total*100)
 			}()
 		}
 
@@ -212,7 +212,7 @@ func main() {
 	fmt.Println()
 }
 
-func write(w *csv.Writer, iter int, acc, loss float64) error {
+func write(w *csv.Writer, iter int, acc, loss float32) error {
 	if err := w.Write([]string{
 		fmt.Sprintf("%d", iter),
 		fmt.Sprintf("%v", acc),

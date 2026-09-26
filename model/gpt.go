@@ -33,7 +33,7 @@ type GPT struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
+	Theta         float32
 	M.Model
 }
 
@@ -43,7 +43,7 @@ func NewGPT(
 	embedDim int,
 	numOfHeads int,
 	numOfBlocks int,
-	theta float64,
+	theta float32,
 ) *GPT {
 	gpt := &GPT{
 		VocabSize:     vocabSize,
@@ -77,6 +77,20 @@ func (m *GPT) Forward(ids *variable.Variable) *variable.Variable {
 	x = m.L["norm"].First(x)
 	logits := m.L["unembed"].First(x) // (B, C, V)
 	return logits
+}
+
+func (m *GPT) Load(params layer.Parameters) error {
+	for k, v := range params {
+		if p, ok := m.Params()[k]; ok {
+			p.Data = tensor.Clone(v.Data)
+			continue
+		}
+
+		return fmt.Errorf("parameter %s not found", k)
+	}
+
+	m.ClearCache()
+	return nil
 }
 
 func (m *GPT) ClearCache() {
@@ -131,25 +145,16 @@ func NewGPTFromState(s *GPTState) (*GPT, error) {
 		s.Theta,
 	)
 
-	if err := m.Load(s.Params); err != nil {
-		return nil, fmt.Errorf("load: %v", err)
-	}
-
-	return m, nil
-}
-
-func (m *GPT) Load(params layer.Parameters) error {
-	for k, v := range params {
+	for k, v := range s.Params {
 		if p, ok := m.Params()[k]; ok {
-			p.Data = tensor.Clone(v.Data)
+			p.Data = v
 			continue
 		}
 
-		return fmt.Errorf("parameter %s not found in model", k)
+		return nil, fmt.Errorf("parameter %s not found", k)
 	}
 
-	m.ClearCache()
-	return nil
+	return m, nil
 }
 
 func (m *GPT) Save(w io.Writer) error {
@@ -161,6 +166,11 @@ func (m *GPT) Save(w io.Writer) error {
 }
 
 func (m *GPT) State() *GPTState {
+	params := make(map[string]*tensor.Tensor[float32])
+	for k, v := range m.Params() {
+		params[k] = tensor.Clone(v.Data)
+	}
+
 	return &GPTState{
 		VocabSize:     m.VocabSize,
 		MaxContextLen: m.MaxContextLen,
@@ -168,6 +178,6 @@ func (m *GPT) State() *GPTState {
 		NumOfHeads:    m.NumOfHeads,
 		NumOfBlocks:   m.NumOfBlocks,
 		Theta:         m.Theta,
-		Params:        m.Params(),
+		Params:        params,
 	}
 }
