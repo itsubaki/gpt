@@ -102,7 +102,7 @@ go run cmd/pretrain/main.go
 Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim256/loss.png">
+<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss.png">
 
 ```shell
 % make generate
@@ -126,7 +126,7 @@ go run cmd/sft/main.go
 SFT          100%|██████████████████████████████| 500/500
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim256/loss_sft.png">
+<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss_sft.png">
 
 ```shell
 % make chat
@@ -168,7 +168,7 @@ go run cmd/grpo/main.go
 GRPO         100%|██████████████████████████████| 100/100
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim256/loss_grpo.png">
+<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss_grpo.png">
 
 ```shell
 % make eval
