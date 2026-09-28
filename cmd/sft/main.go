@@ -98,10 +98,6 @@ func main() {
 		),
 	}
 
-	// progress bar
-	bar := progress.NewProgressBar("SFT", maxIters, os.Stdout)
-	bar.Update(0)
-
 	// save loss to csv
 	f, err := os.Create("loss_sft.csv")
 	if err != nil {
@@ -112,8 +108,13 @@ func main() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
+	// progress bar
+	bar := progress.NewProgressBar("SFT", maxIters, os.Stdout)
+	bar.Update(0)
+
+	// training loop
 	var minLoss float32 = 1.0
-	for i := range maxIters {
+  for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
 

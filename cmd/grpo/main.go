@@ -108,6 +108,7 @@ func main() {
 	bar := progress.NewProgressBar("GRPO", maxIters, os.Stdout)
 	bar.Update(0)
 
+  // training loop
 	var acc float32
 	var loss *variable.Variable
 	for i := range maxIters {
