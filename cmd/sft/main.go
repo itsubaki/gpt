@@ -114,7 +114,7 @@ func main() {
 
 	// training loop
 	var minLoss float32 = 1.0
-  for i := range maxIters {
+	for i := range maxIters {
 		// batch
 		x, y := loader.Batch()
 
