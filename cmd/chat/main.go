@@ -79,9 +79,12 @@ func main() {
 			fmt.Printf("%v,", id)
 		}
 
+		elapsed := time.Since(now).Seconds()
+		tokensPerSec := float64(len(ids)) / elapsed
+
 		fmt.Println()
 		fmt.Println("------------------------------")
-		fmt.Println("generation time:", time.Since(now))
+		fmt.Printf("%d tokens / %.1fs (%.1f tok/s)\n", len(ids), elapsed, tokensPerSec)
 		fmt.Println("------------------------------")
 		fmt.Println(bpeTokenizer.Decode(ids))
 		fmt.Println("------------------------------")

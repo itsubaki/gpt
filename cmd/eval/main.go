@@ -67,7 +67,7 @@ func main() {
 	fmt.Println("------------------------------")
 	fmt.Println(" temperature   :", temperature)
 	fmt.Println(" max new tokens:", maxNewTokens)
-	fmt.Println(" batch size     :", batchSize)
+	fmt.Println(" batch size    :", batchSize)
 	fmt.Println("------------------------------")
 
 	var correct int
