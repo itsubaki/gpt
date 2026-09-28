@@ -88,10 +88,6 @@ func main() {
 		),
 	}
 
-	// progress bar
-	bar := progress.NewProgressBar("Pre-Training", maxIters, os.Stdout)
-	bar.Update(0)
-
 	// save loss to csv
 	f, err := os.Create("loss.csv")
 	if err != nil {
@@ -101,6 +97,10 @@ func main() {
 
 	w := csv.NewWriter(f)
 	defer w.Flush()
+
+	// progress bar
+	bar := progress.NewProgressBar("Pre-Training", maxIters, os.Stdout)
+	bar.Update(0)
 
 	// training loop
 	for i := range maxIters {
