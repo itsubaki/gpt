@@ -2,4 +2,4 @@ module github.com/itsubaki/gpt
 
 go 1.26.1
 
-require github.com/itsubaki/autograd v0.0.8-0.20260926234444-dede4d1d719e
+require github.com/itsubaki/autograd v0.0.8-0.20260929104503-7ba5d6fcffda

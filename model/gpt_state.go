@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/itsubaki/autograd/layer"
+	"github.com/itsubaki/autograd/tensor"
 )
 
 type GPTState struct {
@@ -14,8 +14,8 @@ type GPTState struct {
 	EmbedDim      int
 	NumOfHeads    int
 	NumOfBlocks   int
-	Theta         float64
-	Params        layer.Parameters
+	Theta         float32
+	Params        map[string]*tensor.Tensor[float32]
 }
 
 func NewGPTStateFrom(r io.Reader) (*GPTState, error) {

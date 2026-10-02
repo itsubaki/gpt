@@ -20,7 +20,7 @@ func LayerNorm(embedDim int) *LayerNormT {
 }
 
 type LayerNormT struct {
-	eps float64
+	eps float32
 	L.Parameters
 }
 

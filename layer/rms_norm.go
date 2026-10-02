@@ -19,7 +19,7 @@ func RMSNorm(embedDim int) *RMSNormT {
 }
 
 type RMSNormT struct {
-	eps float64
+	eps float32
 	L.Parameters
 }
 
