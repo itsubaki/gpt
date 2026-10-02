@@ -197,7 +197,7 @@ func main() {
 				}
 
 				m.Train()
-				acc = float32(correct) / float32(total*100)
+				acc = float32(correct) / float32(total) * 100
 			}()
 		}
 
