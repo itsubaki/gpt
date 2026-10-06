@@ -13,7 +13,7 @@ func ExampleBlock() {
 	numOfhead := 8
 	batchSize := 2
 	contextLen := 30
-	theta := 1000.0
+	theta := float32(1000.0)
 
 	rope := function.RoPE(theta, embedDim, contextLen)
 	block := L.Block(embedDim, numOfhead, rope)

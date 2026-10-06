@@ -2,8 +2,8 @@ package function
 
 import (
 	"fmt"
-	"math"
 
+	"github.com/itsubaki/autograd/math"
 	"github.com/itsubaki/autograd/tensor"
 	"github.com/itsubaki/autograd/variable"
 )
@@ -11,20 +11,20 @@ import (
 type RoPEFunc func(offset int) func(x ...*variable.Variable) *variable.Variable
 
 // RoPE implements the Rotary Position Embedding (RoPE) function.
-func RoPE(theta float64, embedDim, contextLen int) RoPEFunc {
+func RoPE(theta float32, embedDim, contextLen int) RoPEFunc {
 	if embedDim%2 != 0 {
 		panic(fmt.Sprintf("embedDim=%d is odd", embedDim))
 	}
 
 	halfDim := embedDim / 2
-	cos := make([]float64, contextLen*halfDim)
-	sin := make([]float64, contextLen*halfDim)
+	cos := make([]float32, contextLen*halfDim)
+	sin := make([]float32, contextLen*halfDim)
 
 	for pos := range contextLen {
 		for i := range halfDim {
-			pow := float64(2*i) / float64(embedDim)
+			pow := float32(2*i) / float32(embedDim)
 			freq := 1.0 / math.Pow(theta, pow)
-			angle := float64(pos) * freq
+			angle := float32(pos) * freq
 
 			idx := pos*halfDim + i
 			cos[idx] = math.Cos(angle)
@@ -46,8 +46,8 @@ func RoPE(theta float64, embedDim, contextLen int) RoPEFunc {
 }
 
 type RoPET struct {
-	Cos        []float64
-	Sin        []float64
+	Cos        []float32
+	Sin        []float32
 	HalfDim    int
 	ContextLen int
 	offset     int

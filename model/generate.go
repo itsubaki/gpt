@@ -31,7 +31,7 @@ func GenerateText(
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,
-	temperature float64,
+	temperature float32,
 ) string {
 	tokens := GenerateTokens(
 		model,
@@ -56,7 +56,7 @@ func GenerateTokens(
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,
-	temperature float64,
+	temperature float32,
 ) <-chan int {
 	ch := make(chan int)
 
@@ -106,7 +106,7 @@ func GenerateTokens(
 	return ch
 }
 
-func sample(logits *variable.Variable, temperature float64) int {
+func sample(logits *variable.Variable, temperature float32) int {
 	if temperature == 0 {
 		return tensor.Argmax(logits.Data, 0).At()
 	}
@@ -116,18 +116,18 @@ func sample(logits *variable.Variable, temperature float64) int {
 }
 
 func newVariable(ids []int) *variable.Variable {
-	f := make([]float64, len(ids))
+	f := make([]float32, len(ids))
 	for i, id := range ids {
-		f[i] = float64(id)
+		f[i] = float32(id)
 	}
 
 	return variable.New(f...)
 }
 
 func multinomial(probs *variable.Variable) int {
-	r := rand.Float64()
+	r := rand.Float32()
 
-	var cum float64
+	var cum float32
 	for i := range probs.Size() {
 		cum += probs.At(i)
 		if r < cum {

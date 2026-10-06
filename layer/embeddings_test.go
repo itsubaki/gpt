@@ -13,9 +13,9 @@ func ExampleEmbeddings() {
 	vocabSize := 100
 	maxContextLen := 10
 
-	tokens := make([]float64, maxContextLen)
+	tokens := make([]float32, maxContextLen)
 	for i := range tokens {
-		tokens[i] = float64(rand.Intn(vocabSize))
+		tokens[i] = float32(rand.Intn(vocabSize))
 	}
 
 	x := variable.New(tokens...).Reshape(1, maxContextLen)
