@@ -10,7 +10,7 @@ import (
 var _ grpo.Model = (*MockModel)(nil)
 
 type MockModel struct {
-	logits  []float64
+	logits  []float32
 	B, C, V int
 }
 
@@ -24,7 +24,7 @@ func (m *MockModel) Eval() {}
 
 func ExampleComputeProbs() {
 	m := &MockModel{
-		logits: []float64{
+		logits: []float32{
 			1, 0, 0,
 			0, 1, 0,
 
@@ -46,12 +46,12 @@ func ExampleComputeProbs() {
 	fmt.Println(probs)
 
 	// Output:
-	// variable[2 1]([0.21194155761708544 0.5761168847658291])
+	// variable[2 1]([0.21194157 0.57611686])
 }
 
 func ExampleLoss() {
 	model := &MockModel{
-		logits: []float64{
+		logits: []float32{
 			2, 1, 0,
 			0, 2, 1,
 			1, 0, 2,
@@ -66,7 +66,7 @@ func ExampleLoss() {
 	}
 
 	oldModel := &MockModel{
-		logits: []float64{
+		logits: []float32{
 			1, 0, 0,
 			0, 1, 0,
 			0, 0, 1,
@@ -90,7 +90,7 @@ func ExampleLoss() {
 		1, 1,
 	).Reshape(2, 2)
 
-	advantages := []float64{
+	advantages := []float32{
 		1.0,
 		0.7,
 	}
@@ -107,5 +107,5 @@ func ExampleLoss() {
 	fmt.Println(loss)
 
 	// Output:
-	// variable(-1.9629863337842814)
+	// variable(-1.962986)
 }

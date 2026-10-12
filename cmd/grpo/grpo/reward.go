@@ -7,7 +7,7 @@ import (
 
 var re = regexp.MustCompile(`-?\d+`)
 
-func Reward(groundTruth, response string) float64 {
+func Reward(groundTruth, response string) float32 {
 	matches := re.FindAllString(response, -1)
 	if len(matches) == 0 {
 		return 0.0

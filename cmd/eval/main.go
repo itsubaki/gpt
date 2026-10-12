@@ -79,7 +79,7 @@ func main() {
 			bpeTokenizer,
 			prompt,
 			maxNewTokens,
-			temperature,
+			float32(temperature),
 		)
 
 		matched := re.FindStringSubmatch(response)

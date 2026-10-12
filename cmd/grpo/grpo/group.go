@@ -9,9 +9,9 @@ func GenerateGroup(
 	prompts []string,
 	gts []string,
 	groupSize int,
-) ([]string, []string, []float64) {
+) ([]string, []string, []float32) {
 	var allPrompts, allResponses []string
-	var allAdvantages []float64
+	var allAdvantages []float32
 	for i := range prompts {
 		prompt, responses := prompts[i], make([]string, groupSize)
 		for j := range responses {
@@ -20,19 +20,19 @@ func GenerateGroup(
 		}
 
 		// calculate rewards and advantages
-		var rewards []float64
+		var rewards []float32
 		for j := range responses {
 			r := Reward(gts[i], responses[j])
 			rewards = append(rewards, r)
 		}
 
-		var mean float64
+		var mean float32
 		for _, r := range rewards {
 			mean += r
 		}
-		mean /= float64(len(rewards))
+		mean /= float32(len(rewards))
 
-		var advantages []float64
+		var advantages []float32
 		for _, r := range rewards {
 			advantages = append(advantages, r-mean)
 		}

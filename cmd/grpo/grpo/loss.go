@@ -18,8 +18,8 @@ func Loss(
 	oldModel Model,
 	ids *variable.Variable,
 	mask *variable.Variable,
-	advantages []float64,
-	epsilon float64,
+	advantages []float32,
+	epsilon float32,
 ) *variable.Variable {
 	probs := ComputeProbs(model, ids)
 
@@ -41,7 +41,7 @@ func Loss(
 	tokenObjective := F.Mul(masks, F.Minimum(unclipped, clipped)) // masks * minimum(unclipped, clipped)
 	sum := F.Sum()(tokenObjective)
 
-	samples := float64(ids.Shape()[0])
+	samples := float32(ids.Shape()[0])
 	return F.Neg(F.Div(sum, variable.New(samples))) // -1 * sum / samples
 }
 
