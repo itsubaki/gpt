@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// optimizer
-	o := optimizer.AdamW{
+	optim := &optimizer.AdamW{
 		Alpha:       float32(learningRate),
 		Beta1:       float32(beta1),
 		Beta2:       float32(beta2),
@@ -88,7 +88,7 @@ func main() {
 	}
 
 	// dataloader
-	loader := dataloader.DataLoader{
+	loader := &dataloader.DataLoader{
 		BatchSize: batchSize,
 		Shuffle:   true,
 		Dataset: dataloader.NewAlpacaDataset(
@@ -130,7 +130,7 @@ func main() {
 		m.Cleargrads()
 		loss.Backward()
 		hook.ClipGrad(float32(clip))(m.Params())
-		o.Update(m.Params())
+		optim.Update(m.Params())
 
 		// flush loss
 		if err := write(w, i, loss.At()); err != nil {

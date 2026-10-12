@@ -79,7 +79,7 @@ func main() {
 	oldModel.Eval()
 
 	// optimizer
-	o := optimizer.AdamW{
+	optim := &optimizer.AdamW{
 		Alpha:       float32(learningRate),
 		Beta1:       float32(beta1),
 		Beta2:       float32(beta2),
@@ -155,7 +155,7 @@ func main() {
 
 			loss.Backward()
 			hook.ClipGrad(float32(clip))(m.Params())
-			o.Update(m.Params())
+			optim.Update(m.Params())
 		}
 
 		// write accuracy and loss to csv
