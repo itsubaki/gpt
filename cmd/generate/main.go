@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -64,6 +65,7 @@ func main() {
 		// generate text
 		now := time.Now()
 		tokens := model.GenerateTokens(
+			context.Background(),
 			m,
 			m.MaxContextLen,
 			bpeTokenizer,

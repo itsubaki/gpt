@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"math/rand/v2"
 
 	F "github.com/itsubaki/autograd/function"
@@ -34,6 +35,7 @@ func GenerateText(
 	temperature float32,
 ) string {
 	tokens := GenerateTokens(
+		context.Background(),
 		model,
 		maxContextLen,
 		tokenizer,
@@ -50,7 +52,12 @@ func GenerateText(
 	return tokenizer.Decode(ids)
 }
 
+// GenerateTokens streams prompt and generated tokens until generation completes or
+// ctx is canceled. Cancellation closes the channel after any in-flight Encode or
+// Forward call returns. Callers that stop receiving must cancel ctx and wait for
+// the channel to close before reusing the model.
 func GenerateTokens(
+	ctx context.Context,
 	model Model,
 	maxContextLen int,
 	tokenizer Tokenizer,
@@ -79,7 +86,12 @@ func GenerateTokens(
 			for _, id := range ids {
 				x = newVariable([]int{id}).Reshape(1, 1) // (1, 1)
 				x = model.Forward(x)                     // (1, 1, V)
-				ch <- id
+
+				select {
+				case <-ctx.Done():
+					return
+				case ch <- id:
+				}
 			}
 
 			// generate tokens
@@ -94,7 +106,11 @@ func GenerateTokens(
 				}
 
 				// send next token to channel
-				ch <- nextID
+				select {
+				case <-ctx.Done():
+					return
+				case ch <- nextID:
+				}
 
 				// next token only
 				x = newVariable([]int{nextID}).Reshape(1, 1) // (1, 1)
