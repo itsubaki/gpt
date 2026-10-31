@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -74,6 +75,7 @@ func main() {
 	prompts, gts := dataloader.Batch()
 	for i, prompt := range prompts {
 		response := model.GenerateText(
+			context.Background(),
 			m,
 			m.MaxContextLen,
 			bpeTokenizer,

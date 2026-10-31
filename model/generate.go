@@ -27,6 +27,7 @@ type Model interface {
 }
 
 func GenerateText(
+	ctx context.Context,
 	model Model,
 	maxContextLen int,
 	tokenizer Tokenizer,
@@ -35,7 +36,7 @@ func GenerateText(
 	temperature float32,
 ) string {
 	tokens := GenerateTokens(
-		context.Background(),
+		ctx,
 		model,
 		maxContextLen,
 		tokenizer,

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"flag"
 	"fmt"
@@ -180,6 +181,7 @@ func main() {
 				for j := range dataset.Len() {
 					prompt, gt := dataset.GetItem(j)
 					response := model.GenerateText(
+						context.Background(),
 						m,
 						m.MaxContextLen,
 						bpeTokenizer,
