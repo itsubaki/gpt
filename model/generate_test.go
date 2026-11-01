@@ -26,20 +26,33 @@ func (generationTokenizer) Encode(string) []int { return []int{1} }
 func (generationTokenizer) Decode([]int) string { return "" }
 func (generationTokenizer) EndTokenID() int     { return 2 }
 
-func TestGenerateTokensDone(t *testing.T) {
-	for _, name := range []string{
-		"prompt",
-		"generated",
-	} {
+func TestGenerateTokens_done(t *testing.T) {
+	cases := []struct {
+		receive   []int
+		wantCalls int
+	}{
+		{
+			// Cancel while sending the prompt.
+			receive:   nil,
+			wantCalls: 1,
+		},
+		{
+			// Consume the prompt, then cancel while sending a generated token.
+			receive:   []int{1},
+			wantCalls: 1,
+		},
+	}
+
+	for _, c := range cases {
 		synctest.Test(t, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
 			m := &generationModel{}
 			tokens := model.GenerateTokens(ctx, m, 8, generationTokenizer{}, "prompt", 2, 0)
-			if name == "generated" {
-				if id := <-tokens; id != 1 {
-					t.Fatalf("prompt token = %d, want 1", id)
+			for _, want := range c.receive {
+				if id := <-tokens; id != want {
+					t.Fatalf("token = %d, want %d", id, want)
 				}
 			}
 
@@ -59,8 +72,8 @@ func TestGenerateTokensDone(t *testing.T) {
 				t.Fatal("token channel was not closed after cancellation")
 			}
 
-			if m.calls != 1 {
-				t.Fatalf("Forward called %d times, want 1", m.calls)
+			if m.calls != c.wantCalls {
+				t.Fatalf("Forward called %d times, want %d", m.calls, c.wantCalls)
 			}
 		})
 	}
