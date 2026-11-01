@@ -19,7 +19,16 @@ func GenerateGroup(
 	for i := range prompts {
 		prompt, responses := prompts[i], make([]string, groupSize)
 		for j := range responses {
-			fullText := model.GenerateText(context.Background(), m, maxContextLen, tokenizer, prompt, 1000, 1.0)
+			fullText := model.GenerateText(
+				context.Background(),
+				m,
+				maxContextLen,
+				tokenizer,
+				prompt,
+				1000,
+				1.0,
+			)
+
 			responses[j] = fullText[len(prompt):]
 		}
 
