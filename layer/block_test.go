@@ -15,7 +15,8 @@ func ExampleBlock() {
 	contextLen := 30
 	theta := float32(1000.0)
 
-	rope := function.RoPE(theta, embedDim, contextLen)
+	headDim := embedDim / numOfhead
+	rope := function.RoPE(theta, headDim, contextLen)
 	block := L.Block(embedDim, numOfhead, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
