@@ -15,7 +15,7 @@ func ExampleBlock() {
 	contextLen := 30
 	theta := float32(1000.0)
 
-	headDim := embedDim / numOfhead
+	headDim := int(embedDim / numOfhead)
 	rope := function.RoPE(theta, headDim, contextLen)
 	block := L.Block(embedDim, numOfhead, rope)
 
