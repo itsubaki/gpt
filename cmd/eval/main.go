@@ -77,7 +77,6 @@ func main() {
 		response := model.GenerateText(
 			context.Background(),
 			m,
-			m.MaxContextLen,
 			bpeTokenizer,
 			prompt,
 			maxNewTokens,

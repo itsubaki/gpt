@@ -29,7 +29,6 @@ type Model interface {
 func GenerateText(
 	ctx context.Context,
 	model Model,
-	maxContextLen int,
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,
@@ -38,7 +37,6 @@ func GenerateText(
 	tokens := GenerateTokens(
 		ctx,
 		model,
-		maxContextLen,
 		tokenizer,
 		prompt,
 		maxNewTokens,
@@ -60,7 +58,6 @@ func GenerateText(
 func GenerateTokens(
 	ctx context.Context,
 	model Model,
-	maxContextLen int,
 	tokenizer Tokenizer,
 	prompt string,
 	maxNewTokens int,

@@ -123,7 +123,6 @@ func main() {
 		// sample group of prompts and responses
 		allPrompts, allResponses, allAdvantages := grpo.GenerateGroup(
 			oldModel,
-			oldModel.MaxContextLen,
 			bpeTokenizer,
 			prompts,
 			gts,
@@ -183,7 +182,6 @@ func main() {
 					response := model.GenerateText(
 						context.Background(),
 						m,
-						m.MaxContextLen,
 						bpeTokenizer,
 						prompt,
 						1000, // max new tokens

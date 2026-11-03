@@ -8,7 +8,6 @@ import (
 
 func GenerateGroup(
 	m model.Model,
-	maxContextLen int,
 	tokenizer model.Tokenizer,
 	prompts []string,
 	gts []string,
@@ -22,7 +21,6 @@ func GenerateGroup(
 			fullText := model.GenerateText(
 				context.Background(),
 				m,
-				maxContextLen,
 				tokenizer,
 				prompt,
 				1000,
