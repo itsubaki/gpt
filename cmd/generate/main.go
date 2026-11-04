@@ -67,7 +67,6 @@ func main() {
 		tokens := model.GenerateTokens(
 			context.Background(),
 			m,
-			m.MaxContextLen,
 			bpeTokenizer,
 			prompt,
 			maxNewTokens,

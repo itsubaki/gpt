@@ -49,7 +49,7 @@ func TestGenerateTokens_done(t *testing.T) {
 			defer cancel()
 
 			m := &generationModel{}
-			tokens := model.GenerateTokens(ctx, m, 8, generationTokenizer{}, "prompt", 2, 0)
+			tokens := model.GenerateTokens(ctx, m, generationTokenizer{}, "prompt", 2, 0)
 			for _, want := range c.receive {
 				if id := <-tokens; id != want {
 					t.Fatalf("token = %d, want %d", id, want)

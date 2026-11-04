@@ -68,7 +68,6 @@ func main() {
 		tokens := model.GenerateTokens(
 			context.Background(),
 			m,
-			m.MaxContextLen,
 			bpeTokenizer,
 			dataloader.AlpacaFormat(prompt),
 			maxNewTokens,
