@@ -1,5 +1,13 @@
 SHELL := /bin/bash
 
+RELEASE_TAG ?= weights-v0
+WEIGHTS := \
+	merge_rules.gob \
+	tiny_codes.bin \
+	model_gpt.gob \
+	model_gpt_sft.gob \
+	model_gpt_grpo.gob
+
 test:
 	go test -cover $(shell { go list ./... | grep -v '/cmd/'; go list ./cmd/grpo/grpo; }) -v -coverprofile=coverage.txt -covermode=atomic
 	go tool cover -html=coverage.txt -o coverage.html
@@ -19,13 +27,20 @@ update:
 install:
 	go install github.com/itsubaki/plot@latest
 
+.PHONY: release
+release:
+	gh release create $(RELEASE_TAG) \
+		$(addprefix testdata/,$(WEIGHTS)) \
+		--repo itsubaki/gpt \
+		--title "$(RELEASE_TAG)" \
+		--notes "GPT model weights" \
+		--latest
+
 .PHONY: testdata
 testdata:
-	curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/merge_rules.gob
-	curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/tiny_codes.bin
-	curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt.gob
-	curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_sft.gob
-	curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_grpo.gob
+	@for file in $(WEIGHTS); do \
+		curl -fLsS --retry 3 -o testdata/$$file https://github.com/itsubaki/gpt/releases/download/$(RELEASE_TAG)/$$file || exit 1; \
+	done
 
 dl:
 	curl -fs -o testdata/tiny_codes.txt      https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
