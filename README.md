@@ -11,14 +11,6 @@ A GPT implementation in Go from scratch.
 % make testdata example
 ```
 
-```shell
-curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/merge_rules.gob
-curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/tiny_codes.bin
-curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt.gob
-curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_sft.gob
-curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_grpo.gob
-```
-
 ```python
 ### Instruction:
 check if number is prime
@@ -104,7 +96,7 @@ go run cmd/pretrain/main.go
 Pre-Training 100%|██████████████████████████████| 20000/20000
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss.png">
+<img src="https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/images/loss.png">
 
 ```shell
 % make generate
@@ -128,7 +120,7 @@ go run cmd/sft/main.go
 SFT          100%|██████████████████████████████| 500/500
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss_sft.png">
+<img src="https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/images/loss_sft.png">
 
 ```shell
 % make chat
@@ -168,7 +160,7 @@ go run cmd/grpo/main.go
 GRPO         100%|██████████████████████████████| 100/100
 ```
 
-<img src="https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/loss_grpo.png">
+<img src="https://raw.githubusercontent.com/itsubaki/gpt/refs/heads/images/loss_grpo.png">
 
 ```shell
 % make eval
