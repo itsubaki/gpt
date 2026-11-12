@@ -21,7 +21,7 @@ curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsuba
 
 ```python
 ### Instruction:
-Write a is_prime function
+check if number is prime
 
 ### Response:
 def is_prime(n):
