@@ -11,18 +11,18 @@ import (
 type RoPEFunc func(offset int) func(x ...*variable.Variable) *variable.Variable
 
 // RoPE implements the Rotary Position Embedding (RoPE) function.
-func RoPE(theta float32, embedDim, contextLen int) RoPEFunc {
-	if embedDim%2 != 0 {
-		panic(fmt.Sprintf("embedDim=%d is odd", embedDim))
+func RoPE(theta float32, headDim, contextLen int) RoPEFunc {
+	if headDim%2 != 0 {
+		panic(fmt.Sprintf("headDim=%d is odd", headDim))
 	}
 
-	halfDim := embedDim / 2
+	halfDim := headDim / 2
 	cos := make([]float32, contextLen*halfDim)
 	sin := make([]float32, contextLen*halfDim)
 
 	for pos := range contextLen {
 		for i := range halfDim {
-			pow := float32(2*i) / float32(embedDim)
+			pow := float32(2*i) / float32(headDim)
 			freq := 1.0 / math.Pow(theta, pow)
 			angle := float32(pos) * freq
 

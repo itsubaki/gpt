@@ -1,5 +1,13 @@
 SHELL := /bin/bash
 
+RELEASE_TAG ?= weights-v0
+WEIGHTS := \
+	merge_rules.gob \
+	tiny_codes.bin \
+	model_gpt.gob \
+	model_gpt_sft.gob \
+	model_gpt_grpo.gob
+
 test:
 	go test -cover $(shell { go list ./... | grep -v '/cmd/'; go list ./cmd/grpo/grpo; }) -v -coverprofile=coverage.txt -covermode=atomic
 	go tool cover -html=coverage.txt -o coverage.html
@@ -19,13 +27,20 @@ update:
 install:
 	go install github.com/itsubaki/plot@latest
 
+.PHONY: release
+release:
+	gh release create $(RELEASE_TAG) \
+		$(addprefix testdata/,$(WEIGHTS)) \
+		--repo itsubaki/gpt \
+		--title "$(RELEASE_TAG)" \
+		--notes "GPT model weights" \
+		--latest
+
 .PHONY: testdata
 testdata:
-	curl -fs -o testdata/merge_rules.gob    https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/merge_rules.gob
-	curl -fs -o testdata/tiny_codes.bin     https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/tiny_codes.bin
-	curl -fs -o testdata/model_gpt.gob      https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt.gob
-	curl -fs -o testdata/model_gpt_sft.gob  https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_sft.gob
-	curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsubaki/weights/refs/heads/main/embeddim384_fp32/model_gpt_grpo.gob
+	@for file in $(WEIGHTS); do \
+		curl -fLsS --retry 3 -o testdata/$$file https://github.com/itsubaki/gpt/releases/download/$(RELEASE_TAG)/$$file || exit 1; \
+	done
 
 dl:
 	curl -fs -o testdata/tiny_codes.txt      https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-6/refs/heads/main/codebot/tiny_codes.txt
@@ -41,14 +56,14 @@ tokenize:
 
 pretrain:
 	caffeinate -i go run cmd/pretrain/main.go
-	plot loss.csv
+	plot -x-max 20100 -y-max 7.5 loss.csv
 
 generate:
 	go run cmd/generate/main.go
 
 sft:
 	caffeinate -i go run cmd/sft/main.go
-	plot loss_sft.csv
+	plot -x-max 500 -y-max 6 loss_sft.csv
 
 chat:
 	go run cmd/chat/main.go
@@ -56,7 +71,7 @@ chat:
 .PHONY: grpo
 grpo:
 	caffeinate -i go run cmd/grpo/main.go
-	plot loss_grpo.csv
+	plot -x-max 100 -y-max 110 loss_grpo.csv
 
 example:
 	go run cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
@@ -64,7 +79,7 @@ example:
 	go run cmd/generate/main.go --temperature 0.3 --prompt 'def fibonacci(n):'
 	go run cmd/generate/main.go --temperature 0.3 --prompt 'def is_prime(n):'
 	go run cmd/generate/main.go --prompt 'def'
-	go run cmd/chat/main.go --prompt 'Write a is_prime function'
+	go run cmd/chat/main.go --prompt 'check if number is prime'
 	go run cmd/chat/main.go --prompt 'Who are you?'
 	go run cmd/chat/main.go --prompt '3+9='
 

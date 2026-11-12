@@ -60,7 +60,8 @@ func NewGPT(
 	gpt.Add("unembed", L.Linear(embedDim, vocabSize))   // no bias in unembedding layer
 
 	// Transformer blocks with RoPE
-	rope := function.RoPE(theta, embedDim, maxContextLen)
+	headDim := int(embedDim / numOfHeads)
+	rope := function.RoPE(theta, headDim, maxContextLen)
 	for i := range numOfBlocks {
 		gpt.Add(newBlock(i, embedDim, numOfHeads, rope))
 	}

@@ -21,7 +21,7 @@ curl -fs -o testdata/model_gpt_grpo.gob https://raw.githubusercontent.com/itsuba
 
 ```python
 ### Instruction:
-Write a is_prime function
+check if number is prime
 
 ### Response:
 def is_prime(n):
@@ -132,18 +132,16 @@ SFT          100%|████████████████████�
 
 ```shell
 % make chat
-go run cmd/chat/main.go --prompt 'Write a loop'
+go run cmd/chat/main.go --prompt 'create a for loop from 1 to 5'
 ```
 
 ```
 ### Instruction:
-Write a loop
+create a for loop from 1 to 5
 
 ### Response:
-for i in range(5):
+for i in range(1, 6):
     print(i)
-else:
-    print('done')
 ```
 
 ```

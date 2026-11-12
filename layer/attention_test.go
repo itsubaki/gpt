@@ -17,7 +17,7 @@ func ExampleMultiHeadAttention() {
 	contextLen := 10
 	theta := float32(1000.0)
 
-	rope := function.RoPE(theta, embedDim, contextLen)
+	rope := function.RoPE(theta, headDim, contextLen)
 	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
@@ -43,7 +43,7 @@ func ExampleMultiHeadAttention_rope() {
 	contextLen := 10
 	theta := float32(1000.0)
 
-	rope := function.RoPE(theta, embedDim, contextLen)
+	rope := function.RoPE(theta, headDim, contextLen)
 	mha := L.MultiHeadAttention(embedDim, numOfhead, headDim, rope)
 
 	x := variable.Randn([]int{batchSize, contextLen, embedDim})
