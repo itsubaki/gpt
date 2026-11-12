@@ -56,14 +56,14 @@ tokenize:
 
 pretrain:
 	caffeinate -i go run cmd/pretrain/main.go
-	plot loss.csv
+	plot -x-max 20100 -y-max 7.5 loss.csv
 
 generate:
 	go run cmd/generate/main.go
 
 sft:
 	caffeinate -i go run cmd/sft/main.go
-	plot loss_sft.csv
+	plot -x-max 500 -y-max 6 loss_sft.csv
 
 chat:
 	go run cmd/chat/main.go
@@ -71,7 +71,7 @@ chat:
 .PHONY: grpo
 grpo:
 	caffeinate -i go run cmd/grpo/main.go
-	plot loss_grpo.csv
+	plot -x-max 100 -y-max 110 loss_grpo.csv
 
 example:
 	go run cmd/generate/main.go --temperature 0.3 --prompt 'def add(a, b):'
