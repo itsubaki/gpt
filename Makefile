@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 RELEASE_TAG ?= weights-v0
-WEIGHTS := merge_rules.gob tiny_codes.bin model_gpt.gob model_gpt_sft.gob model_gpt_grpo.gob
+WEIGHTS := merge_rules.gob model_gpt.gob model_gpt_sft.gob model_gpt_grpo.gob
 
 test:
 	go test -cover $(shell { go list ./... | grep -v '/cmd/'; go list ./cmd/grpo/grpo; }) -v -coverprofile=coverage.txt -covermode=atomic
