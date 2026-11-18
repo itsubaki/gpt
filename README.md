@@ -181,6 +181,19 @@ go run cmd/eval/main.go --model-path testdata/model_gpt_grpo.gob --batch-size 20
 accuracy: 100 %
 ```
 
+## Notes
+
+The pretrained and SFT checkpoints were compared on next-token prediction using the same 512 Python code tokens from `testdata/tiny_codes.bin`. Eight evenly spaced windows were selected, each containing 64 target tokens and one preceding input token. Context was reset at the start of each window. At each position, the model received the preceding ground-truth tokens (teacher forcing), and its highest-scoring next token was compared with the actual next token.
+
+| Checkpoint | Correct predictions | Next-token accuracy |
+|---|---:|---:|
+| Pretrained GPT | 446/512 | 87.1% |
+| SFT | 312/512 | 60.9% |
+
+SFT updates all model parameters to predict responses to instructions, without mixing in the original pretraining objective. These updates can improve instruction following while reducing accuracy on raw code continuation. The observed drop is consistent with forgetting during fine-tuning, but this small evaluation does not establish its cause or demonstrate overfitting.
+
+This measures next-token prediction with correct context, rather than the correctness of freely generated programs. The samples come from the pretraining corpus, so these results do not measure generalization to unseen code.
+
 ## References
 
 - [ゼロから作るDeep Learning ❻](https://www.oreilly.co.jp/books/9784814401611/)
