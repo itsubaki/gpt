@@ -68,6 +68,10 @@ func GenerateTokens(
 	go func() {
 		defer close(ch)
 
+		if len(prompt) == 0 {
+			return
+		}
+
 		// generation
 		func() {
 			// disable gradient tracking for generation

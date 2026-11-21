@@ -84,6 +84,10 @@ func main() {
 		)
 
 		matched := re.FindStringSubmatch(response)
+		if len(matched) < 3 {
+			continue
+		}
+
 		fmt.Printf("%-6s %v\n",
 			matched[1]+matched[2],
 			matched[2] == gts[i],
