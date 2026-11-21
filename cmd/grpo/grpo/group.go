@@ -2,6 +2,7 @@ package grpo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/itsubaki/gpt/model"
 )
@@ -12,18 +13,33 @@ func GenerateGroup(
 	prompts []string,
 	gts []string,
 	groupSize int,
-) ([]string, []string, []float32) {
+	maxContextLen int,
+) ([]string, []string, []float32, error) {
+	if maxContextLen <= 0 {
+		return nil, nil, nil, fmt.Errorf("max context length must be positive: %d", maxContextLen)
+	}
+
 	var allPrompts, allResponses []string
 	var allAdvantages []float32
 	for i := range prompts {
 		prompt, responses := prompts[i], make([]string, groupSize)
+		promptLen := len(tokenizer.Encode(prompt))
+		if promptLen == 0 {
+			return nil, nil, nil, fmt.Errorf("prompt %d has no tokens", i)
+		}
+
+		if promptLen >= maxContextLen {
+			return nil, nil, nil, fmt.Errorf("prompt %d has %d tokens, leaving no room for a response within max context length %d", i, promptLen, maxContextLen)
+		}
+
+		maxNewTokens := maxContextLen - promptLen
 		for j := range responses {
 			fullText := model.GenerateText(
 				context.Background(),
 				m,
 				tokenizer,
 				prompt,
-				1000,
+				maxNewTokens,
 				1.0,
 			)
 
@@ -56,5 +72,5 @@ func GenerateGroup(
 		}
 	}
 
-	return allPrompts, allResponses, allAdvantages
+	return allPrompts, allResponses, allAdvantages, nil
 }

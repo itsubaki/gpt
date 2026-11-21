@@ -121,13 +121,17 @@ func main() {
 		}
 
 		// sample group of prompts and responses
-		allPrompts, allResponses, allAdvantages := grpo.GenerateGroup(
+		allPrompts, allResponses, allAdvantages, err := grpo.GenerateGroup(
 			oldModel,
 			bpeTokenizer,
 			prompts,
 			gts,
 			groupSize,
+			oldModel.MaxContextLen,
 		)
+		if err != nil {
+			panic(err)
+		}
 
 		if verbose {
 			fmt.Println()
@@ -141,7 +145,11 @@ func main() {
 		}
 
 		// get batch of ids and mask
-		ids, mask := dataset.GetBatch(allPrompts, allResponses)
+		ids, mask, err := dataset.GetBatch(allPrompts, allResponses, m.MaxContextLen)
+		if err != nil {
+			panic(err)
+		}
+
 		for range updatePerGeneration {
 			m.Cleargrads()
 			loss = grpo.Loss(

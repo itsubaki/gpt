@@ -47,7 +47,11 @@ func (s *Dataset) GetItem(i int) (string, string) {
 	return s.Prompts[i], s.GroundTruths[i]
 }
 
-func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable.Variable) {
+func (s *Dataset) GetBatch(prompts, gts []string, maxContextLen int) (*variable.Variable, *variable.Variable, error) {
+	if maxContextLen <= 0 {
+		return nil, nil, fmt.Errorf("max context length must be positive: %d", maxContextLen)
+	}
+
 	var allIDs, allMasks [][]int
 	for i := range prompts {
 		promptIDs := s.Tokenizer.Encode(prompts[i])
@@ -55,6 +59,10 @@ func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable
 
 		// ids
 		ids := append(promptIDs, responseIDs...)
+		if len(ids) > maxContextLen {
+			return nil, nil, fmt.Errorf("sample %d has %d tokens, exceeding max context length %d", i, len(ids), maxContextLen)
+		}
+
 		allIDs = append(allIDs, ids)
 
 		// mask
@@ -95,5 +103,5 @@ func (s *Dataset) GetBatch(prompts, gts []string) (*variable.Variable, *variable
 
 	ids := variable.From(tensor.Float32(tensor.New([]int{len(paddedIDs)}, paddedIDs)))       // (B*C)
 	masks := variable.From(tensor.Float32(tensor.New([]int{len(paddedMasks)}, paddedMasks))) // (B*C)
-	return ids.Reshape(len(prompts), maxLen), masks.Reshape(len(prompts), maxLen)            // (B, C)
+	return ids.Reshape(len(prompts), maxLen), masks.Reshape(len(prompts), maxLen), nil       // (B, C)
 }
